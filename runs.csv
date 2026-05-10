@@ -199,3 +199,13 @@ run_id,ts,eval,harness,model,tag,wall_s,tok_in,tok_out,tools,exit,score_pct
 2026-05-10T12-38-22Z_dijkstra_squeezer-verify_qwen3_coder_30b_a3b_q4_K_M_baseline,2026-05-10T12-38-22Z,dijkstra,squeezer-verify,qwen3-coder:30b-a3b-q4_K_M,baseline,522,103998,8681,30,0,100
 2026-05-10T12-47-09Z_bug-fix_squeezer-architect_qwen3_14b_baseline,2026-05-10T12-47-09Z,bug-fix,squeezer-architect,qwen3:14b,baseline,113,3292,3724,1,0,100
 2026-05-10T12-49-07Z_sql-injection-fix_squeezer-architect_qwen3_14b_baseline,2026-05-10T12-49-07Z,sql-injection-fix,squeezer-architect,qwen3:14b,baseline,105,6294,3539,2,0,30
+2026-05-10T12-50-58Z_wifi-stats_squeezer-architect_qwen3_14b_baseline,2026-05-10T12-50-58Z,wifi-stats,squeezer-architect,qwen3:14b,baseline,246,13292,8636,14,0,48
+2026-05-10T12-55-09Z_chem-balance_squeezer-architect_qwen3_14b_baseline,2026-05-10T12-55-09Z,chem-balance,squeezer-architect,qwen3:14b,baseline,256,2832,9277,0,0,0
+2026-05-10T12-59-30Z_kepler-orbit_squeezer-architect_qwen3_14b_baseline,2026-05-10T12-59-30Z,kepler-orbit,squeezer-architect,qwen3:14b,baseline,265,2950,9587,0,0,0
+2026-05-10T13-04-00Z_dijkstra_squeezer-architect_qwen3_14b_baseline,2026-05-10T13-04-00Z,dijkstra,squeezer-architect,qwen3:14b,baseline,93,4240,2615,1,0,100
+2026-05-10T13-05-38Z_bug-fix_squeezer-architect_qwen3_coder_30b_a3b_q4_K_M_baseline,2026-05-10T13-05-38Z,bug-fix,squeezer-architect,qwen3-coder:30b-a3b-q4_K_M,baseline,70,13840,1309,6,0,100
+2026-05-10T13-06-53Z_sql-injection-fix_squeezer-architect_qwen3_coder_30b_a3b_q4_K_M_baseline,2026-05-10T13-06-53Z,sql-injection-fix,squeezer-architect,qwen3-coder:30b-a3b-q4_K_M,baseline,105,20454,1868,6,0,85
+2026-05-10T13-08-43Z_wifi-stats_squeezer-architect_qwen3_coder_30b_a3b_q4_K_M_baseline,2026-05-10T13-08-43Z,wifi-stats,squeezer-architect,qwen3-coder:30b-a3b-q4_K_M,baseline,308,38995,4982,12,0,60
+2026-05-10T13-13-56Z_chem-balance_squeezer-architect_qwen3_coder_30b_a3b_q4_K_M_baseline,2026-05-10T13-13-56Z,chem-balance,squeezer-architect,qwen3-coder:30b-a3b-q4_K_M,baseline,173,3132,3283,0,0,0
+2026-05-10T13-16-54Z_kepler-orbit_squeezer-architect_qwen3_coder_30b_a3b_q4_K_M_baseline,2026-05-10T13-16-54Z,kepler-orbit,squeezer-architect,qwen3-coder:30b-a3b-q4_K_M,baseline,116,18855,2191,5,0,100
+2026-05-10T13-18-55Z_dijkstra_squeezer-architect_qwen3_coder_30b_a3b_q4_K_M_baseline,2026-05-10T13-18-55Z,dijkstra,squeezer-architect,qwen3-coder:30b-a3b-q4_K_M,baseline,162,22550,2988,7,0,100

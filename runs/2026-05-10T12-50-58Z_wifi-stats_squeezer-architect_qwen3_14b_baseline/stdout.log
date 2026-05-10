@@ -25,3 +25,17 @@
 [executor it=1] TOOL write_file {"path":"frontend/app/page.tsx","content":"import { WifiInfo } from \"../models/WifiInfo\";\nimport styles from \"../styles/globals.css\";\n\nexport default fun
 [executor it=1] TOOL write_file {"content":"import { WifiInfo } from \"../models/WifiInfo\";\nimport styles from \"../styles/globals.css\";\n\nexport default function WifiPage() {\n  const { d
 [executor it=2] TOOL run_bash {"command":"cd backend \u0026\u0026 uvicorn main:app --reload \u0026 cd frontend \u0026\u0026 npm run dev","timeout":30}
+[executor it=3] To resolve the errors, follow these steps:
+
+1. **Install Python dependencies** (for backend):
+   ```bash
+   cd backend
+   pip install uvicorn
+   ```
+
+2. **Install Node.js** (if missing):
+   - Download from: https://nodejs.org/
+   - Verify i
+[executor] done — 14 tools, 12683/6985 tok, 177.9s
+
+══════ PIPELINE DONE — 2 steps, 13292/8636 tok total ══════
