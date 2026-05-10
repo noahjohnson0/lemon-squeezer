@@ -103,9 +103,14 @@ echo "  eval:    $EVAL  | model: $MODEL  | tag: $TAG"
 echo "  flags:   ${EXTRA_FLAGS[*]:-(none)}"
 echo
 
-# Optional setup: drop starter files into the workspace before the harness runs
+# Optional setup: drop starter files into the workspace before the harness runs.
+# If setup.sh writes a prompt.md into the workspace, prefer that over the eval's
+# static one — lets RAG/needle-haystack evals generate dynamic prompts per run.
 if [[ -f "$SETUP" ]]; then
   ( cd "$WS" && bash "$SETUP" "$WS" "$EVAL_DIR" )
+  if [[ -f "$WS/prompt.md" ]]; then
+    PROMPT_FILE="$WS/prompt.md"
+  fi
 fi
 
 START=$(date +%s)

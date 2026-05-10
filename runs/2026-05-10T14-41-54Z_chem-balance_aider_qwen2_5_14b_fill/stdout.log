@@ -1,0 +1,8 @@
+
+You can skip this check with --no-gitignore
+Added .aider* to .gitignore
+Aider v0.86.2
+Model: ollama_chat/qwen2.5:14b with whole edit format
+Git repo: .git with 0 files
+Repo-map: using 4096.0 tokens, auto refresh
+

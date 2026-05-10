@@ -246,3 +246,5 @@ run_id,ts,eval,harness,model,tag,wall_s,tok_in,tok_out,tools,exit,score_pct
 2026-05-10T14-28-21Z_solar-position_aider_mistral_small_24b_fill,2026-05-10T14-28-21Z,solar-position,aider,mistral-small:24b,fill,439,5400,2400,0,0,11
 2026-05-10T14-28-24Z_hamming-code_aider_qwen3_14b_m4max-q14b,2026-05-10T14-28-24Z,hamming-code,aider,qwen3:14b,m4max-q14b,176,0,0,0,143,0
 2026-05-10T14-35-45Z_sql-injection-fix_aider_mistral_small_24b_fill,2026-05-10T14-35-45Z,sql-injection-fix,aider,mistral-small:24b,fill,48,803,289,0,0,20
+2026-05-10T14-36-39Z_unit-convert_aider_mistral_small_24b_fill,2026-05-10T14-36-39Z,unit-convert,aider,mistral-small:24b,fill,150,863,1100,0,0,30
+2026-05-10T14-39-16Z_wifi-stats_aider_mistral_small_24b_fill,2026-05-10T14-39-16Z,wifi-stats,aider,mistral-small:24b,fill,151,780,1100,0,0,67
