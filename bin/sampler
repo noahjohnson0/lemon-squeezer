@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+# Per-run hardware telemetry sampler.
+# Samples remote-GPU stats (via SSH to OLLAMA_HOST) and local host load while a run is in flight.
+# Writes runs/<id>/metrics.csv + appends aggregates to runs/<id>/meta.json.
+#
+# Usage:
+#   sampler start <run_dir>   -> daemonises, prints sampler PID to stdout
+#   sampler stop  <run_dir> <pid>  -> stops sampler, aggregates into meta.json
+set -u
+ACTION="${1:?usage: sampler start|stop ...}"
+RUN_DIR="${2:?run_dir required}"
+
+# Defaults overridable via env
+SSH_TARGET="${SAMPLER_SSH_TARGET:-user@localhost}"
+SAMPLE_INTERVAL="${SAMPLER_INTERVAL:-1}"
+
+case "$ACTION" in
+  start)
+    csv="$RUN_DIR/metrics.csv"
+    flag="$RUN_DIR/.sampling"
+    echo "ts,gpu_util_pct,gpu_mem_used_mb,gpu_temp_c,gpu_power_w,gpu_fan_pct,host_load1" > "$csv"
+    touch "$flag"
+    (
+      # Try to use SSH multiplexing for low-overhead per-sample queries.
+      ctl="$RUN_DIR/.sshctl"
+      ssh -o ControlMaster=yes -o ControlPersist=60 -o ControlPath="$ctl" -fN "$SSH_TARGET" 2>/dev/null
+      while [[ -f "$flag" ]]; do
+        ts=$(date +%s)
+        gpu="$(ssh -o ControlPath="$ctl" "$SSH_TARGET" \
+          'nvidia-smi --query-gpu=utilization.gpu,memory.used,temperature.gpu,power.draw,fan.speed --format=csv,noheader,nounits' 2>/dev/null \
+          | tr -d ' \r' | head -1)"
+        load=$(uptime | awk -F'load averages?: ' '{print $2}' | awk '{print $1}' | tr -d ',')
+        echo "${ts},${gpu},${load}" >> "$csv"
+        sleep "$SAMPLE_INTERVAL"
+      done
+      ssh -o ControlPath="$ctl" -O exit "$SSH_TARGET" 2>/dev/null
+      rm -f "$ctl"
+    ) </dev/null >/dev/null 2>&1 &
+    SAMPLER_PID=$!
+    disown $SAMPLER_PID 2>/dev/null
+    echo "$SAMPLER_PID"
+    ;;
+  stop)
+    pid="${3:?pid required}"
+    rm -f "$RUN_DIR/.sampling"
+    # Wait briefly for the sampler loop to notice and exit cleanly
+    for _ in 1 2 3; do
+      kill -0 "$pid" 2>/dev/null || break
+      sleep 1
+    done
+    kill "$pid" 2>/dev/null
+    # Aggregate into meta.json
+    python3 - "$RUN_DIR/metrics.csv" "$RUN_DIR/meta.json" <<'PY'
+import csv, json, sys, os
+csv_path, meta_path = sys.argv[1], sys.argv[2]
+def f(v):
+    try: return float(v)
+    except: return None
+rows = []
+with open(csv_path) as fh:
+    rd = csv.DictReader(fh)
+    for r in rd:
+        rows.append({k: f(v) for k,v in r.items()})
+
+def col(n):
+    return [r[n] for r in rows if r.get(n) is not None]
+
+agg = {"samples": len(rows)}
+def add(name, fn, src):
+    vs = col(src)
+    if vs: agg[name] = round(fn(vs), 2)
+add("gpu_util_avg",     lambda v: sum(v)/len(v), "gpu_util_pct")
+add("gpu_util_peak",    max,                     "gpu_util_pct")
+add("gpu_mem_peak_mb",  max,                     "gpu_mem_used_mb")
+add("gpu_mem_avg_mb",   lambda v: sum(v)/len(v), "gpu_mem_used_mb")
+add("gpu_temp_peak_c",  max,                     "gpu_temp_c")
+add("gpu_temp_avg_c",   lambda v: sum(v)/len(v), "gpu_temp_c")
+add("gpu_power_avg_w",  lambda v: sum(v)/len(v), "gpu_power_w")
+add("gpu_power_peak_w", max,                     "gpu_power_w")
+add("gpu_fan_peak_pct", max,                     "gpu_fan_pct")
+add("host_load_peak",   max,                     "host_load1")
+
+if os.path.exists(meta_path):
+    m = json.load(open(meta_path))
+    m["telemetry"] = agg
+    json.dump(m, open(meta_path, "w"), indent=2)
+    print(f"telemetry: {agg['samples']} samples, peak GPU {agg.get('gpu_temp_peak_c','?')}°C / {agg.get('gpu_mem_peak_mb','?')} MB / {agg.get('gpu_power_peak_w','?')} W")
+PY
+    ;;
+  *)
+    echo "unknown action: $ACTION" >&2; exit 1
+    ;;
+esac

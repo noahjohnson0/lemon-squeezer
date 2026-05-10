@@ -1,0 +1,20 @@
+{
+  "run_id": "2026-05-10T07-43-03Z_sql-injection-fix_aider_qwen3_14b_baseline",
+  "ts": "2026-05-10T07-43-03Z",
+  "eval": "sql-injection-fix",
+  "harness": "aider",
+  "model": "qwen3:14b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 38,
+  "tokens_in": 832,
+  "tokens_out": 936,
+  "tool_calls": 0,
+  "score_pct": "35",
+  "telemetry": {
+    "samples": 38,
+    "gpu_mem_peak_mb": 3.07,
+    "gpu_mem_avg_mb": 2.7
+  }
+}

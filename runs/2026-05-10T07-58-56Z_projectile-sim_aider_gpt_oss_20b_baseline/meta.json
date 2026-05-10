@@ -1,0 +1,20 @@
+{
+  "run_id": "2026-05-10T07-58-56Z_projectile-sim_aider_gpt_oss_20b_baseline",
+  "ts": "2026-05-10T07-58-56Z",
+  "eval": "projectile-sim",
+  "harness": "aider",
+  "model": "gpt-oss:20b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 97,
+  "tokens_in": 1000,
+  "tokens_out": 1500,
+  "tool_calls": 0,
+  "score_pct": "100",
+  "telemetry": {
+    "samples": 95,
+    "gpu_mem_peak_mb": 3.14,
+    "gpu_mem_avg_mb": 2.69
+  }
+}

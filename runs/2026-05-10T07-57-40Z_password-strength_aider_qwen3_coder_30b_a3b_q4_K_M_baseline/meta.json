@@ -1,0 +1,20 @@
+{
+  "run_id": "2026-05-10T07-57-40Z_password-strength_aider_qwen3_coder_30b_a3b_q4_K_M_baseline",
+  "ts": "2026-05-10T07-57-40Z",
+  "eval": "password-strength",
+  "harness": "aider",
+  "model": "qwen3-coder:30b-a3b-q4_K_M",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 98,
+  "tokens_in": 998,
+  "tokens_out": 699,
+  "tool_calls": 0,
+  "score_pct": "93",
+  "telemetry": {
+    "samples": 97,
+    "gpu_mem_peak_mb": 3.14,
+    "gpu_mem_avg_mb": 2.91
+  }
+}

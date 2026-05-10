@@ -1,0 +1,20 @@
+{
+  "run_id": "2026-05-10T08-00-59Z_sql-injection-fix_aider_gpt_oss_20b_baseline",
+  "ts": "2026-05-10T08-00-59Z",
+  "eval": "sql-injection-fix",
+  "harness": "aider",
+  "model": "gpt-oss:20b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 139,
+  "tokens_in": 886,
+  "tokens_out": 247,
+  "tool_calls": 0,
+  "score_pct": "65",
+  "telemetry": {
+    "samples": 136,
+    "gpu_mem_peak_mb": 3.43,
+    "gpu_mem_avg_mb": 2.61
+  }
+}

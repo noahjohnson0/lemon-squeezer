@@ -11,7 +11,7 @@ shift 4
 if [[ "${1:-}" == "--" ]]; then shift; fi
 EXTRA_FLAGS=("$@")
 
-ROOT="$HOME/lemon-squeezer"
+ROOT="$HOME/repos/lemon-squeezer"
 EVAL_DIR="$ROOT/evals/$EVAL"
 HARNESS_SCRIPT="$ROOT/bin/harnesses/$HARNESS.sh"
 [[ -d "$EVAL_DIR" ]] || { echo "no such eval: $EVAL_DIR" >&2; exit 1; }
@@ -40,6 +40,13 @@ if [[ -f "$SETUP" ]]; then
 fi
 
 START=$(date +%s)
+
+# Start hardware-telemetry sampler (best-effort; doesn't block the run if it fails)
+SAMPLER_PID=""
+if [[ -x "$ROOT/bin/sampler" ]]; then
+  SAMPLER_PID="$("$ROOT/bin/sampler" start "$RUN_DIR" 2>/dev/null || true)"
+fi
+
 set +e
 ( source "$HARNESS_SCRIPT" \
   && harness_run "$WS" "$PROMPT_FILE" "$MODEL" "$RUN_DIR" \
@@ -80,6 +87,11 @@ print(json.dumps({
   "score_pct": "$SCORE"
 }, indent=2))
 PY
+
+# Stop sampler AFTER meta.json is initialized — sampler appends telemetry to it
+if [[ -n "$SAMPLER_PID" && -x "$ROOT/bin/sampler" ]]; then
+  "$ROOT/bin/sampler" stop "$RUN_DIR" "$SAMPLER_PID" >/dev/null 2>&1 || true
+fi
 
 cat "$RUN_DIR/meta.json" | python3 -c "import json,sys; print(json.dumps(json.load(sys.stdin)))" >> "$ROOT/runs.jsonl"
 

@@ -1,0 +1,20 @@
+{
+  "run_id": "2026-05-10T07-36-15Z_chem-balance_aider_qwen3_14b_baseline",
+  "ts": "2026-05-10T07-36-15Z",
+  "eval": "chem-balance",
+  "harness": "aider",
+  "model": "qwen3:14b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 318,
+  "tokens_in": 905,
+  "tokens_out": 8800,
+  "tool_calls": 0,
+  "score_pct": "?",
+  "telemetry": {
+    "samples": 310,
+    "gpu_mem_peak_mb": 4.52,
+    "gpu_mem_avg_mb": 3.34
+  }
+}

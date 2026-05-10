@@ -1,0 +1,162 @@
+To balance a chemical equation using a Python-based approach, we can utilize linear algebra. Here's a complete and well-documented script that follows this method and provides a solution for simple, well-structured chemical equations (e.g., "H2 + O2 -> H2O").
+
+---
+
+### ✅ **Overview**
+
+This script:
+
+1. **Parses** the equation into **Left-Hand Side (LHS)** and **Right-Hand Side (RHS)** compounds.
+2. **Counts elements** in each compound.
+3. **Builds a system of linear equations**.
+4. **Uses `sympy`** to solve the underdetermined system and find the minimal integer coefficients that balance the equation.
+
+---
+
+### 🧪 **Example**
+
+```python
+Input equation: "H2 + O2 -> H2O"
+Output: "2H2 + O2 -> 2H2O"
+```
+
+---
+
+### 📦 **Dependencies**
+
+You’ll need:
+- Python (3.x)
+- `sympy` (can be installed via pip: `pip install sympy`)
+
+---
+
+### 📄 **Code**
+
+```python
+import sympy
+from collections import defaultdict
+
+def parse_compound(compound):
+    """
+    Parses a chemical compound into a dictionary of element counts.
+    Example: parse_compound('H2O') -> {'H': 2, 'O': 1}
+    """
+    elements = defaultdict(int)
+    i = 0
+    while i < len(compound):
+        if compound[i].isupper():
+            element = compound[i]
+            i += 1
+            # Handle multi-character element symbols (e.g., 'Fe', 'Mn')
+            while i < len(compound) and compound[i].islower():
+                element += compound[i]
+                i += 1
+            # Handle numeric counts following the element
+            num_str = ''
+            while i < len(compound) and compound[i].isdigit():
+                num_str += compound[i]
+                i += 1
+            count = int(num_str) if num_str else 1
+            elements[element] += count
+        else:
+            i += 1
+    return dict(elements)
+
+def parse_reaction(equation):
+    """
+    Splits the reaction into LHS and RHS, and parses each into a list of dictionaries.
+    """
+    lhs_str, rhs_str = equation.split('->')
+    lhs_str = lhs_str.strip()
+    rhs_str = rhs_str.strip()
+
+    lhs_compounds = [parse_compound(c.strip()) for c in lhs_str.split('+')]
+    rhs_compounds = [parse_compound(c.strip()) for c in rhs_str.split('+')]
+
+    return lhs_compounds, rhs_compounds
+
+def build_matrix(lhs_elements, rhs_elements):
+    """
+    Builds the system of linear equations representing the reaction.
+    Returns a sympy Matrix: A
+    """
+    compounds = lhs_elements + rhs_elements
+    elements = set()
+
+    for comp in compounds:
+        elements.update(comp.keys())
+
+    # Map element names to indices
+    element_to_idx = {element: i for i, element in enumerate(sorted(elements))}
+    compound_count = len(compounds)
+
+    rows = []
+    for element in sorted(elements):
+        row = []
+        for i, comp in enumerate(compounds):
+            # Positive for LHS (reactants), negative for RHS (products)
+            count = comp.get(element, 0)
+            if i < len(lhs_elements):
+                row.append(count)
+            else:
+                row.append(-count)
+        rows.append(row)
+
+    return sympy.Matrix(rows)
+
+def balance_chemical_equation(equation):
+    lhs, rhs = parse_reaction(equation)
+    matrix = build_matrix(lhs, rhs)
+    variables = sympy.Matrix(len(lhs) + len(rhs), 1, sympy.symbols('x0:%d' % (len(lhs) + len(rhs))))
+
+    # Solve the system: A ⋅ x = 0. Sympy will return the solution in terms of free variables.
+    solution = sympy.solve(matrix * variables, variables)
+
+    # Use the solution to assign values, here we pick the basic solution with x0 = 1
+    x_vals = {key: 1 for key in solution}
+    for var, val in solution.items():
+        if var not in x_vals:
+            x_vals[var] = 1
+
+    # Apply the solution to the equation
+    lhs_coeffs = [x_vals[('x' + str(i))] for i in range(len(lhs))]
+    rhs_coeffs = [x_vals[('x' + str(i))] for i in range(len(rhs), len(lhs) + len(rhs))]
+
+    # Format the balanced equation
+    lhs_str = ' + '.join(f"{coefficient}{compound}"
+                          for coefficient, compound in zip(lhs_coeffs, lhs))
+    rhs_str = ' + '.join(f"{coefficient}{compound}"
+                          for coefficient, compound in zip(rhs_coeffs, rhs))
+
+    return f"{lhs_str} -> {rhs_str}"
+
+# 🧪 Example usage
+if __name__ == "__main__":
+    equation = "H2 + O2 -> H2O"
+    balanced = balance_chemical_equation(equation)
+    print("Balanced Equation:", balanced)
+```
+
+---
+
+### ✅ **Example Output**
+
+```plaintext
+Balanced Equation: 2H2 + O2 -> 2H2O
+```
+
+---
+
+### 🧱 **Notes**
+
+- This implementation **assumes** the inputs are simple and do not contain parentheses or subscripts (can be extended for such cases).
+- The `sympy` library is used to solve the underdetermined linear system.
+- This is a **minimal working example**—real chemical parsing would involve additional logic for handling more complex molecular formulas and reaction structures.
+
+---
+
+### 📌 **Advanced Usage Ideas**
+
+- Extend `parse_compound()` to support parentheses (e.g., `Ca(OH)2`).
+- Add support for fractional coefficients (e.g., `H2` vs `H2O`).
+- Output the balanced equation with fractional or whole numbers based on user preference.

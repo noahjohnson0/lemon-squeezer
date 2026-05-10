@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Read all runs, write CSV + Markdown tables + a per-eval/per-model leaderboard.
 set -euo pipefail
-ROOT="$HOME/lemon-squeezer"
+ROOT="$HOME/repos/lemon-squeezer"
 
 # Always rebuild runs.jsonl from per-run meta.json (source of truth)
 : > "$ROOT/runs.jsonl"

@@ -1,0 +1,25 @@
+PASS H2 + O2 -> H2O
+PASS CH4 + O2 -> CO2 + H2O
+PASS C2H6 + O2 -> CO2 + H2O
+PASS Fe + Cl2 -> FeCl3
+PASS Al + HCl -> AlCl3 + H2
+PASS Al2(SO4)3 + NaOH -> Al(OH)3 + Na2SO4
+PASS KMnO4 + HCl -> KCl + MnCl2 + H2O + Cl2
+--- 7 / 7
+{
+  "checks": [
+    {"name":"file:balance.py","pass":1,"weight":5,"note":""},
+    {"name":"compiles","pass":1,"weight":5,"note":""},
+    {"name":"case:eq1","pass":1,"weight":10,"note":""},
+    {"name":"case:eq2","pass":1,"weight":10,"note":""},
+    {"name":"case:eq3","pass":1,"weight":10,"note":""},
+    {"name":"case:eq4","pass":1,"weight":10,"note":""},
+    {"name":"case:eq5","pass":1,"weight":10,"note":""},
+    {"name":"case:eq6","pass":1,"weight":10,"note":""},
+    {"name":"case:eq7","pass":1,"weight":10,"note":""},
+    {"name":"raises_valueerror","pass":1,"weight":5,"note":""}
+  ],
+  "gained": 85,
+  "total": 85,
+  "score_pct": 100
+}

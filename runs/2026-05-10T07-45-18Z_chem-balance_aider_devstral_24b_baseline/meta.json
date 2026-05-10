@@ -1,0 +1,20 @@
+{
+  "run_id": "2026-05-10T07-45-18Z_chem-balance_aider_devstral_24b_baseline",
+  "ts": "2026-05-10T07-45-18Z",
+  "eval": "chem-balance",
+  "harness": "aider",
+  "model": "devstral:24b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 410,
+  "tokens_in": 871,
+  "tokens_out": 655,
+  "tool_calls": 0,
+  "score_pct": "?",
+  "telemetry": {
+    "samples": 400,
+    "gpu_mem_peak_mb": 3.66,
+    "gpu_mem_avg_mb": 2.91
+  }
+}

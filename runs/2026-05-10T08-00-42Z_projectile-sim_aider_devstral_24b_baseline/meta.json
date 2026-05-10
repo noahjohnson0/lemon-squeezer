@@ -1,0 +1,20 @@
+{
+  "run_id": "2026-05-10T08-00-42Z_projectile-sim_aider_devstral_24b_baseline",
+  "ts": "2026-05-10T08-00-42Z",
+  "eval": "projectile-sim",
+  "harness": "aider",
+  "model": "devstral:24b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 497,
+  "tokens_in": 2723,
+  "tokens_out": 1645,
+  "tool_calls": 0,
+  "score_pct": "58",
+  "telemetry": {
+    "samples": 486,
+    "gpu_mem_peak_mb": 4.51,
+    "gpu_mem_avg_mb": 3.09
+  }
+}

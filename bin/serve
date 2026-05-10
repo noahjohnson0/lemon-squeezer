@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Serve the dashboard. Usage: serve [port]
 PORT="${1:-8765}"
-cd "$HOME/lemon-squeezer"
+cd "$HOME/repos/lemon-squeezer"
 echo "→ http://localhost:$PORT/dashboard.html"
 exec python3 -m http.server "$PORT" --bind 127.0.0.1

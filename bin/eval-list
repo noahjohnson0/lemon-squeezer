@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Show all runs as a table.
-python3 - "$HOME/lemon-squeezer/runs.jsonl" <<'PY'
+python3 - "$HOME/repos/lemon-squeezer/runs.jsonl" <<'PY'
 import json, sys, os
 path=sys.argv[1]
 if not os.path.exists(path):

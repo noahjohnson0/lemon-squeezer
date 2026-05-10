@@ -1,0 +1,20 @@
+{
+  "run_id": "2026-05-10T07-52-18Z_projectile-sim_aider_qwen3_14b_baseline",
+  "ts": "2026-05-10T07-52-18Z",
+  "eval": "projectile-sim",
+  "harness": "aider",
+  "model": "qwen3:14b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 307,
+  "tokens_in": 965,
+  "tokens_out": 8100,
+  "tool_calls": 0,
+  "score_pct": "100",
+  "telemetry": {
+    "samples": 300,
+    "gpu_mem_peak_mb": 7.13,
+    "gpu_mem_avg_mb": 4.12
+  }
+}

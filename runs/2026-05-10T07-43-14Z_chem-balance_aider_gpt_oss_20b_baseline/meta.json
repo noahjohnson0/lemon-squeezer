@@ -1,0 +1,20 @@
+{
+  "run_id": "2026-05-10T07-43-14Z_chem-balance_aider_gpt_oss_20b_baseline",
+  "ts": "2026-05-10T07-43-14Z",
+  "eval": "chem-balance",
+  "harness": "aider",
+  "model": "gpt-oss:20b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 115,
+  "tokens_in": 958,
+  "tokens_out": 2000,
+  "tool_calls": 0,
+  "score_pct": "?",
+  "telemetry": {
+    "samples": 112,
+    "gpu_mem_peak_mb": 3.35,
+    "gpu_mem_avg_mb": 2.89
+  }
+}
