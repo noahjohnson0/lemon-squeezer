@@ -319,3 +319,4 @@ run_id,ts,eval,harness,model,tag,wall_s,tok_in,tok_out,tools,exit,score_pct
 2026-05-10T20-29-03Z_julian-day_aider_qwen3_8b_fill,2026-05-10T20-29-03Z,julian-day,aider,qwen3:8b,fill,600,0,0,0,124,0
 2026-05-10T20-39-09Z_kalman-filter_aider_qwen3_8b_fill,2026-05-10T20-39-09Z,kalman-filter,aider,qwen3:8b,fill,600,0,0,0,124,0
 2026-05-10T20-49-16Z_kepler-orbit_aider_qwen3_8b_fill,2026-05-10T20-49-16Z,kepler-orbit,aider,qwen3:8b,fill,600,0,0,0,124,0
+2026-05-10T20-59-22Z_knapsack_aider_qwen3_8b_fill,2026-05-10T20-59-22Z,knapsack,aider,qwen3:8b,fill,600,0,0,0,124,0
