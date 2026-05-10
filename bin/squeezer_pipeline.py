@@ -78,6 +78,44 @@ Do not author new files. Pick the best of what's there and promote it. Emit a fi
 message naming the candidate index you picked and one-sentence rationale.
 """
 
+ARCHITECT_PROMPT = """You are a senior software architect. You do not write any code.
+Read the user's task carefully. Emit a numbered plan, in plain text, that an executor
+agent will follow line by line. Be specific:
+
+  1. Name the file(s) to create and their exact purpose
+  2. List the function/class signatures the executor must implement (signatures only — not bodies)
+  3. For each function, state the algorithmic approach in 1-2 sentences (e.g. "use heapq with (cost, node) tuples", "Gauss-Jordan with partial pivoting")
+  4. Call out edge cases the executor must handle
+  5. Note any reference values to test against
+
+Do NOT use any tools. Do NOT write code or files. Output ONLY the numbered plan as your assistant message."""
+
+EXECUTOR_PROMPT = """You are an implementer working from a plan an architect handed you.
+The plan is below in the user message. Implement it exactly:
+
+  - Use list_files / read_file / write_file / run_bash as needed
+  - Follow the architect's signatures and algorithmic guidance
+  - Verify your work (syntax check + at least one quick run via run_bash) before stopping
+  - If the plan has gaps, fill them with the simplest reasonable choice
+
+Stop only when every step of the plan is implemented and you've verified it runs."""
+
+VERIFY_PROMPT = """You are a careful coding agent who writes code AND property-based tests
+for it in the same session. Procedure:
+
+1. Identify the function/class signatures the user wants.
+2. Write the implementation.
+3. Write a tests file `test_<module>.py` that includes:
+   - At least one happy-path case per function
+   - At least one edge case
+   - One PROPERTY test (e.g. round-trip: decode(encode(x)) == x; or invariant:
+     after sort, output is non-decreasing AND length unchanged AND multiset preserved)
+4. Run the tests via run_bash with `python3 -m pytest -x test_<module>.py 2>&1 | tail -20`.
+5. If tests fail, fix the implementation OR the test (whichever is wrong) and re-run.
+6. Stop only when all tests pass.
+
+Tools: read_file, write_file, list_files, run_bash. Send COMPLETE file contents to write_file."""
+
 
 def run_step(name: str, model: str, system_prompt: str, user_prompt: str,
              workspace: Path, run_dir: Path, base_url: str,
@@ -154,6 +192,24 @@ def run_step(name: str, model: str, system_prompt: str, user_prompt: str,
             "tool_calls": tot_calls, "wall_s": round(elapsed, 1), "final": final_text}
 
 
+def pipeline_architect(args, user_prompt: str, ws: Path, run_dir: Path) -> list[dict]:
+    architect = args.architect_model or args.primary_model.split(",")[0]
+    executor  = args.primary_model.split(",")[0]
+    steps = []
+    # Step 1: architect emits a plan as text (no tools — empty schema)
+    plan_step = run_step("architect", architect, ARCHITECT_PROMPT, user_prompt, ws, run_dir,
+                         args.base_url, allow_write=False, max_iter=2)
+    steps.append(plan_step)
+    plan = plan_step.get("final", "") or "(no plan emitted)"
+    # Step 2: executor implements
+    exec_input = f"{user_prompt}\n\n--- ARCHITECT PLAN ---\n{plan}\n\nImplement this plan now."
+    steps.append(run_step("executor", executor, EXECUTOR_PROMPT, exec_input, ws, run_dir, args.base_url))
+    return steps
+
+def pipeline_verify(args, user_prompt: str, ws: Path, run_dir: Path) -> list[dict]:
+    primary = args.primary_model.split(",")[0]
+    return [run_step("verify", primary, VERIFY_PROMPT, user_prompt, ws, run_dir, args.base_url, max_iter=30)]
+
 def pipeline_critique(args, user_prompt: str, ws: Path, run_dir: Path) -> list[dict]:
     primary = args.primary_model.split(",")[0]
     critic  = args.critic_model
@@ -211,10 +267,11 @@ def main() -> None:
     p.add_argument("--run-dir", required=True)
     p.add_argument("--prompt-file", required=True)
     p.add_argument("--base-url", default=(os.environ.get("OLLAMA_API_BASE") or "http://localhost:11434") + "/v1")
-    p.add_argument("--pipeline", choices=["critique", "ensemble"], required=True)
+    p.add_argument("--pipeline", choices=["critique", "ensemble", "architect", "verify"], required=True)
     p.add_argument("--primary-model", required=True, help="single model OR comma-separated for ensemble")
     p.add_argument("--critic-model",  default=None, help="critique pipeline only")
     p.add_argument("--judge-model",   default=None, help="ensemble pipeline only (defaults to first primary)")
+    p.add_argument("--architect-model", default=None, help="architect pipeline only (defaults to primary)")
     p.add_argument("--rounds", type=int, default=1, help="critique pipeline: number of critique→refine cycles")
     args = p.parse_args()
 
@@ -228,8 +285,14 @@ def main() -> None:
         if not args.critic_model:
             print("--critic-model required for critique pipeline", file=sys.stderr); sys.exit(2)
         steps = pipeline_critique(args, user_prompt, ws, run_dir)
-    else:
+    elif args.pipeline == "ensemble":
         steps = pipeline_ensemble(args, user_prompt, ws, run_dir)
+    elif args.pipeline == "architect":
+        steps = pipeline_architect(args, user_prompt, ws, run_dir)
+    elif args.pipeline == "verify":
+        steps = pipeline_verify(args, user_prompt, ws, run_dir)
+    else:
+        print(f"unknown pipeline: {args.pipeline}", file=sys.stderr); sys.exit(2)
 
     tot_in = sum(s["tokens_in"] for s in steps)
     tot_out = sum(s["tokens_out"] for s in steps)

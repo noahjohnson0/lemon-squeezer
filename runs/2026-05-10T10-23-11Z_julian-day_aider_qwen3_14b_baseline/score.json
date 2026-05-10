@@ -1,0 +1,11 @@
+{
+  "checks": [
+    {"name":"file:dates.py","pass":0,"weight":5,"note":""},
+    {"name":"compiles","pass":0,"weight":5,"note":""},
+    {"name":"e_2024","pass":0,"weight":5,"note":""},
+    {"name":"jd_2000_1_1","pass":0,"weight":5,"note":""}
+  ],
+  "gained": 0,
+  "total": 20,
+  "score_pct": 0
+}

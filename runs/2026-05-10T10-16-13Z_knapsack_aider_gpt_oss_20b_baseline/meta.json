@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-05-10T10-16-13Z_knapsack_aider_gpt_oss_20b_baseline",
+  "ts": "2026-05-10T10-16-13Z",
+  "eval": "knapsack",
+  "harness": "aider",
+  "model": "gpt-oss:20b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 36,
+  "tokens_in": 799,
+  "tokens_out": 768,
+  "tool_calls": 0,
+  "score_pct": "100",
+  "telemetry": {
+    "samples": 26,
+    "gpu_util_avg": 34.5,
+    "gpu_util_peak": 67.0,
+    "gpu_mem_peak_mb": 11360.0,
+    "gpu_mem_avg_mb": 10667.04,
+    "gpu_temp_peak_c": 57.0,
+    "gpu_temp_avg_c": 53.19,
+    "gpu_power_avg_w": 44.07,
+    "gpu_power_peak_w": 76.31,
+    "gpu_fan_peak_pct": 0.0,
+    "host_load_peak": 2.62
+  }
+}

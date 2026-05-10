@@ -1,0 +1,5 @@
+ny_summer_solstice 0 alt=68.86 (want 65-72) az=320.42 (want 130-150)
+london_winter_solstice 0 alt=15.06 (want 13-17) az=0.39 (want 175-188)
+equator_equinox 1 alt=88.16 (want 85-92) az=265.34 (want 0-360)
+sydney_winter_solstice 0 alt=32.69 (want 28-36) az=179.22 (want 350-10)
+anchorage_summer_noon 0 alt=52.21 (want 48-56) az=359.41 (want 175-192)

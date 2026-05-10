@@ -121,3 +121,16 @@ run_id,ts,eval,harness,model,tag,wall_s,tok_in,tok_out,tools,exit,score_pct
 2026-05-10T10-13-27Z_crc-checksum_aider_gpt_oss_20b_baseline,2026-05-10T10-13-27Z,crc-checksum,aider,gpt-oss:20b,baseline,39,871,840,0,0,100
 2026-05-10T10-14-09Z_hamming-code_aider_gpt_oss_20b_baseline,2026-05-10T10-14-09Z,hamming-code,aider,gpt-oss:20b,baseline,81,1100,1900,0,0,100
 2026-05-10T10-15-34Z_dijkstra_aider_gpt_oss_20b_baseline,2026-05-10T10-15-34Z,dijkstra,aider,gpt-oss:20b,baseline,36,812,693,0,0,100
+2026-05-10T10-16-13Z_knapsack_aider_gpt_oss_20b_baseline,2026-05-10T10-16-13Z,knapsack,aider,gpt-oss:20b,baseline,36,799,768,0,0,100
+2026-05-10T10-16-53Z_unit-convert_aider_gpt_oss_20b_baseline,2026-05-10T10-16-53Z,unit-convert,aider,gpt-oss:20b,baseline,158,942,3800,0,0,100
+2026-05-10T10-19-35Z_regression-ci_aider_qwen3_14b_baseline,2026-05-10T10-19-35Z,regression-ci,aider,qwen3:14b,baseline,55,789,2100,0,0,100
+2026-05-10T10-20-33Z_fft-spectrum_aider_qwen3_14b_baseline,2026-05-10T10-20-33Z,fft-spectrum,aider,qwen3:14b,baseline,81,791,3300,0,0,100
+2026-05-10T10-21-57Z_matrix-ops_aider_qwen3_14b_baseline,2026-05-10T10-21-57Z,matrix-ops,aider,qwen3:14b,baseline,70,802,2800,0,0,100
+2026-05-10T10-23-11Z_julian-day_aider_qwen3_14b_baseline,2026-05-10T10-23-11Z,julian-day,aider,qwen3:14b,baseline,600,0,0,0,124,0
+2026-05-10T10-33-15Z_solar-position_aider_qwen3_14b_baseline,2026-05-10T10-33-15Z,solar-position,aider,qwen3:14b,baseline,161,1100,5200,0,0,28
+2026-05-10T10-36-00Z_kalman-filter_aider_qwen3_14b_baseline,2026-05-10T10-36-00Z,kalman-filter,aider,qwen3:14b,baseline,146,905,6000,0,0,100
+2026-05-10T10-38-29Z_regression-ci_aider_qwen3_coder_30b_a3b_q4_K_M_baseline,2026-05-10T10-38-29Z,regression-ci,aider,qwen3-coder:30b-a3b-q4_K_M,baseline,33,787,603,0,0,100
+2026-05-10T10-39-06Z_fft-spectrum_aider_qwen3_coder_30b_a3b_q4_K_M_baseline,2026-05-10T10-39-06Z,fft-spectrum,aider,qwen3-coder:30b-a3b-q4_K_M,baseline,25,789,438,0,0,100
+2026-05-10T10-39-34Z_matrix-ops_aider_qwen3_coder_30b_a3b_q4_K_M_baseline,2026-05-10T10-39-34Z,matrix-ops,aider,qwen3-coder:30b-a3b-q4_K_M,baseline,55,800,1200,0,0,100
+2026-05-10T10-40-32Z_julian-day_aider_qwen3_coder_30b_a3b_q4_K_M_baseline,2026-05-10T10-40-32Z,julian-day,aider,qwen3-coder:30b-a3b-q4_K_M,baseline,29,932,536,0,0,70
+2026-05-10T10-41-05Z_solar-position_aider_qwen3_coder_30b_a3b_q4_K_M_baseline,2026-05-10T10-41-05Z,solar-position,aider,qwen3-coder:30b-a3b-q4_K_M,baseline,52,1100,1000,0,0,28

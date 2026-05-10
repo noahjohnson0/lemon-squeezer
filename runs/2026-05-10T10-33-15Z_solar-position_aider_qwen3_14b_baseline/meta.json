@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-05-10T10-33-15Z_solar-position_aider_qwen3_14b_baseline",
+  "ts": "2026-05-10T10-33-15Z",
+  "eval": "solar-position",
+  "harness": "aider",
+  "model": "qwen3:14b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 161,
+  "tokens_in": 1100,
+  "tokens_out": 5200,
+  "tool_calls": 0,
+  "score_pct": "28",
+  "telemetry": {
+    "samples": 114,
+    "gpu_util_avg": 94.71,
+    "gpu_util_peak": 97.0,
+    "gpu_mem_peak_mb": 11414.0,
+    "gpu_mem_avg_mb": 11322.45,
+    "gpu_temp_peak_c": 68.0,
+    "gpu_temp_avg_c": 66.75,
+    "gpu_power_avg_w": 211.37,
+    "gpu_power_peak_w": 218.03,
+    "gpu_fan_peak_pct": 49.0,
+    "host_load_peak": 2.17
+  }
+}
