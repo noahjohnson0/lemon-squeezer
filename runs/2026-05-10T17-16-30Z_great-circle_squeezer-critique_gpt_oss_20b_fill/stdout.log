@@ -3,3 +3,19 @@
 [draft it=0] TOOL write_file {"path":"geo.py","content":"\"\"\"Geodesic utilities.\n\nThis module implements two basic spherical Earth navigation helpers\nusing the haversine formula for gr
 [draft it=1] TOOL list_files {"dir":"."}
 [draft it=2] TOOL run_bash {"command":"python -m pyflakes geo.py","timeout":15000}
+[draft it=3] TOOL run_bash {"command":"python3 -m pyflakes geo.py","timeout":15000}
+[draft it=4] TOOL run_bash {"command":"python3 -m py_compile geo.py","timeout":15000}
+[draft it=5] The project now contains a single module **`geo.py`** which provides two core navigation helpers:
+
+1. **`distance_km`** – Calculates the great‑circle distance in kilometres between two geographic points using the haversine formula.
+2. **`be
+[draft] done — 5 tools, 9999/2030 tok, 87.8s
+
+══════ STEP: critique-1  (gpt-oss:20b) ══════
+[critique-1 it=0] TOOL list_files {"dir":"."}
+[critique-1 it=1] TOOL read_file {"path":"geo.py"}
+[critique-1 it=2] OK: nothing to fix
+[critique-1] done — 2 tools, 3216/738 tok, 33.6s
+[pipeline] critic happy after round 1; halting refinement
+
+══════ PIPELINE DONE — 2 steps, 13215/2768 tok total ══════

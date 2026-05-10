@@ -1,0 +1,27 @@
+{
+  "pipeline": "critique",
+  "steps": [
+    {
+      "name": "draft",
+      "model": "gpt-oss:20b",
+      "tokens_in": 9999,
+      "tokens_out": 2030,
+      "tool_calls": 5,
+      "wall_s": 87.8,
+      "final": "The project now contains a single module **`geo.py`** which provides two core navigation helpers:\n\n1. **`distance_km`** \u2013 Calculates the great\u2011circle distance in kilometres between two geographic points using the haversine formula.\n2. **`bearing_deg`** \u2013 Computes the initial forward azimuth (bearing) from point\u202f1 to point\u202f2, returning a value in [0,\u202f360) degrees.\n\nBoth functions:\n- Use only the standard library (`math`).\n- Handle identical coordinates gracefully: distance \u2192 `0.0`, bearing \u2192 `0.0`.\n- Accept inputs in decimal degrees and return values in the required units.\n\nThe module includes clear documentation strings, type annotations, and a small runnable demo when executed directly. The file was verified to compile without errors."
+    },
+    {
+      "name": "critique-1",
+      "model": "gpt-oss:20b",
+      "tokens_in": 3216,
+      "tokens_out": 738,
+      "tool_calls": 2,
+      "wall_s": 33.6,
+      "final": "OK: nothing to fix"
+    }
+  ],
+  "primary_model": "gpt-oss:20b",
+  "critic_model": "gpt-oss:20b",
+  "judge_model": null,
+  "rounds": 1
+}
