@@ -289,3 +289,5 @@ run_id,ts,eval,harness,model,tag,wall_s,tok_in,tok_out,tools,exit,score_pct
 2026-05-10T16-51-19Z_cli-tool_squeezer-critique_gpt_oss_20b_fill,2026-05-10T16-51-19Z,cli-tool,squeezer-critique,gpt-oss:20b,fill,521,24936,11492,17,0,100
 2026-05-10T17-00-06Z_crc-checksum_squeezer-critique_gpt_oss_20b_fill,2026-05-10T17-00-06Z,crc-checksum,squeezer-critique,gpt-oss:20b,fill,128,5626,2994,3,0,100
 2026-05-10T17-02-21Z_dijkstra_squeezer-critique_gpt_oss_20b_fill,2026-05-10T17-02-21Z,dijkstra,squeezer-critique,gpt-oss:20b,fill,115,10853,2719,7,0,100
+2026-05-10T17-04-22Z_engineering_squeezer-critique_gpt_oss_20b_fill,2026-05-10T17-04-22Z,engineering,squeezer-critique,gpt-oss:20b,fill,318,52273,7184,19,0,100
+2026-05-10T17-09-47Z_fft-spectrum_squeezer-critique_gpt_oss_20b_fill,2026-05-10T17-09-47Z,fft-spectrum,squeezer-critique,gpt-oss:20b,fill,396,18406,8696,10,0,100

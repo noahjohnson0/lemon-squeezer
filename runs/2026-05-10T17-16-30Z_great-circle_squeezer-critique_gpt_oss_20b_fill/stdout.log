@@ -1,0 +1,5 @@
+
+══════ STEP: draft  (gpt-oss:20b) ══════
+[draft it=0] TOOL write_file {"path":"geo.py","content":"\"\"\"Geodesic utilities.\n\nThis module implements two basic spherical Earth navigation helpers\nusing the haversine formula for gr
+[draft it=1] TOOL list_files {"dir":"."}
+[draft it=2] TOOL run_bash {"command":"python -m pyflakes geo.py","timeout":15000}
