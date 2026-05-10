@@ -1,0 +1,22 @@
+{
+  "checks": [
+    {"name":"file:backend/*.py","pass":1,"weight":5,"note":""},
+    {"name":"file:frontend/app/page","pass":1,"weight":5,"note":""},
+    {"name":"file:README.md","pass":1,"weight":3,"note":""},
+    {"name":"backend:cors_configured","pass":1,"weight":8,"note":"browser fetch from :3000 needs CORS"},
+    {"name":"backend:uses_modern_wifi_cmd","pass":0,"weight":6,"note":"airport -I deprecated in Sonoma+"},
+    {"name":"backend:correct_endpoint","pass":1,"weight":4,"note":""},
+    {"name":"backend:python_compiles","pass":1,"weight":8,"note":""},
+    {"name":"backend:guarded_regex","pass":1,"weight":4,"note":"no unguarded .group(1)"},
+    {"name":"frontend:use_client_directive","pass":0,"weight":8,"note":"App Router needs 'use client' for hooks"},
+    {"name":"frontend:polls_every_3s","pass":1,"weight":4,"note":""},
+    {"name":"frontend:absolute_or_proxied_fetch","pass":0,"weight":6,"note":"relative /api/wifi hits Next, not FastAPI"},
+    {"name":"frontend:package_json","pass":1,"weight":5,"note":""},
+    {"name":"frontend:layout_tsx","pass":1,"weight":4,"note":"App Router requires root layout"},
+    {"name":"readme:python_install","pass":1,"weight":2,"note":""},
+    {"name":"readme:node_install","pass":1,"weight":2,"note":""}
+  ],
+  "gained": 54,
+  "total": 74,
+  "score_pct": 72
+}

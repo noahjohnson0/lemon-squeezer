@@ -1,7 +1,7 @@
 import asyncio
+import json
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Dict, Any
 
 app = FastAPI(title="WiFi Info API")
 
@@ -14,7 +14,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-async def _run_airport_command() -> Dict[str, Any]:
+async def _run_airport_command() -> dict:
     """Run the macOS airport command and parse its output into a dict.
     Returns an empty dict if the command fails.
     """
@@ -32,7 +32,7 @@ async def _run_airport_command() -> Dict[str, Any]:
     except Exception:
         return {}
 
-    data: Dict[str, Any] = {}
+    data = {}
     for line in output.splitlines():
         if ":" not in line:
             continue
@@ -53,19 +53,31 @@ async def get_wifi():
             "security": None,
         }
 
-    # Mapping of desired fields to keys in the output dict
     ssid = raw.get("ssid")
     bssid = raw.get("lastbssid") or raw.get("bssid")
+
     # RSSI: 'agrctlrssi' or 'lastrssi'
     rssi_str = raw.get("agrctlrssi") or raw.get("lastrssi")
-    rssi = int(rssi_str) if rssi_str is not None and rssi_str.lstrip("-\d") == "" else None
+    try:
+        rssi = int(rssi_str) if rssi_str is not None else None
+    except Exception:
+        rssi = None
+
     channel = raw.get("channel")
-    channel = int(channel) if channel and channel.isdigit() else None
+    try:
+        channel = int(channel) if channel is not None else None
+    except Exception:
+        channel = None
+
     # TX rate: 'lastrate' or 'lasttxrate' in Mbps
     tx_rate_str = raw.get("lastrate") or raw.get("lasttxrate")
-    tx_rate = int(tx_rate_str) if tx_rate_str and tx_rate_str.isdigit() else None
-    # Security is not part of the airport command output; fallback to None
-    security = None
+    try:
+        tx_rate = float(tx_rate_str) if tx_rate_str is not None else None
+    except Exception:
+        tx_rate = None
+
+    # Security may appear as 'encryption' key like 'WPA2' or 'WPA3'
+    security = raw.get("encryption") or raw.get("security") or None
 
     return {
         "ssid": ssid,
