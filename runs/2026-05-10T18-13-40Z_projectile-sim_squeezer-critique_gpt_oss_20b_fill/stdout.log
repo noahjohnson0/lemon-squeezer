@@ -14,3 +14,25 @@ Key features:
 [critique-1 it=2] TOOL run_bash {"command":"python3 -m py_compile projectile.py","timeout":15000}
 [critique-1 it=3] TOOL run_bash {"command":"python3 projectile.py 50 45 0 0.01 1.5 --dt 0.001","timeout":15000}
 [critique-1 it=4] TOOL run_bash {"command":"python3 projectile.py 50 45 0.3 0.05 1.5 --rho 1.225 --dt 0.001","timeout":15000}
+[critique-1 it=5] **Defect Summary**
+
+| # | Defect | Why It Mismatch | Suggested Fix |
+|---|--------|-----------------|---------------|
+| 1 | **Incorrect RK4 implementation – third stage intermediate state is computed without the ½ factor** | In the `rk4_ste
+[critique-1] done — 5 tools, 9892/6582 tok, 285.9s
+
+══════ STEP: refine-1  (gpt-oss:20b) ══════
+[refine-1 it=0] TOOL read_file {"path":"projectile.py"}
+[refine-1 it=1] TOOL run_bash {"command":"python3 projectile.py 50 45 0 0.01 0.1","timeout":15000}
+[refine-1 it=2] TOOL write_file {"path":"projectile.py","content":"#!/usr/bin/env python3\n\"\"\"\nSimulation of projectile motion with quadratic air drag using RK4.\n\nUsage:\n    projectile.
+[refine-1 it=3] TOOL run_bash {"command":"python3 projectile.py 50 45 0 0.01 0.1","timeout":15000}
+[refine-1 it=4] TOOL run_bash {"command":"python3 projectile.py 50 45 0.5 0.01 0.1","timeout":15000}
+[refine-1 it=5] Implemented corrected RK4 step in **projectile.py**
+
+* Fixed the third stage intermediate state calculation by adding the ½ factor.
+* Updated comments and added detailed explanations.
+
+The simulation now performs proper RK4 integration and 
+[refine-1] done — 5 tools, 16182/2827 tok, 124.1s
+
+══════ PIPELINE DONE — 3 steps, 28882/11761 tok total ══════

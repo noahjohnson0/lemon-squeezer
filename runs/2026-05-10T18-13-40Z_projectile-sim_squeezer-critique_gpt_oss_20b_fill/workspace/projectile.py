@@ -29,8 +29,10 @@ def parse_arguments():
     parser.add_argument("Cd", type=float, help="Drag coefficient")
     parser.add_argument("area_m2", type=float, help="Cross‑sectional area (m^2)")
     parser.add_argument("mass_kg", type=float, help="Mass of the projectile (kg)")
-    parser.add_argument("--rho", type=float, default=1.225, help="Air density (kg/m^3), default 1.225 @ sea level")
-    parser.add_argument("--dt", type=float, default=0.001, help="Time step for RK4 integration (s), default 0.001")
+    parser.add_argument("--rho", type=float, default=1.225,
+                        help="Air density (kg/m^3), default 1.225 @ sea level")
+    parser.add_argument("--dt", type=float, default=0.001,
+                        help="Time step for RK4 integration (s), default 0.001")
     return parser.parse_args()
 
 
@@ -49,7 +51,8 @@ def rk4_step(state, dt, k):
     k2 = derivative(state_k1, k)
     state_k2 = [state[i] + dt * k2[i] * 0.5 for i in range(4)]
     k3 = derivative(state_k2, k)
-    state_k3 = [state[i] + dt * k3[i] for i in range(4)]
+    # Corrected: use 0.5 factor for the third stage intermediate state
+    state_k3 = [state[i] + dt * k3[i] * 0.5 for i in range(4)]
     k4 = derivative(state_k3, k)
     new_state = [state[i] + dt * (k1[i] + 2 * k2[i] + 2 * k3[i] + k4[i]) / 6.0 for i in range(4)]
     return new_state
@@ -122,4 +125,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
