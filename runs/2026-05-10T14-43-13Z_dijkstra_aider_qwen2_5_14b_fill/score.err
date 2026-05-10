@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "<stdin>", line 7, in <module>
+  File "/Users/noahjohnson0/repos/lemon-squeezer/runs/2026-05-10T14-43-13Z_dijkstra_aider_qwen2_5_14b_fill/workspace/dijkstra.py", line 41, in shortest_path
+    previous_nodes[neighbor] = current_node  # Use the initialized dictionary
+    ^^^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'previous_nodes' where it is not associated with a value
