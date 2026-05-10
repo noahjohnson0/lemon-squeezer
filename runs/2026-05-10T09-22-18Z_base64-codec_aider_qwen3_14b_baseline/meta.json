@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-05-10T09-22-18Z_base64-codec_aider_qwen3_14b_baseline",
+  "ts": "2026-05-10T09-22-18Z",
+  "eval": "base64-codec",
+  "harness": "aider",
+  "model": "qwen3:14b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 143,
+  "wall_seconds": 1344,
+  "tokens_in": 0,
+  "tokens_out": 0,
+  "tool_calls": 0,
+  "score_pct": "0",
+  "telemetry": {
+    "samples": 935,
+    "gpu_util_avg": 65.7,
+    "gpu_util_peak": 75.0,
+    "gpu_mem_peak_mb": 11151.0,
+    "gpu_mem_avg_mb": 10917.74,
+    "gpu_temp_peak_c": 64.0,
+    "gpu_temp_avg_c": 61.33,
+    "gpu_power_avg_w": 154.79,
+    "gpu_power_peak_w": 171.2,
+    "gpu_fan_peak_pct": 36.0,
+    "host_load_peak": 5.04
+  }
+}

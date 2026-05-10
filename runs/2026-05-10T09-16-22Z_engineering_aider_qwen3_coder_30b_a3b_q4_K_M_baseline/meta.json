@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-05-10T09-16-22Z_engineering_aider_qwen3_coder_30b_a3b_q4_K_M_baseline",
+  "ts": "2026-05-10T09-16-22Z",
+  "eval": "engineering",
+  "harness": "aider",
+  "model": "qwen3-coder:30b-a3b-q4_K_M",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 24,
+  "tokens_in": 947,
+  "tokens_out": 328,
+  "tool_calls": 0,
+  "score_pct": "100",
+  "telemetry": {
+    "samples": 17,
+    "gpu_util_avg": 21.06,
+    "gpu_util_peak": 54.0,
+    "gpu_mem_peak_mb": 11393.0,
+    "gpu_mem_avg_mb": 10756.24,
+    "gpu_temp_peak_c": 53.0,
+    "gpu_temp_avg_c": 49.88,
+    "gpu_power_avg_w": 38.24,
+    "gpu_power_peak_w": 73.06,
+    "gpu_fan_peak_pct": 43.0,
+    "host_load_peak": 4.79
+  }
+}

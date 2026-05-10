@@ -1,0 +1,12 @@
+{
+  "checks": [
+    {"name":"file:base64codec.py","pass":0,"weight":5,"note":""},
+    {"name":"compiles","pass":0,"weight":5,"note":""},
+    {"name":"enc1","pass":0,"weight":5,"note":""},
+    {"name":"rt1","pass":0,"weight":5,"note":""},
+    {"name":"rejects_invalid","pass":0,"weight":5,"note":""}
+  ],
+  "gained": 0,
+  "total": 25,
+  "score_pct": 0
+}

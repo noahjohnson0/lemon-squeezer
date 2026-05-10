@@ -104,12 +104,34 @@ if [[ -x "$ROOT/bin/sampler" ]]; then
   SAMPLER_PID="$("$ROOT/bin/sampler" start "$RUN_DIR" 2>/dev/null || true)"
 fi
 
+# Per-run wall-clock timeout (default 10 min). Override via $LEMON_RUN_TIMEOUT (seconds).
+# Pipelines like squeezer-critique/squeezer-ensemble can take longer; bump for those.
+RUN_TIMEOUT="${LEMON_RUN_TIMEOUT:-600}"
+case "$HARNESS" in
+  squeezer-critique|squeezer-ensemble) RUN_TIMEOUT="${LEMON_PIPELINE_TIMEOUT:-1800}" ;;
+esac
+TIMEOUT_BIN="$(command -v gtimeout || command -v timeout || echo '')"
+
 set +e
-( source "$HARNESS_SCRIPT" \
-  && harness_run "$WS" "$PROMPT_FILE" "$MODEL" "$RUN_DIR" \
-       ${EXTRA_FLAGS[@]+"${EXTRA_FLAGS[@]}"} \
+if [[ -n "$TIMEOUT_BIN" ]]; then
+  ( source "$HARNESS_SCRIPT" \
+    && "$TIMEOUT_BIN" --foreground "$RUN_TIMEOUT" bash -c '
+        source "$1"
+        harness_run "$2" "$3" "$4" "$5" "${@:6}"
+      ' _ "$HARNESS_SCRIPT" "$WS" "$PROMPT_FILE" "$MODEL" "$RUN_DIR" \
+        ${EXTRA_FLAGS[@]+"${EXTRA_FLAGS[@]}"} \
   ) >"$RUN_DIR/stdout.log" 2>"$RUN_DIR/stderr.log"
+else
+  ( source "$HARNESS_SCRIPT" \
+    && harness_run "$WS" "$PROMPT_FILE" "$MODEL" "$RUN_DIR" \
+         ${EXTRA_FLAGS[@]+"${EXTRA_FLAGS[@]}"} \
+    ) >"$RUN_DIR/stdout.log" 2>"$RUN_DIR/stderr.log"
+fi
 EXIT=$?
+# Exit 124 = timeout
+if [[ "$EXIT" == "124" ]]; then
+  echo "[eval-run] HARD TIMEOUT after ${RUN_TIMEOUT}s — killing harness" >> "$RUN_DIR/stderr.log"
+fi
 set -e
 WALL=$(( $(date +%s) - START ))
 

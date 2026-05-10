@@ -88,3 +88,15 @@ run_id,ts,eval,harness,model,tag,wall_s,tok_in,tok_out,tools,exit,score_pct
 2026-05-10T09-02-52Z_refactor_squeezer-critique_qwen3_14b_crit,2026-05-10T09-02-52Z,refactor,squeezer-critique,qwen3:14b,crit,221,7529,8645,6,0,?
 2026-05-10T09-06-35Z_wifi-stats_squeezer-critique_qwen3_14b_crit,2026-05-10T09-06-35Z,wifi-stats,squeezer-critique,qwen3:14b,crit,284,18040,10219,15,0,78
 2026-05-10T09-11-22Z_sql-injection-fix_squeezer-critique_gpt_oss_20b_crit,2026-05-10T09-11-22Z,sql-injection-fix,squeezer-critique,gpt-oss:20b,crit,103,9331,1464,8,0,100
+2026-05-10T09-13-08Z_chem-balance_squeezer_qwen3_14b_solo,2026-05-10T09-13-08Z,chem-balance,squeezer,qwen3:14b,solo,145,767,5857,0,0,0
+2026-05-10T09-15-37Z_sql-injection-fix_squeezer_qwen3_14b_solo,2026-05-10T09-15-37Z,sql-injection-fix,squeezer,qwen3:14b,solo,42,1973,1706,1,0,65
+2026-05-10T09-16-22Z_engineering_aider_qwen3_coder_30b_a3b_q4_K_M_baseline,2026-05-10T09-16-22Z,engineering,aider,qwen3-coder:30b-a3b-q4_K_M,baseline,24,947,328,0,0,100
+2026-05-10T09-16-49Z_engineering_aider_gpt_oss_20b_baseline,2026-05-10T09-16-49Z,engineering,aider,gpt-oss:20b,baseline,26,1000,363,0,0,100
+2026-05-10T09-17-18Z_engineering_aider_qwen3_14b_baseline,2026-05-10T09-17-18Z,engineering,aider,qwen3:14b,baseline,33,949,763,0,0,100
+2026-05-10T09-17-53Z_great-circle_aider_qwen3_coder_30b_a3b_q4_K_M_baseline,2026-05-10T09-17-53Z,great-circle,aider,qwen3-coder:30b-a3b-q4_K_M,baseline,31,852,506,0,0,100
+2026-05-10T09-18-28Z_great-circle_aider_gpt_oss_20b_baseline,2026-05-10T09-18-28Z,great-circle,aider,gpt-oss:20b,baseline,58,904,1200,0,0,100
+2026-05-10T09-19-29Z_great-circle_aider_qwen3_14b_baseline,2026-05-10T09-19-29Z,great-circle,aider,qwen3:14b,baseline,107,854,3000,0,0,100
+2026-05-10T09-21-19Z_bug-fix_aider_qwen3_8b_baseline,2026-05-10T09-21-19Z,bug-fix,aider,qwen3:8b,baseline,18,730,895,0,0,100
+2026-05-10T09-21-39Z_cli-tool_aider_qwen3_8b_baseline,2026-05-10T09-21-39Z,cli-tool,aider,qwen3:8b,baseline,15,769,764,0,0,100
+2026-05-10T09-21-57Z_refactor_aider_qwen3_8b_baseline,2026-05-10T09-21-57Z,refactor,aider,qwen3:8b,baseline,18,760,990,0,0,66
+2026-05-10T09-22-18Z_base64-codec_aider_qwen3_14b_baseline,2026-05-10T09-22-18Z,base64-codec,aider,qwen3:14b,baseline,1344,0,0,0,143,0
