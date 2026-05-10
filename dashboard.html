@@ -200,7 +200,7 @@
 </div>
 
 <h2>Leaderboard <span class="num" id="lb-cell-count">–</span></h2>
-<p class="muted" style="margin-top:-8px;">Best score per <code>(harness × model × eval)</code>. Each cell shows the highest score that combination has achieved across any tag (baseline / sysprompt / directive / etc.). Click any cell for the run's score breakdown.</p>
+<p class="muted" style="margin-top:-8px;">Best score per <code>(harness × model × eval)</code>. Each cell shows the highest score that combination has achieved across any tag (baseline / sysprompt / directive / etc.). The <code>rank</code> column is a <strong>Bayesian-shrunk score</strong> — <code>(n·avg + C·μ) / (n + C)</code>, with C=3 pseudo-evals' worth of pull toward the global mean. A 1/8 row of 100% won't outrank a 7/8 row of 95%. Click any cell for the run's score breakdown.</p>
 <div class="card scroll-x">
   <table class="heatmap" id="leaderboard">
     <thead><tr><th>harness</th><th>model</th></tr></thead>
@@ -484,20 +484,30 @@ function renderLeaderboard(runs) {
   const models = unique(runs.map(r => r.model));
   const best = bestPer(runs, r => `${r.eval}|${r.harness}|${r.model}`);
   const thead = document.querySelector("#leaderboard thead tr");
-  thead.innerHTML = '<th>#</th><th>harness</th><th>model</th>' + evals.map(e => `<th>${e}</th>`).join("") + '<th class="num">avg</th><th class="num" title="number of evals this combination has been tested on">n</th>';
-  // Build (harness, model) rows with avg, then sort desc.
+  thead.innerHTML = '<th>#</th><th>harness</th><th>model</th>' + evals.map(e => `<th>${e}</th>`).join("") +
+    '<th class="num" title="raw average across the evals this row has been tested on">avg</th>' +
+    '<th class="num" title="Bayesian-shrunk score: pulls low-coverage rows toward the global mean. = (n·avg + C·μ) / (n + C), C=3.">rank</th>' +
+    '<th class="num" title="how many of the available evals this row has been tested on">cov</th>';
+
+  const totalEvals = evals.length;
+  const C_PRIOR = 3; // pseudo-evals worth of weight pulling toward global mean
+  // Global mean across every (eval × harness × model) cell
+  const allBest = [...best.values()];
+  const globalMean = allBest.length ? allBest.reduce((s,r) => s + r.score_pct, 0) / allBest.length : 50;
+
   const allRows = [];
-  let n = 0;
   for (const h of harnesses) for (const m of models) {
     const cellRuns = evals.map(e => best.get(`${e}|${h}|${m}`));
     const present = cellRuns.filter(Boolean);
-    if (!present.length) continue; // skip totally untested combos
-    n += present.length;
-    const avg = Math.round(present.reduce((s,r) => s + r.score_pct, 0) / present.length);
-    allRows.push({ harness: h, model: m, cellRuns, avg, count: present.length });
+    if (!present.length) continue;
+    const avg = present.reduce((s,r) => s + r.score_pct, 0) / present.length;
+    const n = present.length;
+    const shrunk = (n * avg + C_PRIOR * globalMean) / (n + C_PRIOR);
+    allRows.push({ harness: h, model: m, cellRuns, avg: Math.round(avg), shrunk: Math.round(shrunk), count: n });
   }
-  // Rank: avg desc, ties broken by more-evaluated, then by harness/model alphabetic
-  allRows.sort((a, b) => (b.avg - a.avg) || (b.count - a.count) || a.harness.localeCompare(b.harness) || a.model.localeCompare(b.model));
+  // Rank by shrunk score desc — penalises a 1/8 row of 100% so it doesn't beat a 7/8 row of 95%.
+  allRows.sort((a, b) => (b.shrunk - a.shrunk) || (b.count - a.count) || (b.avg - a.avg) || a.harness.localeCompare(b.harness) || a.model.localeCompare(b.model));
+
   let rows = "";
   allRows.forEach((row, idx) => {
     const cells = row.cellRuns.map(r => {
@@ -506,7 +516,18 @@ function renderLeaderboard(runs) {
     }).join("");
     const rank = idx + 1;
     const medal = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : `${rank}`;
-    rows += `<tr><td class="num" style="color:var(--muted);font-weight:600;">${medal}</td><td><span class="chip ${row.harness}">${row.harness}</span></td><td>${row.model}</td>${cells}<td class="cell"><span class="cell-inner score ${scoreClass(row.avg)}">${row.avg}</span></td><td class="num" style="color:var(--muted);">${row.count}/${evals.length}</td></tr>`;
+    const cov = `${row.count}/${totalEvals}`;
+    const covPct = Math.round(100 * row.count / totalEvals);
+    const covColor = covPct >= 80 ? "var(--text)" : covPct >= 40 ? "var(--mid)" : "var(--muted)";
+    rows += `<tr>
+      <td class="num" style="color:var(--muted);font-weight:600;">${medal}</td>
+      <td><span class="chip ${row.harness}">${row.harness}</span></td>
+      <td>${row.model}</td>
+      ${cells}
+      <td class="cell"><span class="cell-inner score ${scoreClass(row.avg)}">${row.avg}</span></td>
+      <td class="cell"><span class="cell-inner score ${scoreClass(row.shrunk)}" title="Bayesian-shrunk score (C=${C_PRIOR}, global μ=${Math.round(globalMean)})">${row.shrunk}</span></td>
+      <td class="num" style="color:${covColor};font-variant-numeric:tabular-nums;">${cov}</td>
+    </tr>`;
   });
   document.querySelector("#leaderboard tbody").innerHTML = rows;
   document.getElementById("lb-cell-count").textContent = `${n} cells`;
