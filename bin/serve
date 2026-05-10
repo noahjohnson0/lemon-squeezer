@@ -1,6 +1,20 @@
 #!/usr/bin/env bash
-# Serve the dashboard. Usage: serve [port]
+# Serve the dashboard locally + start the inflight watcher so "running right now" is live.
+# Usage: serve [port]
+#
+# When deployed to a static host (e.g. GitHub Pages), this script isn't used —
+# the dashboard fetches inflight.json directly and gracefully hides the panel
+# when it's stale or absent.
+set -u
 PORT="${1:-8765}"
-cd "$HOME/repos/lemon-squeezer"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT"
+
+# Background watcher writes inflight.json every ~2s
+python3 "$ROOT/bin/inflight-watcher" >/tmp/lemon-squeezer-watcher.log 2>&1 &
+WATCHER_PID=$!
+trap 'kill $WATCHER_PID 2>/dev/null; rm -f "$ROOT/inflight.json"' EXIT
+
 echo "→ http://localhost:$PORT/dashboard.html"
+echo "  watcher: PID $WATCHER_PID  log: /tmp/lemon-squeezer-watcher.log"
 exec python3 -m http.server "$PORT" --bind 127.0.0.1

@@ -1,0 +1,19 @@
+{
+  "run_id": "2026-05-10T08-13-58Z_password-strength_aider_devstral_24b_baseline",
+  "ts": "2026-05-10T08-13-58Z",
+  "eval": "password-strength",
+  "harness": "aider",
+  "model": "devstral:24b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 112,
+  "tokens_in": 970,
+  "tokens_out": 693,
+  "tool_calls": 0,
+  "score_pct": "100",
+  "telemetry": {
+    "samples": 110,
+    "host_load_peak": 5.18
+  }
+}

@@ -29,6 +29,10 @@ RUN_DIR="$ROOT/runs/$RUN_ID"
 WS="$RUN_DIR/workspace"
 mkdir -p "$WS"
 
+# Stash original (un-sanitised) metadata so the inflight watcher can show real names
+printf '%s' "$MODEL" > "$RUN_DIR/.model"
+printf '%s' "$TAG"   > "$RUN_DIR/.tag"
+
 echo "▶ run_id:  $RUN_ID"
 echo "  harness: $HARNESS"
 echo "  eval:    $EVAL  | model: $MODEL  | tag: $TAG"

@@ -1,0 +1,19 @@
+{
+  "run_id": "2026-05-10T08-15-52Z_port-scanner_aider_devstral_24b_baseline",
+  "ts": "2026-05-10T08-15-52Z",
+  "eval": "port-scanner",
+  "harness": "aider",
+  "model": "devstral:24b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 291,
+  "tokens_in": 861,
+  "tokens_out": 367,
+  "tool_calls": 0,
+  "score_pct": "85",
+  "telemetry": {
+    "samples": 284,
+    "host_load_peak": 3.29
+  }
+}

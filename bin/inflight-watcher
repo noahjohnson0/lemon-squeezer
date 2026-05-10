@@ -1,0 +1,129 @@
+#!/usr/bin/env python3
+"""inflight-watcher — write a static inflight.json describing currently-running evals.
+
+Polls runs/ for directories that DON'T yet have meta.json (== unfinished) and surfaces
+them with their elapsed time, latest GPU sample, and last stdout line.
+
+inflight.json is just a static file. When this script isn't running, the file goes stale
+and the dashboard treats it as "no live runs". Works fine on GH Pages — just always empty
+because nothing's writing it remotely.
+"""
+from __future__ import annotations
+import json, os, re, time
+from datetime import datetime, timezone
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+RUNS = ROOT / "runs"
+OUT  = ROOT / "inflight.json"
+INTERVAL = float(os.environ.get("INFLIGHT_INTERVAL", "2"))
+
+# 2026-05-10T08-02-17Z_<eval>_<harness>_<safe-model>_<tag>
+RUN_RE = re.compile(r"^(?P<ts>\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}Z)_(?P<eval>[^_]+)_(?P<harness>[^_]+)_(?P<rest>.+)$")
+
+def parse_run_id(rid: str) -> dict:
+    m = RUN_RE.match(rid)
+    if not m: return {"run_id": rid}
+    rest = m.group("rest")
+    if "_" in rest:
+        model_safe, tag = rest.rsplit("_", 1)
+    else:
+        model_safe, tag = rest, ""
+    return {
+        "run_id": rid,
+        "started_ts": m.group("ts"),
+        "eval": m.group("eval"),
+        "harness": m.group("harness"),
+        "model": model_safe,   # may be overridden by .model marker file
+        "tag": tag,
+    }
+
+def read_marker(d, name, default):
+    p = d / name
+    if p.exists():
+        try: return p.read_text().strip() or default
+        except: pass
+    return default
+
+def latest_metrics(d: Path) -> dict:
+    p = d / "metrics.csv"
+    if not p.exists(): return {}
+    try:
+        lines = [l for l in p.read_text().splitlines() if l.strip()]
+        if len(lines) < 2: return {}
+        last  = lines[-1].split(",")
+        first = lines[1].split(",")
+        def g(arr, i):
+            try: return float(arr[i])
+            except: return None
+        out = {
+            "samples": len(lines) - 1,
+            "gpu_util_pct":    g(last, 1),
+            "gpu_mem_used_mb": g(last, 2),
+            "gpu_temp_c":      g(last, 3),
+            "gpu_power_w":     g(last, 4),
+            "gpu_fan_pct":     g(last, 5),
+        }
+        a = g(first, 0); b = g(last, 0)
+        if a and b: out["elapsed_s"] = int(b - a)
+        return out
+    except Exception:
+        return {}
+
+def latest_stdout(d: Path) -> str:
+    p = d / "stdout.log"
+    if not p.exists(): return ""
+    try:
+        text = p.read_text(errors="replace")
+        ls = [l for l in text.splitlines() if l.strip()]
+        return ls[-1][:240] if ls else ""
+    except Exception:
+        return ""
+
+def fallback_elapsed(d: Path) -> int:
+    """Use directory mtime as a proxy when no metrics yet."""
+    try:
+        return int(time.time() - d.stat().st_mtime)
+    except Exception:
+        return 0
+
+def scan() -> list[dict]:
+    out = []
+    if not RUNS.exists(): return out
+    for d in sorted(RUNS.iterdir(), reverse=True):
+        if not d.is_dir(): continue
+        if (d / "meta.json").exists(): continue   # finished
+        # Heuristic: must have either an active sampler flag OR be very recent.
+        is_sampling = (d / ".sampling").exists()
+        age = fallback_elapsed(d)
+        if not is_sampling and age > 600: continue   # likely zombie, skip
+        info = parse_run_id(d.name)
+        # Prefer original (un-sanitised) names from marker files written by eval-run
+        info["model"] = read_marker(d, ".model", info.get("model", ""))
+        info["tag"]   = read_marker(d, ".tag",   info.get("tag", ""))
+        info["active"] = is_sampling
+        info.update(latest_metrics(d))
+        if "elapsed_s" not in info:
+            info["elapsed_s"] = age
+        info["last_stdout"] = latest_stdout(d)
+        out.append(info)
+    return out
+
+def main() -> None:
+    while True:
+        try:
+            data = {
+                "generated_ts": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                "interval_s": INTERVAL,
+                "runs": scan(),
+            }
+            tmp = OUT.with_suffix(".json.tmp")
+            tmp.write_text(json.dumps(data, indent=2))
+            tmp.replace(OUT)
+        except Exception as e:
+            # Don't die — just skip this tick
+            print(f"[inflight-watcher] tick failed: {e!r}", flush=True)
+        time.sleep(INTERVAL)
+
+if __name__ == "__main__":
+    main()

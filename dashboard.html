@@ -132,6 +132,35 @@
   </p>
 </header>
 
+<!-- LIVE PANEL — populated by bin/inflight-watcher writing inflight.json.
+     Hidden when the file is missing or stale (e.g. served from GitHub Pages). -->
+<section id="live-panel" class="card" style="display:none; border-left: 3px solid var(--accent);">
+  <h3 style="display:flex; align-items:center; gap:8px;">
+    <span class="pulse" style="display:inline-block; width:8px; height:8px; background:var(--good); border-radius:50%; box-shadow:0 0 6px var(--good);"></span>
+    Running right now
+    <span class="num" id="live-count" style="font-size:11px; color:var(--muted); border:1px solid var(--border); padding:1px 6px; border-radius:999px; font-weight:400;">–</span>
+    <span class="muted" id="live-stamp" style="font-size:11px; margin-left:auto;"></span>
+  </h3>
+  <p class="desc" style="margin-top:4px;">Live view of in-flight evals on the local GPU host. Sampled every <code id="live-interval">2</code>s by <code>bin/inflight-watcher</code>. This panel only appears when the watcher is running.</p>
+  <div id="live-rows"></div>
+</section>
+<style>
+  @keyframes pulse-anim { 0%,100% { opacity: 1 } 50% { opacity: 0.35 } }
+  .pulse { animation: pulse-anim 1.6s ease-in-out infinite; }
+  .live-row { display: grid; grid-template-columns: 1fr auto; gap: 6px 16px; padding: 10px 0; border-top: 1px solid var(--border); align-items: start; }
+  .live-row:first-of-type { border-top: 0; }
+  .live-row .head { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .live-row .head strong { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+  .live-row .meta { color: var(--muted); font-size: 11px; }
+  .live-row .stdout { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; grid-column: 1 / -1; }
+  .live-row .gpu { display: flex; gap: 14px; align-items: center; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; }
+  .live-row .gpu .v { color: var(--text); font-variant-numeric: tabular-nums; }
+  .live-row .gpu .v.warm { color: var(--mid); }
+  .live-row .gpu .v.hot  { color: var(--bad); }
+  .live-row .barwrap { width: 64px; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; display: inline-block; vertical-align: middle; }
+  .live-row .barwrap > span { display: block; height: 100%; background: var(--accent); }
+</style>
+
 <section class="stats">
   <div class="stat"><div class="v" id="s-runs">–</div><div class="l">runs captured</div></div>
   <div class="stat"><div class="v" id="s-evals">–</div><div class="l">eval tasks</div></div>
@@ -289,6 +318,64 @@ const EVAL_BLURBS = {
     weights: "detects open (25) · detects closed (25) · detects filtered (15) · 200-port bulk (15)"
   },
 };
+
+async function loadInflight() {
+  try {
+    const r = await fetch("inflight.json?t=" + Date.now(), { cache: "no-store" });
+    if (!r.ok) return null;
+    return await r.json();
+  } catch { return null; }
+}
+function fmtElapsed(s) {
+  if (!s && s !== 0) return "–";
+  if (s < 60) return `${s}s`;
+  const m = Math.floor(s/60), r = s%60;
+  return `${m}m ${r}s`;
+}
+function renderInflight(data) {
+  const panel = document.getElementById("live-panel");
+  if (!data || !Array.isArray(data.runs)) { panel.style.display = "none"; return; }
+  // Stale check — if generated_ts is older than 30s, treat as no live data
+  const ageMs = data.generated_ts ? (Date.now() - new Date(data.generated_ts).getTime()) : Infinity;
+  if (ageMs > 30000 || data.runs.length === 0) {
+    if (data.runs.length === 0 && ageMs <= 30000) {
+      // watcher alive but nothing running — show idle
+      panel.style.display = "block";
+      document.getElementById("live-count").textContent = "0 active";
+      document.getElementById("live-rows").innerHTML = '<p class="muted" style="margin:8px 0 0;font-size:12px;">watcher is up · no evals running.</p>';
+      document.getElementById("live-stamp").textContent = "updated " + Math.round(ageMs/1000) + "s ago";
+      document.getElementById("live-interval").textContent = data.interval_s ?? 2;
+      return;
+    }
+    panel.style.display = "none"; return;
+  }
+  panel.style.display = "block";
+  document.getElementById("live-count").textContent = `${data.runs.length} active`;
+  document.getElementById("live-stamp").textContent = "updated " + Math.round(ageMs/1000) + "s ago";
+  document.getElementById("live-interval").textContent = data.interval_s ?? 2;
+  const tempClass = t => (t == null ? "" : t > 80 ? "hot" : t > 70 ? "warm" : "");
+  const utilWidth = u => `width:${Math.max(0,Math.min(100, u||0))}%`;
+  document.getElementById("live-rows").innerHTML = data.runs.map(r => `
+    <div class="live-row">
+      <div>
+        <div class="head">
+          <strong>${r.eval}</strong>
+          <span class="chip ${r.harness}">${r.harness}</span>
+          <span>${r.model}</span>
+          <span class="chip">${r.tag||""}</span>
+          <span class="meta">${fmtElapsed(r.elapsed_s)} · ${r.samples ?? 0} samples</span>
+        </div>
+        <div class="stdout">${r.last_stdout ? "›  " + r.last_stdout.replace(/</g,"&lt;") : ""}</div>
+      </div>
+      <div class="gpu">
+        ${r.gpu_util_pct != null ? `<span title="GPU util"><span class="barwrap"><span style="${utilWidth(r.gpu_util_pct)}"></span></span> <span class="v">${Math.round(r.gpu_util_pct)}%</span></span>` : ''}
+        ${r.gpu_temp_c   != null ? `<span title="GPU temp"><span class="v ${tempClass(r.gpu_temp_c)}">${Math.round(r.gpu_temp_c)}°C</span></span>` : ''}
+        ${r.gpu_power_w  != null ? `<span title="GPU power"><span class="v">${Math.round(r.gpu_power_w)}W</span></span>` : ''}
+        ${r.gpu_mem_used_mb != null ? `<span title="GPU VRAM"><span class="v">${(r.gpu_mem_used_mb/1024).toFixed(1)}GB</span></span>` : ''}
+        ${r.gpu_fan_pct  != null ? `<span title="fan"><span class="v">fan ${Math.round(r.gpu_fan_pct)}%</span></span>` : ''}
+      </div>
+    </div>`).join("");
+}
 
 async function loadRuns() {
   const r = await fetch("runs.jsonl?t=" + Date.now());
@@ -738,6 +825,12 @@ async function refresh() {
   renderRecent(r);
   document.getElementById("footer-path").textContent = location.origin;
 }
+// Inflight refresh is independent — runs more often than the heavy refresh
+async function refreshInflight() {
+  const data = await loadInflight();
+  renderInflight(data);
+}
+let inflightTimer = null;
 for (const id of ["filter-eval","filter-harness","filter-model"]) {
   document.getElementById(id).addEventListener("change", e => { STATE.filters[id.replace("filter-","")] = e.target.value; refresh(); });
 }
@@ -758,6 +851,9 @@ function setupRefresh() {
 document.getElementById("refresh").addEventListener("change", setupRefresh);
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeDrawer(); });
 refresh(); setupRefresh();
+// Live panel updates every 2s independent of the main refresh.
+refreshInflight();
+inflightTimer = setInterval(refreshInflight, 2000);
 </script>
 </body>
 </html>

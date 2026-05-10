@@ -1,0 +1,19 @@
+{
+  "run_id": "2026-05-10T08-14-09Z_password-strength_pi_qwen3_14b_baseline",
+  "ts": "2026-05-10T08-14-09Z",
+  "eval": "password-strength",
+  "harness": "pi",
+  "model": "qwen3:14b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 334,
+  "tokens_in": 2054,
+  "tokens_out": 9025,
+  "tool_calls": 0,
+  "score_pct": "0",
+  "telemetry": {
+    "samples": 326,
+    "host_load_peak": 5.18
+  }
+}

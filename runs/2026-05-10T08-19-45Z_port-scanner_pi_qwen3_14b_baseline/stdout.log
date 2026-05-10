@@ -1,0 +1,7 @@
+The `scanner.py` file has been created successfully. It implements a TCP port scanner that meets all the specified requirements. The script includes:
+
+- A `scan` function that checks the status of each port on a given host.
+- Proper handling of socket errors to distinguish between open, closed, and filtered states.
+- A command-line interface that accepts a host and a list of ports, then prints the results sorted by port.
+
+You can now use the script as intended for educational/defensive network inventory purposes.
