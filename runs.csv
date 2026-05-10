@@ -322,3 +322,4 @@ run_id,ts,eval,harness,model,tag,wall_s,tok_in,tok_out,tools,exit,score_pct
 2026-05-10T20-59-22Z_knapsack_aider_qwen3_8b_fill,2026-05-10T20-59-22Z,knapsack,aider,qwen3:8b,fill,600,0,0,0,124,0
 2026-05-10T21-09-27Z_levenshtein_aider_qwen3_8b_fill,2026-05-10T21-09-27Z,levenshtein,aider,qwen3:8b,fill,601,0,0,0,124,0
 2026-05-10T21-19-34Z_lru-cache_aider_qwen3_8b_fill,2026-05-10T21-19-34Z,lru-cache,aider,qwen3:8b,fill,600,0,0,0,124,0
+2026-05-10T21-29-41Z_matrix-ops_aider_qwen3_8b_fill,2026-05-10T21-29-41Z,matrix-ops,aider,qwen3:8b,fill,600,0,0,0,124,0
