@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-05-10T10-15-34Z_dijkstra_aider_gpt_oss_20b_baseline",
+  "ts": "2026-05-10T10-15-34Z",
+  "eval": "dijkstra",
+  "harness": "aider",
+  "model": "gpt-oss:20b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 36,
+  "tokens_in": 812,
+  "tokens_out": 693,
+  "tool_calls": 0,
+  "score_pct": "100",
+  "telemetry": {
+    "samples": 25,
+    "gpu_util_avg": 30.64,
+    "gpu_util_peak": 44.0,
+    "gpu_mem_peak_mb": 11360.0,
+    "gpu_mem_avg_mb": 10953.6,
+    "gpu_temp_peak_c": 53.0,
+    "gpu_temp_avg_c": 51.32,
+    "gpu_power_avg_w": 42.42,
+    "gpu_power_peak_w": 75.76,
+    "gpu_fan_peak_pct": 0.0,
+    "host_load_peak": 2.56
+  }
+}

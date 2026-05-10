@@ -1,0 +1,219 @@
+#!/usr/bin/env python3
+import sys
+import re
+import math
+from decimal import Decimal, getcontext
+
+# Set precision for decimal calculations
+getcontext().prec = 28
+
+# Unit conversion factors (to base units)
+# Length: base = meter
+length_units = {
+    'mm': 0.001,
+    'cm': 0.01,
+    'm': 1.0,
+    'km': 1000.0,
+    'in': 0.0254,
+    'ft': 0.3048,
+    'yd': 0.9144,
+    'mi': 1609.344,
+    'mile': 1609.344,
+    'miles': 1609.344
+}
+
+# Mass: base = gram
+mass_units = {
+    'mg': 0.001,
+    'g': 1.0,
+    'kg': 1000.0,
+    'oz': 28.349523125,
+    'lb': 453.59237,
+    'lbs': 453.59237
+}
+
+# Volume: base = liter
+volume_units = {
+    'ml': 0.001,
+    'l': 1.0,
+    'gal': 3.785411784
+}
+
+# Temperature: base = Celsius (offset conversion)
+temp_units = {
+    'c': 'c',
+    'f': 'f',
+    'k': 'k'
+}
+
+# Speed: base = m/s
+speed_units = {
+    'mph': 0.44704,
+    'kph': 0.2777777777777778,
+    'm/s': 1.0
+}
+
+# Unit categories
+unit_categories = {
+    'length': length_units,
+    'mass': mass_units,
+    'volume': volume_units,
+    'temperature': temp_units,
+    'speed': speed_units
+}
+
+# Category mappings
+category_map = {
+    'mm': 'length', 'cm': 'length', 'm': 'length', 'km': 'length',
+    'in': 'length', 'ft': 'length', 'yd': 'length', 'mi': 'length',
+    'mile': 'length', 'miles': 'length',
+    'mg': 'mass', 'g': 'mass', 'kg': 'mass', 'oz': 'mass', 'lb': 'mass',
+    'lbs': 'mass',
+    'ml': 'volume', 'l': 'volume', 'gal': 'volume',
+    'c': 'temperature', 'f': 'temperature', 'k': 'temperature',
+    'mph': 'speed', 'kph': 'speed', 'm/s': 'speed'
+}
+
+def parse_expression(expr):
+    # Split by 'to' to separate source and target
+    parts = expr.split(' to ')
+    if len(parts) != 2:
+        raise ValueError("Invalid expression format")
+    
+    source_part = parts[0].strip()
+    target_unit = parts[1].strip()
+    
+    # Parse source terms
+    terms = re.findall(r'(\d+(?:\.\d+)?)\s*([a-zA-Z]+)', source_part)
+    if not terms:
+        raise ValueError("No valid terms found")
+    
+    # Check for temperature terms
+    temp_terms = [t for t in terms if t[1].lower() in ['c', 'f', 'k']]
+    if temp_terms:
+        if len(temp_terms) > 1:
+            raise ValueError("Multi-term temperature inputs not supported")
+        if len(terms) > 1:
+            raise ValueError("Temperature terms cannot be combined with other units")
+    
+    return terms, target_unit
+
+def convert_to_base(value, unit):
+    """Convert a value to base unit"""
+    unit_lower = unit.lower()
+    
+    if unit_lower in length_units:
+        return value * length_units[unit_lower]
+    elif unit_lower in mass_units:
+        return value * mass_units[unit_lower]
+    elif unit_lower in volume_units:
+        return value * volume_units[unit_lower]
+    elif unit_lower in temp_units:
+        # For temperature, return as-is for now
+        return unit_lower, value
+    elif unit_lower in speed_units:
+        return value * speed_units[unit_lower]
+    else:
+        raise ValueError(f"Unknown unit: {unit}")
+
+def convert_from_base(value, unit):
+    """Convert base unit value to target unit"""
+    unit_lower = unit.lower()
+    
+    if unit_lower in length_units:
+        return value / length_units[unit_lower]
+    elif unit_lower in mass_units:
+        return value / mass_units[unit_lower]
+    elif unit_lower in volume_units:
+        return value / volume_units[unit_lower]
+    elif unit_lower in speed_units:
+        return value / speed_units[unit_lower]
+    elif unit_lower in ['c', 'f', 'k']:
+        # For temperature, return as-is for now
+        return unit_lower, value
+    else:
+        raise ValueError(f"Unknown unit: {unit}")
+
+def convert_temperature(source_unit, source_value, target_unit):
+    """Convert temperature between units"""
+    # Convert to Celsius first
+    if source_unit == 'c':
+        celsius = source_value
+    elif source_unit == 'f':
+        celsius = (source_value - 32) * 5/9
+    elif source_unit == 'k':
+        celsius = source_value - 273.15
+    else:
+        raise ValueError("Invalid source temperature unit")
+    
+    # Convert from Celsius to target
+    if target_unit == 'c':
+        return celsius
+    elif target_unit == 'f':
+        return celsius * 9/5 + 32
+    elif target_unit == 'k':
+        return celsius + 273.15
+    else:
+        raise ValueError("Invalid target temperature unit")
+
+def main():
+    if len(sys.argv) != 2:
+        print("Usage: python3 convert.py \"<expression>\"", file=sys.stderr)
+        sys.exit(1)
+    
+    try:
+        expr = sys.argv[1]
+        terms, target_unit = parse_expression(expr)
+        
+        # Check if target unit is valid
+        if target_unit.lower() not in category_map:
+            raise ValueError(f"Unknown target unit: {target_unit}")
+        
+        target_category = category_map[target_unit.lower()]
+        
+        # Process terms
+        total_value = 0.0
+        current_category = None
+        
+        for value_str, unit in terms:
+            value = float(value_str)
+            unit_lower = unit.lower()
+            
+            # Check if unit is valid
+            if unit_lower not in category_map:
+                raise ValueError(f"Unknown unit: {unit}")
+            
+            unit_category = category_map[unit_lower]
+            
+            # Check for category consistency
+            if current_category is None:
+                current_category = unit_category
+            elif current_category != unit_category:
+                raise ValueError("Cannot mix different unit categories")
+            
+            # Special handling for temperature
+            if unit_category == 'temperature':
+                if len(terms) > 1:
+                    raise ValueError("Temperature terms cannot be combined with other units")
+                result = convert_temperature(unit_lower, value, target_unit.lower())
+                print(f"{result:.4f} {target_unit}")
+                return
+            
+            # Convert to base unit and sum
+            base_value = convert_to_base(value, unit)
+            total_value += base_value
+        
+        # Convert to target unit
+        if target_category == 'temperature':
+            # This shouldn't happen due to earlier check, but just in case
+            raise ValueError("Temperature conversion should have been handled above")
+        
+        result = convert_from_base(total_value, target_unit)
+        print(f"{result:.4f} {target_unit}")
+        
+    except Exception as e:
+        print(f"error: {str(e)}", file=sys.stderr)
+        sys.exit(1)
+
+if __name__ == '__main__':
+    main()

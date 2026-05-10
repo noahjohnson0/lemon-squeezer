@@ -1,0 +1,17 @@
+{
+  "checks": [
+    {"name":"file:dijkstra.py","pass":1,"weight":5,"note":""},
+    {"name":"compiles","pass":1,"weight":5,"note":""},
+    {"name":"g1_dist","pass":1,"weight":8,"note":"4"},
+    {"name":"g1_path","pass":1,"weight":8,"note":"['A', 'B', 'C', 'D']"},
+    {"name":"self","pass":1,"weight":8,"note":"0.0 ['A']"},
+    {"name":"nopath","pass":1,"weight":8,"note":"inf []"},
+    {"name":"tie_dist","pass":1,"weight":8,"note":"2"},
+    {"name":"tie_path_valid","pass":1,"weight":8,"note":"['A', 'B', 'D']"},
+    {"name":"big_dist","pass":1,"weight":8,"note":"6"},
+    {"name":"big_path","pass":1,"weight":8,"note":"['a', 'b', 'c', 'd', 'e']"}
+  ],
+  "gained": 74,
+  "total": 74,
+  "score_pct": 100
+}

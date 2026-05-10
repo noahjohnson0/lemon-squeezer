@@ -128,6 +128,8 @@ def main():
     p.add_argument("--base-url", default=(os.environ.get("OLLAMA_API_BASE") or "http://localhost:11434") + "/v1",
                    help="Override via $OLLAMA_API_BASE (e.g. http://192.168.x.x:11434 for a remote Ollama host)")
     p.add_argument("--max-iter", type=int, default=24)
+    p.add_argument("--system", default=None,
+                   help="Override the default system prompt with raw text or @path/to/file.md")
     args = p.parse_args()
 
     workspace = Path(args.workspace).resolve()
@@ -143,8 +145,11 @@ def main():
     if starter:
         user_prompt = f"{user_prompt}\n\n[workspace already contains:\n{starter}\n]"
 
+    sys_prompt = SYSTEM_PROMPT
+    if args.system:
+        sys_prompt = Path(args.system[1:]).read_text() if args.system.startswith("@") else args.system
     messages = [
-        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "system", "content": sys_prompt},
         {"role": "user",   "content": user_prompt},
     ]
 

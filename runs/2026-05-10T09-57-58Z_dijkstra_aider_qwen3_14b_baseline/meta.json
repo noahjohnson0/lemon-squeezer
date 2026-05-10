@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-05-10T09-57-58Z_dijkstra_aider_qwen3_14b_baseline",
+  "ts": "2026-05-10T09-57-58Z",
+  "eval": "dijkstra",
+  "harness": "aider",
+  "model": "qwen3:14b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 239,
+  "tokens_in": 758,
+  "tokens_out": 2000,
+  "tool_calls": 0,
+  "score_pct": "100",
+  "telemetry": {
+    "samples": 170,
+    "gpu_util_avg": 94.84,
+    "gpu_util_peak": 98.0,
+    "gpu_mem_peak_mb": 11574.0,
+    "gpu_mem_avg_mb": 11480.78,
+    "gpu_temp_peak_c": 68.0,
+    "gpu_temp_avg_c": 66.18,
+    "gpu_power_avg_w": 206.5,
+    "gpu_power_peak_w": 214.93,
+    "gpu_fan_peak_pct": 48.0,
+    "host_load_peak": 1.92
+  }
+}

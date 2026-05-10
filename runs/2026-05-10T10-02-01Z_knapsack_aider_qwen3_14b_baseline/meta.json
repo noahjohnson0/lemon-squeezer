@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-05-10T10-02-01Z_knapsack_aider_qwen3_14b_baseline",
+  "ts": "2026-05-10T10-02-01Z",
+  "eval": "knapsack",
+  "harness": "aider",
+  "model": "qwen3:14b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 98,
+  "tokens_in": 749,
+  "tokens_out": 4000,
+  "tool_calls": 0,
+  "score_pct": "100",
+  "telemetry": {
+    "samples": 70,
+    "gpu_util_avg": 94.36,
+    "gpu_util_peak": 100.0,
+    "gpu_mem_peak_mb": 11414.0,
+    "gpu_mem_avg_mb": 11267.3,
+    "gpu_temp_peak_c": 69.0,
+    "gpu_temp_avg_c": 66.57,
+    "gpu_power_avg_w": 205.02,
+    "gpu_power_peak_w": 217.68,
+    "gpu_fan_peak_pct": 48.0,
+    "host_load_peak": 2.08
+  }
+}

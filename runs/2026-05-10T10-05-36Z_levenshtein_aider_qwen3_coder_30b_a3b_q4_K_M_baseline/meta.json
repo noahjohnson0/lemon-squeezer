@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-05-10T10-05-36Z_levenshtein_aider_qwen3_coder_30b_a3b_q4_K_M_baseline",
+  "ts": "2026-05-10T10-05-36Z",
+  "eval": "levenshtein",
+  "harness": "aider",
+  "model": "qwen3-coder:30b-a3b-q4_K_M",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 44,
+  "tokens_in": 819,
+  "tokens_out": 867,
+  "tool_calls": 0,
+  "score_pct": "100",
+  "telemetry": {
+    "samples": 31,
+    "gpu_util_avg": 31.26,
+    "gpu_util_peak": 45.0,
+    "gpu_mem_peak_mb": 11568.0,
+    "gpu_mem_avg_mb": 10891.06,
+    "gpu_temp_peak_c": 46.0,
+    "gpu_temp_avg_c": 44.13,
+    "gpu_power_avg_w": 33.73,
+    "gpu_power_peak_w": 69.45,
+    "gpu_fan_peak_pct": 39.0,
+    "host_load_peak": 2.02
+  }
+}

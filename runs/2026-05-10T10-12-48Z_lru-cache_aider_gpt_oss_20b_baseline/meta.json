@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-05-10T10-12-48Z_lru-cache_aider_gpt_oss_20b_baseline",
+  "ts": "2026-05-10T10-12-48Z",
+  "eval": "lru-cache",
+  "harness": "aider",
+  "model": "gpt-oss:20b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 35,
+  "tokens_in": 870,
+  "tokens_out": 736,
+  "tool_calls": 0,
+  "score_pct": "100",
+  "telemetry": {
+    "samples": 25,
+    "gpu_util_avg": 34.28,
+    "gpu_util_peak": 50.0,
+    "gpu_mem_peak_mb": 11541.0,
+    "gpu_mem_avg_mb": 11134.84,
+    "gpu_temp_peak_c": 61.0,
+    "gpu_temp_avg_c": 58.0,
+    "gpu_power_avg_w": 45.64,
+    "gpu_power_peak_w": 85.97,
+    "gpu_fan_peak_pct": 0.0,
+    "host_load_peak": 2.15
+  }
+}
