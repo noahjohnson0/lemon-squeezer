@@ -11,6 +11,9 @@ import StatsBar from "@/components/StatsBar";
 import LiveRuns from "@/components/LiveRuns";
 import Leaderboard from "@/components/Leaderboard";
 import Scatter3D from "@/components/Scatter3D";
+import HeatmapMatrix from "@/components/HeatmapMatrix";
+import HardwarePanel from "@/components/HardwarePanel";
+import EvalDeepDive from "@/components/EvalDeepDive";
 import RunDrawer from "@/components/RunDrawer";
 
 export default function Page() {
@@ -62,6 +65,9 @@ export default function Page() {
       <LiveRuns data={inflight} />
       <Scatter3D runs={runs} onSelect={(id) => setSelectedRunId(id)} />
       <Leaderboard runs={runs} onSelectRun={(id) => setSelectedRunId(id)} />
+      <HeatmapMatrix runs={runs} onSelectRun={(id) => setSelectedRunId(id)} />
+      <HardwarePanel runs={runs} />
+      <EvalDeepDive runs={runs} onSelectRun={(id) => setSelectedRunId(id)} />
       <RunDrawer run={selectedRun} onClose={() => setSelectedRunId(null)} />
 
       <footer className="max-w-7xl mx-auto px-6 mt-16 mb-8 pt-6 border-t border-[var(--border)] text-xs text-[var(--muted)] flex flex-wrap gap-3 items-center justify-between">

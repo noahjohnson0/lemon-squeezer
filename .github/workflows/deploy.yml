@@ -1,0 +1,71 @@
+name: Deploy dashboard to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "dashboard-next/**"
+      - "runs.jsonl"
+      - ".github/workflows/deploy.yml"
+  workflow_dispatch: {}
+
+# Single concurrent deploy; in-flight runs get cancelled by newer pushes.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Stage data files into dashboard-next/public
+        run: |
+          # The repo's runs.jsonl + (optionally) inflight.json are the data the
+          # dashboard reads. The dashboard-next/public/ symlinks point one dir up
+          # locally; on CI we copy the resolved files in so the static export
+          # bundles them.
+          mkdir -p dashboard-next/public
+          cp runs.jsonl dashboard-next/public/runs.jsonl
+          # inflight.json may not exist (the watcher only runs locally); that's fine.
+          if [ -f inflight.json ]; then
+            cp inflight.json dashboard-next/public/inflight.json
+          else
+            # Emit an empty stub so the dashboard cleanly hides the live panel.
+            echo '{"generated_ts":"1970-01-01T00:00:00+00:00","interval_s":2,"runs":[],"queued":[]}' > dashboard-next/public/inflight.json
+          fi
+
+      - name: Install dashboard deps
+        working-directory: dashboard-next
+        run: bun install --frozen-lockfile
+
+      - name: Build static export
+        working-directory: dashboard-next
+        env:
+          NODE_ENV: production
+        run: bun run build
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dashboard-next/out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

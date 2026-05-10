@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-05-10T11-15-25Z_lru-cache_aider_phi4_14b_baseline",
+  "ts": "2026-05-10T11-15-25Z",
+  "eval": "lru-cache",
+  "harness": "aider",
+  "model": "phi4:14b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 82,
+  "tokens_in": 5820,
+  "tokens_out": 1354,
+  "tool_calls": 0,
+  "score_pct": "0",
+  "telemetry": {
+    "samples": 58,
+    "gpu_util_avg": 40.98,
+    "gpu_util_peak": 96.0,
+    "gpu_mem_peak_mb": 10689.0,
+    "gpu_mem_avg_mb": 9949.19,
+    "gpu_temp_peak_c": 57.0,
+    "gpu_temp_avg_c": 50.5,
+    "gpu_power_avg_w": 102.54,
+    "gpu_power_peak_w": 156.74,
+    "gpu_fan_peak_pct": 30.0,
+    "host_load_peak": 3.15
+  }
+}

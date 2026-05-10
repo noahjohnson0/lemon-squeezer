@@ -1,0 +1,10 @@
+[ASSISTANT it=0] To solve the problem of finding the shortest path from a source node to a destination node in a weighted directed graph (represented as a dictionary), we need to implement a function that adheres to the following specifications:
+
+---
+
+### ✅ **Problem Summary**
+
+- **Input**:
+  - `graph`: a dictionary
+
+[squeezer] done: 0 tools, 820 in / 5949 out tokens, 146.0s

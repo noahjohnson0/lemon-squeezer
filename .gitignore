@@ -19,4 +19,6 @@ __pycache__/
 dashboard-next/.next/
 dashboard-next/node_modules/
 dashboard-next/out/
+dashboard-next/public/inflight.json
+dashboard-next/public/runs.jsonl
 runs/**/workspace/.git/

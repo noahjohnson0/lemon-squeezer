@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-05-10T11-19-08Z_bug-fix_aider_granite3_3_8b_baseline",
+  "ts": "2026-05-10T11-19-08Z",
+  "eval": "bug-fix",
+  "harness": "aider",
+  "model": "granite3.3:8b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 23,
+  "tokens_in": 4296,
+  "tokens_out": 633,
+  "tool_calls": 0,
+  "score_pct": "27",
+  "telemetry": {
+    "samples": 17,
+    "gpu_util_avg": 41.82,
+    "gpu_util_peak": 100.0,
+    "gpu_mem_peak_mb": 10793.0,
+    "gpu_mem_avg_mb": 6786.71,
+    "gpu_temp_peak_c": 58.0,
+    "gpu_temp_avg_c": 49.47,
+    "gpu_power_avg_w": 101.02,
+    "gpu_power_peak_w": 202.56,
+    "gpu_fan_peak_pct": 30.0,
+    "host_load_peak": 2.22
+  }
+}

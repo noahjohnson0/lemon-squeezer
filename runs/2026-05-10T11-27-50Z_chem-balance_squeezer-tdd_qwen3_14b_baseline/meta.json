@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-05-10T11-27-50Z_chem-balance_squeezer-tdd_qwen3_14b_baseline",
+  "ts": "2026-05-10T11-27-50Z",
+  "eval": "chem-balance",
+  "harness": "squeezer-tdd",
+  "model": "qwen3:14b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 219,
+  "tokens_in": 967,
+  "tokens_out": 8874,
+  "tool_calls": 0,
+  "score_pct": "0",
+  "telemetry": {
+    "samples": 156,
+    "gpu_util_avg": 96.22,
+    "gpu_util_peak": 97.0,
+    "gpu_mem_peak_mb": 10429.0,
+    "gpu_mem_avg_mb": 10429.0,
+    "gpu_temp_peak_c": 68.0,
+    "gpu_temp_avg_c": 66.69,
+    "gpu_power_avg_w": 208.0,
+    "gpu_power_peak_w": 210.25,
+    "gpu_fan_peak_pct": 48.0,
+    "host_load_peak": 3.06
+  }
+}
