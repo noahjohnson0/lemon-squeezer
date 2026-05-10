@@ -1,0 +1,6 @@
+alice_count 1
+bob_count 1
+missing_count 0
+inj1_count 3
+inj2_count -2 ProgrammingError('You can only execute one statement at a time.')
+post_drop_alice 1
