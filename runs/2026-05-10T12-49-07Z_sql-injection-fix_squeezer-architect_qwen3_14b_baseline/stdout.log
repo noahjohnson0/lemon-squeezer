@@ -9,3 +9,12 @@
 [architect] done — 0 tools, 643/862 tok, 37.7s
 
 ══════ STEP: executor  (qwen3:14b) ══════
+[executor it=0] TOOL read_file {"path":"app.py"}
+[executor it=1] TOOL write_file {"path":"app.py","content":"A vulnerable user-lookup endpoint. Has a classic SQL injection bug.\n\nRun: python3 app.py  -\u003e serves on http://127.0.0.1:8765/
+[executor it=2] The SQL-injection vulnerability in `lookup(con, name)` has been fixed by:
+
+1. Replacing the vulnerable string interpolation with a parameterised query using `?` placeholders
+2. Passing the `name` parameter as a tuple `(name,)` to `con.execu
+[executor] done — 2 tools, 5651/2677 tok, 67.0s
+
+══════ PIPELINE DONE — 2 steps, 6294/3539 tok total ══════

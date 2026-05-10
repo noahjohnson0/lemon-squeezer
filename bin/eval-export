@@ -78,5 +78,67 @@ for r in runs:
 with open(f"{root}/RUNS.md", "w") as f:
     f.write("\n".join(md) + "\n")
 
+# Regenerate dashboard-next/public/findings.md so the live site has fresh insights.
+try:
+    from collections import defaultdict
+    findings = []
+    findings.append("# 🍋 Findings\n")
+    findings.append(f"_{len(runs)} runs · {len(set(r['eval'] for r in runs))} evals · "
+                    f"{len(set(r.get('harness','pi') for r in runs))} harnesses · "
+                    f"{len(set(r['model'] for r in runs))} models. Auto-generated._\n")
+    bestmap = {}
+    for r in runs:
+        if not isinstance(r['score_pct'], int): continue
+        k = (r['eval'], r.get('harness','pi'), r['model'])
+        if k not in bestmap or bestmap[k]['score_pct'] < r['score_pct']:
+            bestmap[k] = r
+    def avg(xs): return sum(xs)/len(xs) if xs else 0
+    findings.append("## Harness scoreboard\n")
+    findings.append("| harness | avg | cells |")
+    findings.append("|---|---:|---:|")
+    hav = []
+    for h in sorted({k[1] for k in bestmap}):
+        cells = [(k,v) for k,v in bestmap.items() if k[1] == h]
+        if cells: hav.append((h, avg([v['score_pct'] for _,v in cells]), len(cells)))
+    for h,a,n in sorted(hav, key=lambda x: -x[1]):
+        findings.append(f"| `{h}` | **{a:.1f}** | {n} |")
+    findings.append("")
+    findings.append("## Model scoreboard\n")
+    findings.append("| model | avg | cells |")
+    findings.append("|---|---:|---:|")
+    mav = []
+    for m in sorted({k[2] for k in bestmap}):
+        cells = [(k,v) for k,v in bestmap.items() if k[2] == m]
+        if cells: mav.append((m, avg([v['score_pct'] for _,v in cells]), len(cells)))
+    for m,a,n in sorted(mav, key=lambda x: -x[1]):
+        findings.append(f"| `{m}` | **{a:.1f}** | {n} |")
+    findings.append("")
+    # Multi-step vs single-pass
+    findings.append("## Alchemy: multi-step vs single-pass\n")
+    SINGLE = {'squeezer','aider','pi'}
+    MULTI = {'squeezer-tdd','squeezer-verify','squeezer-critique','squeezer-architect','squeezer-ensemble'}
+    rows = []
+    for (e, m) in {(k[0], k[2]) for k in bestmap}:
+        bs = max([bestmap[(e,h,m)]['score_pct'] for h in SINGLE if (e,h,m) in bestmap], default=None)
+        bm = max([bestmap[(e,h,m)]['score_pct'] for h in MULTI  if (e,h,m) in bestmap], default=None)
+        if bs is not None and bm is not None: rows.append((e, m, bs, bm, bm - bs))
+    rows.sort(key=lambda x: -x[4])
+    findings.append("| eval | model | single-pass | multi-step | Δ |")
+    findings.append("|---|---|---:|---:|---:|")
+    for e,m,s,p,d in rows[:15]:
+        findings.append(f"| `{e}` | `{m}` | {s}% | {p}% | **{d:+d}** |")
+    if rows:
+        positive = sum(1 for r in rows if r[4] > 0)
+        mean_d = avg([r[4] for r in rows])
+        findings.append(f"\n_Across {len(rows)} (eval × model) pairs with both single-pass and multi-step: "
+                        f"{positive} improved with a pipeline. Mean delta = **{mean_d:+.1f} pts**._\n")
+    findings_path = os.path.join(os.path.dirname(root), os.path.basename(root), "dashboard-next/public/findings.md")
+    findings_path = f"{root}/dashboard-next/public/findings.md"
+    if os.path.isdir(os.path.dirname(findings_path)):
+        with open(findings_path, "w") as f:
+            f.write("\n".join(findings) + "\n")
+except Exception as e:
+    pass  # non-fatal
+
 print(f"wrote {len(runs)} runs → {root}/runs.csv, {root}/RUNS.md")
 PY

@@ -198,3 +198,4 @@ run_id,ts,eval,harness,model,tag,wall_s,tok_in,tok_out,tools,exit,score_pct
 2026-05-10T12-34-52Z_kepler-orbit_squeezer-verify_qwen3_coder_30b_a3b_q4_K_M_baseline,2026-05-10T12-34-52Z,kepler-orbit,squeezer-verify,qwen3-coder:30b-a3b-q4_K_M,baseline,205,28169,3809,8,0,100
 2026-05-10T12-38-22Z_dijkstra_squeezer-verify_qwen3_coder_30b_a3b_q4_K_M_baseline,2026-05-10T12-38-22Z,dijkstra,squeezer-verify,qwen3-coder:30b-a3b-q4_K_M,baseline,522,103998,8681,30,0,100
 2026-05-10T12-47-09Z_bug-fix_squeezer-architect_qwen3_14b_baseline,2026-05-10T12-47-09Z,bug-fix,squeezer-architect,qwen3:14b,baseline,113,3292,3724,1,0,100
+2026-05-10T12-49-07Z_sql-injection-fix_squeezer-architect_qwen3_14b_baseline,2026-05-10T12-49-07Z,sql-injection-fix,squeezer-architect,qwen3:14b,baseline,105,6294,3539,2,0,30
