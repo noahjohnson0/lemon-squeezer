@@ -27,7 +27,7 @@ def init_db():
 def lookup(con, name):
     cur = con.cursor()
     # VULNERABLE: string interpolation into SQL
-    q = f"SELECT id, name, email FROM users WHERE name = '{name}'"
+    q = "SELECT id, name, email FROM users WHERE name = ?"\n    cur.execute(q, (name,))
     cur.execute(q)
     return cur.fetchall()
 

@@ -63,7 +63,22 @@
 
   .heatmap td { text-align: center; padding: 4px 6px; }
   .heatmap td.cell { padding: 2px; }
-  .heatmap .cell-inner { padding: 6px 8px; border-radius: 3px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .heatmap .cell-inner { padding: 6px 8px; border-radius: 3px; font-weight: 600; font-variant-numeric: tabular-nums; min-width: 28px; display: inline-block; }
+  /* Leaderboard: horizontal scroll for narrow viewports + sticky left columns */
+  .scroll-x { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .heatmap th, .heatmap td { white-space: nowrap; }
+  .heatmap thead th { position: sticky; top: 0; background: var(--panel); z-index: 2; }
+  .heatmap th:nth-child(-n+3),
+  .heatmap td:nth-child(-n+3) {
+    position: sticky;
+    background: var(--panel);
+    z-index: 1;
+  }
+  .heatmap th:nth-child(1), .heatmap td:nth-child(1) { left: 0; }
+  .heatmap th:nth-child(2), .heatmap td:nth-child(2) { left: 32px; }
+  .heatmap th:nth-child(3), .heatmap td:nth-child(3) { left: 96px; box-shadow: 1px 0 0 var(--border); }
+  .heatmap thead th:nth-child(-n+3) { z-index: 3; }
+  .heatmap tr:hover td:nth-child(-n+3) { background: var(--panel2); }
 
   .toolbar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; font-size: 12px; }
   .toolbar label { color: var(--muted); display: inline-flex; gap: 6px; align-items: center; }
@@ -145,7 +160,7 @@
 
 <h2>Leaderboard <span class="num" id="lb-cell-count">–</span></h2>
 <p class="muted" style="margin-top:-8px;">Best score per <code>(harness × model × eval)</code>. Each cell shows the highest score that combination has achieved across any tag (baseline / sysprompt / directive / etc.). Click any cell for the run's score breakdown.</p>
-<div class="card">
+<div class="card scroll-x">
   <table class="heatmap" id="leaderboard">
     <thead><tr><th>harness</th><th>model</th></tr></thead>
     <tbody></tbody>
