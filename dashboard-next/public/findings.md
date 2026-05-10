@@ -1,13 +1,13 @@
 # 🍋 Findings
 
-_316 runs · 29 evals · 8 harnesses · 10 models. Auto-generated._
+_317 runs · 29 evals · 8 harnesses · 10 models. Auto-generated._
 
 ## Harness scoreboard
 
 | harness | avg | cells |
 |---|---:|---:|
 | `squeezer-critique` | **85.5** | 31 |
-| `aider` | **71.1** | 168 |
+| `aider` | **70.6** | 169 |
 | `squeezer-architect` | **60.2** | 12 |
 | `squeezer-tdd` | **57.7** | 12 |
 | `qa` | **57.3** | 12 |
@@ -26,7 +26,7 @@ _316 runs · 29 evals · 8 harnesses · 10 models. Auto-generated._
 | `mistral-small:24b` | **70.0** | 27 |
 | `qwen3:14b` | **60.6** | 62 |
 | `devstral:24b` | **48.3** | 16 |
-| `qwen3:8b` | **26.6** | 10 |
+| `qwen3:8b` | **24.2** | 11 |
 | `phi4:14b` | **11.6** | 8 |
 | `granite3.3:8b` | **10.0** | 8 |
 
@@ -37,18 +37,18 @@ _316 runs · 29 evals · 8 harnesses · 10 models. Auto-generated._
 | `sql-injection-fix` | `qwen3:14b` | 65% | 85% | **+20** |
 | `sql-injection-fix` | `gpt-oss:20b` | 85% | 100% | **+15** |
 | `password-strength` | `gpt-oss:20b` | 93% | 100% | **+7** |
+| `hamming-code` | `gpt-oss:20b` | 100% | 100% | **+0** |
 | `cli-tool` | `qwen3:14b` | 100% | 100% | **+0** |
-| `fft-spectrum` | `gpt-oss:20b` | 100% | 100% | **+0** |
-| `port-scanner` | `gpt-oss:20b` | 100% | 100% | **+0** |
-| `bug-fix` | `qwen3-coder:30b-a3b-q4_K_M` | 100% | 100% | **+0** |
-| `projectile-sim` | `gpt-oss:20b` | 100% | 100% | **+0** |
-| `levenshtein` | `gpt-oss:20b` | 100% | 100% | **+0** |
-| `bug-fix` | `qwen3:14b` | 100% | 100% | **+0** |
-| `crc-checksum` | `gpt-oss:20b` | 100% | 100% | **+0** |
-| `kepler-orbit` | `qwen3-coder:30b-a3b-q4_K_M` | 100% | 100% | **+0** |
+| `kepler-orbit` | `gpt-oss:20b` | 100% | 100% | **+0** |
 | `chem-balance` | `gpt-oss:20b` | 100% | 100% | **+0** |
-| `cli-tool` | `gpt-oss:20b` | 100% | 100% | **+0** |
-| `dijkstra` | `qwen3:14b` | 100% | 100% | **+0** |
+| `kalman-filter` | `gpt-oss:20b` | 100% | 100% | **+0** |
+| `levenshtein` | `gpt-oss:20b` | 100% | 100% | **+0** |
+| `dijkstra` | `gpt-oss:20b` | 100% | 100% | **+0** |
+| `projectile-sim` | `gpt-oss:20b` | 100% | 100% | **+0** |
+| `sql-injection-fix` | `qwen3-coder:30b-a3b-q4_K_M` | 85% | 85% | **+0** |
+| `kepler-orbit` | `qwen3-coder:30b-a3b-q4_K_M` | 100% | 100% | **+0** |
+| `base64-codec` | `gpt-oss:20b` | 75% | 75% | **+0** |
+| `fft-spectrum` | `gpt-oss:20b` | 100% | 100% | **+0** |
 
 _Across 39 (eval × model) pairs with both single-pass and multi-step: 3 improved with a pipeline. Mean delta = **-9.7 pts**._
 
