@@ -218,6 +218,7 @@ run_id,ts,eval,harness,model,tag,wall_s,tok_in,tok_out,tools,exit,score_pct
 2026-05-10T13-37-56Z_base64-codec_aider_qwen3_14b_m4max-q14b,2026-05-10T13-37-56Z,base64-codec,aider,qwen3:14b,m4max-q14b,600,0,0,0,124,0
 2026-05-10T13-46-13Z_kepler-orbit_aider_gpt_oss_20b_fill,2026-05-10T13-46-13Z,kepler-orbit,aider,gpt-oss:20b,fill,68,1100,1500,0,0,100
 2026-05-10T13-47-26Z_kepler-orbit_aider_qwen3_coder_30b_a3b_q4_K_M_fill,2026-05-10T13-47-26Z,kepler-orbit,aider,qwen3-coder:30b-a3b-q4_K_M,fill,57,1000,1100,0,0,100
+2026-05-10T13-48-01Z_dijkstra_aider_qwen3_14b_m4max-q14b,2026-05-10T13-48-01Z,dijkstra,aider,qwen3:14b,m4max-q14b,600,0,0,0,124,0
 2026-05-10T13-48-29Z_base64-codec_aider_mistral_small_24b_fill,2026-05-10T13-48-29Z,base64-codec,aider,mistral-small:24b,fill,93,757,612,0,0,?
 2026-05-10T13-50-09Z_chem-balance_aider_mistral_small_24b_fill,2026-05-10T13-50-09Z,chem-balance,aider,mistral-small:24b,fill,83,873,572,0,0,?
 2026-05-10T13-51-38Z_cli-tool_aider_mistral_small_24b_fill,2026-05-10T13-51-38Z,cli-tool,aider,mistral-small:24b,fill,41,737,242,0,0,100
@@ -225,3 +226,7 @@ run_id,ts,eval,harness,model,tag,wall_s,tok_in,tok_out,tools,exit,score_pct
 2026-05-10T13-53-41Z_dijkstra_aider_mistral_small_24b_fill,2026-05-10T13-53-41Z,dijkstra,aider,mistral-small:24b,fill,62,727,415,0,0,100
 2026-05-10T13-54-49Z_engineering_aider_mistral_small_24b_fill,2026-05-10T13-54-49Z,engineering,aider,mistral-small:24b,fill,53,920,335,0,0,100
 2026-05-10T13-55-48Z_fft-spectrum_aider_mistral_small_24b_fill,2026-05-10T13-55-48Z,fft-spectrum,aider,mistral-small:24b,fill,55,770,359,0,0,87
+2026-05-10T13-56-50Z_great-circle_aider_mistral_small_24b_fill,2026-05-10T13-56-50Z,great-circle,aider,mistral-small:24b,fill,76,825,516,0,0,100
+2026-05-10T13-58-12Z_hamming-code_aider_mistral_small_24b_fill,2026-05-10T13-58-12Z,hamming-code,aider,mistral-small:24b,fill,120,968,851,0,0,60
+2026-05-10T14-00-20Z_julian-day_aider_mistral_small_24b_fill,2026-05-10T14-00-20Z,julian-day,aider,mistral-small:24b,fill,72,896,486,0,0,70
+2026-05-10T14-01-39Z_kalman-filter_aider_mistral_small_24b_fill,2026-05-10T14-01-39Z,kalman-filter,aider,mistral-small:24b,fill,72,871,477,0,0,100

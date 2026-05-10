@@ -12,14 +12,17 @@ export default function HeatmapMatrix({
   const evals = unique(runs.map((r) => r.eval));
   const harnesses = unique(runs.map((r) => r.harness));
   const models = unique(runs.map((r) => r.model));
-  const best = bestPer(runs, (r) => `${r.eval}|${r.harness}|${r.model}`);
+  const hosts = unique(runs.map((r) => r.host ?? "4070"));
+  const best = bestPer(runs, (r) => `${r.eval}|${r.harness}|${r.model}|${r.host ?? "4070"}`);
 
-  // 1 row per (harness, model) that has at least one run.
-  const rows: { harness: string; model: string }[] = [];
-  for (const h of harnesses) {
-    for (const m of models) {
-      const has = evals.some((e) => best.has(`${e}|${h}|${m}`));
-      if (has) rows.push({ harness: h, model: m });
+  // 1 row per (host, harness, model) that has at least one run.
+  const rows: { host: string; harness: string; model: string }[] = [];
+  for (const host of hosts) {
+    for (const h of harnesses) {
+      for (const m of models) {
+        const has = evals.some((e) => best.has(`${e}|${h}|${m}|${host}`));
+        if (has) rows.push({ host, harness: h, model: m });
+      }
     }
   }
 
@@ -54,19 +57,20 @@ export default function HeatmapMatrix({
             </tr>
           </thead>
           <tbody>
-            {rows.map(({ harness, model }, ri) => (
+            {rows.map(({ host, harness, model }, ri) => (
               <motion.tr
-                key={`${harness}|${model}`}
+                key={`${host}|${harness}|${model}`}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.3, delay: ri * 0.02 }}
               >
                 <td className="sticky left-0 bg-[var(--panel)] z-10 whitespace-nowrap px-2 py-1">
+                  <span className="chip mr-1" title="hardware host">{host}</span>
                   <span className={`chip ${harness} mr-1`}>{harness}</span>
                   <span className="font-mono text-[11px]">{model}</span>
                 </td>
                 {evals.map((e) => {
-                  const r = best.get(`${e}|${harness}|${model}`);
+                  const r = best.get(`${e}|${harness}|${model}|${host}`);
                   if (!r) {
                     return (
                       <td key={e} className="p-0">
@@ -87,7 +91,7 @@ export default function HeatmapMatrix({
                     <td key={e} className="p-0">
                       <button
                         onClick={() => onSelectRun(r.run_id)}
-                        title={`${e} · ${harness} · ${model}\nscore: ${r.score_pct}%\nwall: ${r.wall_seconds}s\ntag: ${r.tag}`}
+                        title={`${e} · ${harness} · ${model} @ ${host}\nscore: ${r.score_pct}%\nwall: ${r.wall_seconds}s\ntag: ${r.tag}`}
                         className="w-9 h-9 rounded-sm font-bold text-[10px] tabular-nums hover:scale-110 transition-transform"
                         style={{ background: bg, color: "white" }}
                       >

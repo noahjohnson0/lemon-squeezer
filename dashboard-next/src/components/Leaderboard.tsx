@@ -25,7 +25,9 @@ export default function Leaderboard({
   const evals = unique(runs.map((r) => r.eval));
   const harnesses = unique(runs.map((r) => r.harness));
   const models = unique(runs.map((r) => r.model));
-  const best = bestPer(runs, (r) => `${r.eval}|${r.harness}|${r.model}`);
+  const hosts = unique(runs.map((r) => r.host ?? "4070"));
+  // Key includes host now: same model on different hosts is now separate rows.
+  const best = bestPer(runs, (r) => `${r.eval}|${r.harness}|${r.model}|${r.host ?? "4070"}`);
   const allCells = [...best.values()];
   const allMean =
     allCells.length > 0
@@ -33,6 +35,7 @@ export default function Leaderboard({
       : 50;
 
   type Row = {
+    host: string;
     harness: string;
     model: string;
     cells: (Run | undefined)[];
@@ -41,20 +44,23 @@ export default function Leaderboard({
     shrunk: number;
   };
   const rows: Row[] = [];
-  for (const h of harnesses) {
-    for (const m of models) {
-      const cells = evals.map((e) => best.get(`${e}|${h}|${m}`));
-      const present = cells.filter(Boolean) as Run[];
-      if (present.length === 0) continue;
-      const avg = present.reduce((s, r) => s + r.score_pct, 0) / present.length;
-      rows.push({
-        harness: h,
-        model: m,
-        cells,
-        avg: Math.round(avg),
-        count: present.length,
-        shrunk: 0,
-      });
+  for (const host of hosts) {
+    for (const h of harnesses) {
+      for (const m of models) {
+        const cells = evals.map((e) => best.get(`${e}|${h}|${m}|${host}`));
+        const present = cells.filter(Boolean) as Run[];
+        if (present.length === 0) continue;
+        const avg = present.reduce((s, r) => s + r.score_pct, 0) / present.length;
+        rows.push({
+          host,
+          harness: h,
+          model: m,
+          cells,
+          avg: Math.round(avg),
+          count: present.length,
+          shrunk: 0,
+        });
+      }
     }
   }
   const ranked = bayesianRank(rows, allMean) as Row[];
@@ -64,7 +70,8 @@ export default function Leaderboard({
       b.count - a.count ||
       b.avg - a.avg ||
       a.harness.localeCompare(b.harness) ||
-      a.model.localeCompare(b.model)
+      a.model.localeCompare(b.model) ||
+      a.host.localeCompare(b.host)
   );
 
   return (
@@ -86,8 +93,9 @@ export default function Leaderboard({
             <thead className="text-[10px] uppercase tracking-wider text-[var(--muted)] border-b border-[var(--border)]">
               <tr>
                 <th className="px-3 py-3 text-left sticky left-0 bg-[var(--panel)] z-10">#</th>
-                <th className="px-3 py-3 text-left sticky left-[44px] bg-[var(--panel)] z-10">harness</th>
-                <th className="px-3 py-3 text-left sticky left-[140px] bg-[var(--panel)] z-10 shadow-[1px_0_0_var(--border)]">
+                <th className="px-3 py-3 text-left sticky left-[44px] bg-[var(--panel)] z-10">host</th>
+                <th className="px-3 py-3 text-left sticky left-[110px] bg-[var(--panel)] z-10">harness</th>
+                <th className="px-3 py-3 text-left sticky left-[206px] bg-[var(--panel)] z-10 shadow-[1px_0_0_var(--border)]">
                   model
                 </th>
                 {evals.map((e) => (
@@ -112,7 +120,7 @@ export default function Leaderboard({
                   return (
                     <motion.tr
                       layout
-                      key={`${row.harness}|${row.model}`}
+                      key={`${row.host}|${row.harness}|${row.model}`}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.3, delay: idx * 0.02 }}
@@ -122,9 +130,12 @@ export default function Leaderboard({
                         {medal}
                       </td>
                       <td className="px-3 py-2 sticky left-[44px] bg-[var(--panel)] group-hover:bg-[var(--panel-2)]">
+                        <span className="chip" title="hardware host">{row.host}</span>
+                      </td>
+                      <td className="px-3 py-2 sticky left-[110px] bg-[var(--panel)] group-hover:bg-[var(--panel-2)]">
                         <span className={`chip ${row.harness}`}>{row.harness}</span>
                       </td>
-                      <td className="px-3 py-2 sticky left-[140px] bg-[var(--panel)] group-hover:bg-[var(--panel-2)] shadow-[1px_0_0_var(--border)] font-mono whitespace-nowrap">
+                      <td className="px-3 py-2 sticky left-[206px] bg-[var(--panel)] group-hover:bg-[var(--panel-2)] shadow-[1px_0_0_var(--border)] font-mono whitespace-nowrap">
                         {row.model}
                       </td>
                       {row.cells.map((c, i) => (

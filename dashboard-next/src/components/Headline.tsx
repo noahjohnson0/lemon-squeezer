@@ -16,14 +16,16 @@ export default function Headline({ runs }: { runs: Run[] }) {
   const evals = unique(runs.map((r) => r.eval));
   const harnesses = unique(runs.map((r) => r.harness));
   const models = unique(runs.map((r) => r.model));
-  const best = bestPer(runs, (r) => `${r.eval}|${r.harness}|${r.model}`);
+  const hosts = unique(runs.map((r) => r.host ?? "4070"));
+  // Same combo on different hardware = different combo, so include host in the key.
+  const best = bestPer(runs, (r) => `${r.eval}|${r.harness}|${r.model}|${r.host ?? "4070"}`);
 
-  // Find the top (harness, model) by Bayesian shrinkage.
   const allCells = [...best.values()];
   const allMean =
     allCells.reduce((s, r) => s + r.score_pct, 0) / Math.max(1, allCells.length);
   const C = 3;
   type Combo = {
+    host: string;
     harness: string;
     model: string;
     avg: number;
@@ -33,23 +35,26 @@ export default function Headline({ runs }: { runs: Run[] }) {
     weakEval?: { eval: string; score: number };
   };
   const combos: Combo[] = [];
-  for (const h of harnesses) {
-    for (const m of models) {
-      const cells = evals.map((e) => best.get(`${e}|${h}|${m}`));
-      const present = cells.filter(Boolean) as Run[];
-      if (present.length < 2) continue;
-      const avg = present.reduce((s, r) => s + r.score_pct, 0) / present.length;
-      const shrunk = (present.length * avg + C * allMean) / (present.length + C);
-      const sorted = [...present].sort((a, b) => b.score_pct - a.score_pct);
-      combos.push({
-        harness: h,
-        model: m,
-        avg,
-        count: present.length,
-        shrunk,
-        bestEval: { eval: sorted[0].eval, score: sorted[0].score_pct },
-        weakEval: { eval: sorted.at(-1)!.eval, score: sorted.at(-1)!.score_pct },
-      });
+  for (const host of hosts) {
+    for (const h of harnesses) {
+      for (const m of models) {
+        const cells = evals.map((e) => best.get(`${e}|${h}|${m}|${host}`));
+        const present = cells.filter(Boolean) as Run[];
+        if (present.length < 2) continue;
+        const avg = present.reduce((s, r) => s + r.score_pct, 0) / present.length;
+        const shrunk = (present.length * avg + C * allMean) / (present.length + C);
+        const sorted = [...present].sort((a, b) => b.score_pct - a.score_pct);
+        combos.push({
+          host,
+          harness: h,
+          model: m,
+          avg,
+          count: present.length,
+          shrunk,
+          bestEval: { eval: sorted[0].eval, score: sorted[0].score_pct },
+          weakEval: { eval: sorted.at(-1)!.eval, score: sorted.at(-1)!.score_pct },
+        });
+      }
     }
   }
   combos.sort((a, b) => b.shrunk - a.shrunk);
@@ -115,10 +120,14 @@ export default function Headline({ runs }: { runs: Run[] }) {
                     {champ.model}
                   </span>
                 </div>
-                <div className="text-xl mt-1 text-[var(--text)]/85">
+                <div className="text-xl mt-1 text-[var(--text)]/85 flex items-center gap-2 flex-wrap">
                   via{" "}
                   <span className={`chip ${champ.harness} text-base`}>
                     {champ.harness}
+                  </span>
+                  on{" "}
+                  <span className="chip text-base" title="hardware host">
+                    {champ.host}
                   </span>
                 </div>
                 <div className="text-sm text-[var(--muted)] mt-3 leading-relaxed">

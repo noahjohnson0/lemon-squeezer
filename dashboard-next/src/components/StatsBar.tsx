@@ -6,6 +6,7 @@ export default function StatsBar({ runs }: { runs: Run[] }) {
   const evals = unique(runs.map((r) => r.eval)).length;
   const models = unique(runs.map((r) => r.model)).length;
   const harnesses = unique(runs.map((r) => r.harness)).length;
+  const hosts = unique(runs.map((r) => r.host ?? "4070")).length;
   const totalWall = runs.reduce((s, r) => s + (r.wall_seconds || 0), 0);
   const totalTok = runs.reduce(
     (s, r) => s + (r.tokens_in || 0) + (r.tokens_out || 0),
@@ -23,15 +24,15 @@ export default function StatsBar({ runs }: { runs: Run[] }) {
     { v: evals, label: "evals" },
     { v: models, label: "models" },
     { v: harnesses, label: "harnesses" },
+    { v: hosts, label: "hosts" },
     { v: `${best}%`, label: "best score" },
     { v: (totalWall / 60).toFixed(1), label: "compute (min)" },
     { v: (totalTok / 1e6).toFixed(2), label: "M tokens" },
-    { v: totalPower.toFixed(1), label: "Wh" },
   ];
 
   return (
     <div className="max-w-7xl mx-auto px-6">
-      <div className="grid grid-cols-2 md:grid-cols-7 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-7 gap-3" data-stats>
         {stats.map((s, i) => (
           <motion.div
             key={s.label}
