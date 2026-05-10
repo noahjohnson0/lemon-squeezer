@@ -7,6 +7,7 @@ import {
   type Inflight,
 } from "@/lib/data";
 import Hero from "@/components/Hero";
+import Headline from "@/components/Headline";
 import StatsBar from "@/components/StatsBar";
 import LiveRuns from "@/components/LiveRuns";
 import Filters, { type FilterState } from "@/components/Filters";
@@ -76,15 +77,20 @@ export default function Page() {
   return (
     <main>
       <Hero runCount={runs.length} />
-      <StatsBar runs={runs} />
+      {/* The actual answer — what to run on your GPU. */}
+      <Headline runs={runs} />
       <LiveRuns data={inflight} />
+      {/* Action: filter the rest of the page */}
       <Filters runs={runs} state={filters} onChange={setFilters} />
-      <HarnessGap runs={filtered} />
-      <Scatter3D runs={filtered} onSelect={(id) => setSelectedRunId(id)} />
+      {/* The supporting evidence, in order of importance */}
       <Leaderboard runs={filtered} onSelectRun={(id) => setSelectedRunId(id)} />
+      <HarnessGap runs={filtered} />
       <HeatmapMatrix runs={filtered} onSelectRun={(id) => setSelectedRunId(id)} />
-      <HardwarePanel runs={filtered} />
       <EvalDeepDive runs={filtered} onSelectRun={(id) => setSelectedRunId(id)} />
+      {/* Auxiliary — efficiency / hardware / 3D for fun */}
+      <HardwarePanel runs={filtered} />
+      <Scatter3D runs={filtered} onSelect={(id) => setSelectedRunId(id)} />
+      <StatsBar runs={runs} />
       <RunDrawer run={selectedRun} onClose={() => setSelectedRunId(null)} />
 
       <footer className="max-w-7xl mx-auto px-6 mt-16 mb-8 pt-6 border-t border-[var(--border)] text-xs text-[var(--muted)] flex flex-wrap gap-3 items-center justify-between">

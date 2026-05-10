@@ -1,0 +1,11 @@
+
+══════ STEP: architect  (gpt-oss:20b) ══════
+[architect it=0] **Numbered Plan for Fixing the SQL‑Injection Vulnerability in `app.py`**
+
+1. **File to modify**  
+   - `app.py` (the only source file containing the vulnerable `lookup(con, name)` function).
+
+2. **Key function signatures that remain unchang
+[architect] done — 0 tools, 643/862 tok, 37.7s
+
+══════ STEP: executor  (qwen3:14b) ══════

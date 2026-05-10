@@ -196,3 +196,5 @@ run_id,ts,eval,harness,model,tag,wall_s,tok_in,tok_out,tools,exit,score_pct
 2026-05-10T12-25-10Z_wifi-stats_squeezer-verify_qwen3_coder_30b_a3b_q4_K_M_baseline,2026-05-10T12-25-10Z,wifi-stats,squeezer-verify,qwen3-coder:30b-a3b-q4_K_M,baseline,157,19831,3206,7,0,75
 2026-05-10T12-27-51Z_chem-balance_squeezer-verify_qwen3_coder_30b_a3b_q4_K_M_baseline,2026-05-10T12-27-51Z,chem-balance,squeezer-verify,qwen3-coder:30b-a3b-q4_K_M,baseline,417,1049,8148,0,0,0
 2026-05-10T12-34-52Z_kepler-orbit_squeezer-verify_qwen3_coder_30b_a3b_q4_K_M_baseline,2026-05-10T12-34-52Z,kepler-orbit,squeezer-verify,qwen3-coder:30b-a3b-q4_K_M,baseline,205,28169,3809,8,0,100
+2026-05-10T12-38-22Z_dijkstra_squeezer-verify_qwen3_coder_30b_a3b_q4_K_M_baseline,2026-05-10T12-38-22Z,dijkstra,squeezer-verify,qwen3-coder:30b-a3b-q4_K_M,baseline,522,103998,8681,30,0,100
+2026-05-10T12-47-09Z_bug-fix_squeezer-architect_qwen3_14b_baseline,2026-05-10T12-47-09Z,bug-fix,squeezer-architect,qwen3:14b,baseline,113,3292,3724,1,0,100
