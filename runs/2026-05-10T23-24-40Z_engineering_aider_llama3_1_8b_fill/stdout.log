@@ -6,6 +6,3 @@ Model: ollama_chat/llama3.1:8b with whole edit format
 Git repo: .git with 0 files
 Repo-map: using 4096 tokens, auto refresh
 
-litellm.APIConnectionError: Ollama_chatException - litellm.Timeout: Connection 
-timed out after 600.0 seconds.
-Retrying in 0.2 seconds...
