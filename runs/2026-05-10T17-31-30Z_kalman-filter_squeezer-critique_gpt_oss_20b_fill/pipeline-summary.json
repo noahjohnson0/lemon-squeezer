@@ -1,0 +1,27 @@
+{
+  "pipeline": "critique",
+  "steps": [
+    {
+      "name": "draft",
+      "model": "gpt-oss:20b",
+      "tokens_in": 6349,
+      "tokens_out": 1828,
+      "tool_calls": 3,
+      "wall_s": 78.7,
+      "final": "`kalman.py` has been created in the root of the workspace.  \nIt implements a lightweight 1\u2011D constant\u2011velocity Kalman filter that\n\n* tracks position and velocity,\n* supports prediction and measurement update,\n* exposes the current state and covariance in convenient Python forms.\n\nYou can now import `Kalman1D` from this file and use it for your constant\u2011velocity tracking tasks."
+    },
+    {
+      "name": "critique-1",
+      "model": "gpt-oss:20b",
+      "tokens_in": 3303,
+      "tokens_out": 2149,
+      "tool_calls": 2,
+      "wall_s": 93.5,
+      "final": "OK: nothing to fix"
+    }
+  ],
+  "primary_model": "gpt-oss:20b",
+  "critic_model": "gpt-oss:20b",
+  "judge_model": null,
+  "rounds": 1
+}

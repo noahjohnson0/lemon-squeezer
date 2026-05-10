@@ -1,0 +1,21 @@
+
+══════ STEP: draft  (gpt-oss:20b) ══════
+[draft it=0] TOOL write_file {"path":"kalman.py","content":"\"\"\"Kalman1D: Constant‑velocity 1‑D Kalman filter.\n\nThe implementation follows the classic linear Kalman filter equations\nwi
+[draft it=1] TOOL list_files {"dir":"/"}
+[draft it=2] TOOL list_files {"dir":"."}
+[draft it=3] `kalman.py` has been created in the root of the workspace.  
+It implements a lightweight 1‑D constant‑velocity Kalman filter that
+
+* tracks position and velocity,
+* supports prediction and measurement update,
+* exposes the current state and
+[draft] done — 3 tools, 6349/1828 tok, 78.7s
+
+══════ STEP: critique-1  (gpt-oss:20b) ══════
+[critique-1 it=0] TOOL list_files {"dir":"."}
+[critique-1 it=1] TOOL read_file {"path":"kalman.py"}
+[critique-1 it=2] OK: nothing to fix
+[critique-1] done — 2 tools, 3303/2149 tok, 93.5s
+[pipeline] critic happy after round 1; halting refinement
+
+══════ PIPELINE DONE — 2 steps, 9652/3977 tok total ══════

@@ -1,0 +1,9 @@
+{
+  "checks": [
+    {"name":"file:dates.py","pass":1,"weight":5,"note":""},
+    {"name":"compiles","pass":0,"weight":5,"note":""}
+  ],
+  "gained": 5,
+  "total": 10,
+  "score_pct": 50
+}
