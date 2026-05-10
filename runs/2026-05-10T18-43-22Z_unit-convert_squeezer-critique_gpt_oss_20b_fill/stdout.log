@@ -1,0 +1,3 @@
+
+══════ STEP: draft  (gpt-oss:20b) ══════
+[draft it=0] TOOL write_file {"path":"convert.py","content":"#!/usr/bin/env python3\n\"\"\"Command line unit converter.\n\nUsage:\n    python3 convert.py \"\u003cvalue\u003e \u003cunit\u003

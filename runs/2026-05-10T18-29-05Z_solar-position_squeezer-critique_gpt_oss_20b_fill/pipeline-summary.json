@@ -1,0 +1,36 @@
+{
+  "pipeline": "critique",
+  "steps": [
+    {
+      "name": "draft",
+      "model": "gpt-oss:20b",
+      "tokens_in": 21589,
+      "tokens_out": 6303,
+      "tool_calls": 7,
+      "wall_s": 276.8,
+      "final": "{\"command\":\"python3 - <<'PY'\\nimport astropy.time as at, astropy.coordinates as ac, astropy.units as u\\nfrom astropy import wcs, coordinates\\nfrom datetime import datetime\\n\\nimport solar\\n\\nobs_lat = 40.71; obs_lon = -74.01\\nobs_year = 2024; obs_month = 6; obs_day = 21\\n# At UTC 16:00\\nalt, az = solar.sun_position(obs_lat,obs_lon,obs_year,obs_month,obs_day,16.0)\\nprint('New solar alt, azi: ', alt, az)\\n\\n# Astropy check\\nt = at.Time(f\\\"{obs_year}-{obs_month}-{obs_day}T{16:02.1f}Z\\\", scale='utc')\\nlocation = ac.EarthLocation(lat=obs_lat*u.deg, lon=obs_lon*u.deg)\\nsun = ac.get_sun(t).transform_to(ac.AltAz(obstime=t, location=location))\\nprint('Astro alt, azi: ', sun.alt.deg, sun.az.deg)\\nPY\",\"timeout\":15000}"
+    },
+    {
+      "name": "critique-1",
+      "model": "gpt-oss:20b",
+      "tokens_in": 4266,
+      "tokens_out": 4702,
+      "tool_calls": 2,
+      "wall_s": 204.6,
+      "final": "**Defects in the provided `sun_position` implementation**\n\n| # | Defect | Why it violates the spec / why it affects correctness |\n|---|--------|-------------------------------------------------------|\n| 1 | Apparent (true\u2011plus\u2011aberration) ecliptic longitude is calculated incorrectly. | The code uses `lambda_sun = _normalize_degree(ecliptic_long + correction)` where the *correction* is: <br>`- 0.00569 - 0.00478\u202f*sin(omega)`<br> but the NOAA/J2000 algorithm requires:<br>`lambda_sun = true_longitude + 0.0053\u202f*sin(omega) - 0.0069\u202f*sin(2*omega)`<br>Wrong sign, wrong coefficients, and the missing `sin(2*omega)` term cause the returned position to deviate by several degrees (often >\u202f1\u202f\u00b0), so the \u201csimple NOAA\u2011style algorithm\u201d is not actually used. |\n| 2 | Missing `sin\u202f(2\u202f\u03c9)` term in the aberration\u2011plus\u2011refraction correction. | The standard correction to the ecliptic longitude is 0.0053\u202f*sin\u202f\u03c9 \u2013 0.0069\u202f*sin\u202f(2\u202f\u03c9).  The implementation omits the `sin\u202f(2\u202f\u03c9)` part altogether, which means the final longitude can be wrong by a few tenths of a degree, again violating the accuracy requirement. |\n| 3 | The sign of the azimuth formula is ambiguous & likely inverted. | The algorithm used for azimuth is `<code>sqrt(1\u2011cos(Dec)\u00b2)\u2026</code>` with `-sin(H)` in the numerator (`-sin(H)` instead of `+sin(H)`).  In the NOAA reference code the azimuth is 0\u202f\u00b0 at the *south* direction and increases clockwise; the spec, however, defines azimuth as \u201cdegrees from north toward east\u201d.  Using the current sign will swap the direction of the azimuth (north \u2194 south) in many cases, so callers will receive the wrong compass bearing. |\n| 4 | Potential math\u2011domain errors for the `asin` calls. | `sin_alt` and `sin_decl` can, due to rounding, become slightly >\u202f1 or <\u202f\u20111.  The hard call `asin(sin_alt)` (or `asin(sin_decl)`) will raise `ValueError: math domain error` for a few days in a year, breaking the function for otherwise valid inputs.  The spec does not forbid such a runtime error; a robust implementation should clamp the argument to the \\[-1,\u202f1] interval. |\n| 5 | No validation of the input range for the `hour` argument. | The spec does not require a sanity check, but in practice callers may supply 24, 25 or negative values; the algorithm will then compute a nonsensical hour angle and return an obviously wrong position.  (No direct violation, but the missing guard can hide bugs.) |\n| 6 | The correction coefficients for aberration & refraction are hard\u2011coded separately for each call. | While the code is syntactically correct, pulling the constant `23.43929111\u202f*\u202f__RAD_PER_DEG` repeatedly makes the implementation harder to maintain and is inconsistent with the \u201csimple NOAA\u2011style\u201d style preferred by the spec. A single pre\u2011computed constant would be clearer. |\n\n---\n\n### What to fix / what to keep\n\n* **Fix #1 & #2** \u2013 Re\u2011implement the ecliptic longitude correction to match the NOAA formula (use the correct signs, magnitudes, and include the `sin(2\u202f\u03c9)` term).  This is the primary source of the large positional errors that violate the spec\u2019s \u201caccurate, simple algorithm\u201d requirement.\n* **Address #3** \u2013 Re\u2011evaluate the azimuth calculation (compare against an authoritative NOAA implementation).  The current `-sin(H)` may invert the bearing relative to the spec\u2019s \u201cdegrees from north toward east\u201d definition.  \n  A quick test: for an observer directly under a sunrise (Dec\u202f\u2248\u202f0) the azimuth should be ~\u202f90\u00b0, but the current formula often yields ~\u202f270\u00b0.\n* **Optionally add #4** \u2013 Clamp `sin_alt` and `sin_decl` to the \\[\n  -1,\n  1\n  \\] range before calling `asin` to avoid runtime ValueErrors for edge\u2011case dates.\n* The remaining parts (date conversion, GMST, RA, hour\u2011angle wrap\u2011around) are syntactically fine and respect the function signature, so they can stay as\u2011is after the corrections above."
+    },
+    {
+      "name": "refine-1",
+      "model": "gpt-oss:20b",
+      "tokens_in": 29583,
+      "tokens_out": 4271,
+      "tool_calls": 9,
+      "wall_s": 369.9,
+      "final": ""
+    }
+  ],
+  "primary_model": "gpt-oss:20b",
+  "critic_model": "gpt-oss:20b",
+  "judge_model": null,
+  "rounds": 1
+}
