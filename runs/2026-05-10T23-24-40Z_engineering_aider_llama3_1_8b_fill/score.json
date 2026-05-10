@@ -1,0 +1,14 @@
+{
+  "checks": [
+    {"name":"file:engineering.py","pass":0,"weight":5,"note":""},
+    {"name":"compiles","pass":0,"weight":5,"note":""},
+    {"name":"re_water_pipe","pass":0,"weight":5,"note":""},
+    {"name":"beam_steel","pass":0,"weight":5,"note":""},
+    {"name":"rc_tau_1uF","pass":0,"weight":5,"note":""},
+    {"name":"vd_equal","pass":0,"weight":5,"note":""},
+    {"name":"no_third_party","pass":0,"weight":5,"note":""}
+  ],
+  "gained": 0,
+  "total": 35,
+  "score_pct": 0
+}

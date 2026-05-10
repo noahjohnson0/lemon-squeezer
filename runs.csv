@@ -332,3 +332,4 @@ run_id,ts,eval,harness,model,tag,wall_s,tok_in,tok_out,tools,exit,score_pct
 2026-05-10T22-54-22Z_unit-convert_aider_qwen3_8b_fill,2026-05-10T22-54-22Z,unit-convert,aider,qwen3:8b,fill,600,0,0,0,124,0
 2026-05-10T23-04-28Z_wifi-stats_aider_qwen3_8b_fill,2026-05-10T23-04-28Z,wifi-stats,aider,qwen3:8b,fill,600,0,0,0,124,0
 2026-05-10T23-14-34Z_chem-balance_aider_llama3_1_8b_fill,2026-05-10T23-14-34Z,chem-balance,aider,llama3.1:8b,fill,600,0,0,0,124,0
+2026-05-10T23-24-40Z_engineering_aider_llama3_1_8b_fill,2026-05-10T23-24-40Z,engineering,aider,llama3.1:8b,fill,1294,0,0,0,124,0

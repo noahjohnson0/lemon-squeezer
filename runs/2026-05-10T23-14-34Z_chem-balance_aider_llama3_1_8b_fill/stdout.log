@@ -9,3 +9,6 @@ Repo-map: using 4096 tokens, auto refresh
 litellm.APIConnectionError: Ollama_chatException - litellm.Timeout: Connection 
 timed out after 600.0 seconds.
 Retrying in 0.2 seconds...
+litellm.APIConnectionError: Ollama_chatException - litellm.Timeout: Connection 
+timed out after 600.0 seconds.
+Retrying in 0.5 seconds...
