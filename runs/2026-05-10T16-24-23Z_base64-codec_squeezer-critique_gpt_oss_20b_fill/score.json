@@ -1,0 +1,10 @@
+{
+  "checks": [
+    {"name":"file:base64codec.py","pass":1,"weight":5,"note":""},
+    {"name":"compiles","pass":0,"weight":5,"note":""},
+    {"name":"no_stdlib_base64","pass":1,"weight":10,"note":""}
+  ],
+  "gained": 15,
+  "total": 20,
+  "score_pct": 75
+}

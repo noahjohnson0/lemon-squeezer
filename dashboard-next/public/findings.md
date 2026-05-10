@@ -1,12 +1,12 @@
 # 🍋 Findings
 
-_284 runs · 29 evals · 8 harnesses · 10 models. Auto-generated._
+_285 runs · 29 evals · 8 harnesses · 10 models. Auto-generated._
 
 ## Harness scoreboard
 
 | harness | avg | cells |
 |---|---:|---:|
-| `squeezer-critique` | **77.2** | 6 |
+| `squeezer-critique` | **76.9** | 7 |
 | `aider` | **74.1** | 161 |
 | `squeezer-architect` | **60.2** | 12 |
 | `squeezer-tdd` | **57.7** | 12 |
@@ -20,7 +20,7 @@ _284 runs · 29 evals · 8 harnesses · 10 models. Auto-generated._
 | model | avg | cells |
 |---|---:|---:|
 | `qwen3:8b` | **88.7** | 3 |
-| `gpt-oss:20b` | **82.6** | 38 |
+| `gpt-oss:20b` | **82.4** | 39 |
 | `llama3.1:8b` | **78.1** | 7 |
 | `qwen3-coder:30b-a3b-q4_K_M` | **77.9** | 55 |
 | `qwen2.5:14b` | **70.2** | 25 |
@@ -36,18 +36,19 @@ _284 runs · 29 evals · 8 harnesses · 10 models. Auto-generated._
 |---|---|---:|---:|---:|
 | `sql-injection-fix` | `qwen3:14b` | 65% | 85% | **+20** |
 | `sql-injection-fix` | `gpt-oss:20b` | 85% | 100% | **+15** |
+| `dijkstra` | `qwen3-coder:30b-a3b-q4_K_M` | 100% | 100% | **+0** |
+| `kepler-orbit` | `qwen3-coder:30b-a3b-q4_K_M` | 100% | 100% | **+0** |
 | `cli-tool` | `qwen3:14b` | 100% | 100% | **+0** |
 | `dijkstra` | `qwen3:14b` | 100% | 100% | **+0** |
-| `kepler-orbit` | `qwen3-coder:30b-a3b-q4_K_M` | 100% | 100% | **+0** |
-| `dijkstra` | `qwen3-coder:30b-a3b-q4_K_M` | 100% | 100% | **+0** |
+| `sql-injection-fix` | `qwen3-coder:30b-a3b-q4_K_M` | 85% | 85% | **+0** |
+| `base64-codec` | `gpt-oss:20b` | 75% | 75% | **+0** |
 | `bug-fix` | `qwen3:14b` | 100% | 100% | **+0** |
 | `bug-fix` | `qwen3-coder:30b-a3b-q4_K_M` | 100% | 100% | **+0** |
-| `sql-injection-fix` | `qwen3-coder:30b-a3b-q4_K_M` | 85% | 85% | **+0** |
 | `wifi-stats` | `qwen3:14b` | 81% | 78% | **-3** |
 | `wifi-stats` | `qwen3-coder:30b-a3b-q4_K_M` | 91% | 83% | **-8** |
 | `chem-balance` | `qwen3:14b` | 11% | 0% | **-11** |
 | `chem-balance` | `qwen3-coder:30b-a3b-q4_K_M` | 29% | 0% | **-29** |
 | `kepler-orbit` | `qwen3:14b` | 100% | 0% | **-100** |
 
-_Across 14 (eval × model) pairs with both single-pass and multi-step: 2 improved with a pipeline. Mean delta = **-8.3 pts**._
+_Across 15 (eval × model) pairs with both single-pass and multi-step: 2 improved with a pipeline. Mean delta = **-7.7 pts**._
 

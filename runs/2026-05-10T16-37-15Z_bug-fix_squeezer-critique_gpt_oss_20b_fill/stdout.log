@@ -1,0 +1,4 @@
+
+══════ STEP: draft  (gpt-oss:20b) ══════
+[draft it=0] TOOL list_files {"dir":"."}
+[draft it=1] TOOL read_file {"path":"csv_total.py"}
