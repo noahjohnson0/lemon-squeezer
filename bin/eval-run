@@ -4,6 +4,38 @@
 set -euo pipefail
 [ -f "$HOME/.config/lemon-squeezer.env" ] && . "$HOME/.config/lemon-squeezer.env"
 
+# ────────────────────────── GPU serialization lock ──────────────────────────
+# The whole point of this benchmark is reproducible wall-clock + telemetry.
+# Concurrent runs against the same Ollama host destroy that — Ollama queues
+# requests, so wall_seconds includes wait-time and the GPU sampler captures
+# whichever run happens to be active at sample time, not necessarily ours.
+#
+# We use an atomic mkdir-based lock: only one eval-run holds the GPU at a time.
+# Multiple invocations queue automatically. Set LEMON_NO_LOCK=1 to bypass
+# (e.g. when running on a separate host).
+LOCK="${HOME}/repos/lemon-squeezer/.gpu.lock"
+if [[ "${LEMON_NO_LOCK:-0}" != "1" ]]; then
+  WAITED=0
+  while ! mkdir "$LOCK" 2>/dev/null; do
+    if (( WAITED == 0 )); then
+      echo "⏳ another eval-run holds the GPU lock; queueing…"
+      WAITED=1
+    fi
+    # Detect stale lock — if owner pid dead, reclaim
+    if [[ -f "$LOCK/owner.pid" ]]; then
+      OWNER=$(cat "$LOCK/owner.pid" 2>/dev/null || echo 0)
+      if (( OWNER > 0 )) && ! kill -0 "$OWNER" 2>/dev/null; then
+        echo "  lock owner pid $OWNER is dead; reclaiming"
+        rm -rf "$LOCK"
+        continue
+      fi
+    fi
+    sleep 2
+  done
+  echo "$$" > "$LOCK/owner.pid"
+  trap 'rm -rf "$LOCK"' EXIT INT TERM
+fi
+
 HARNESS="${1:?usage: eval-run <harness> <eval> <model> <tag> [-- flags...]}"
 EVAL="${2:?eval required}"
 MODEL="${3:?model required}"

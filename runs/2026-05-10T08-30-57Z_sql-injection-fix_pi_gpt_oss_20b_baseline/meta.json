@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-05-10T08-30-57Z_sql-injection-fix_pi_gpt_oss_20b_baseline",
+  "ts": "2026-05-10T08-30-57Z",
+  "eval": "sql-injection-fix",
+  "harness": "pi",
+  "model": "gpt-oss:20b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 45,
+  "tokens_in": 32315,
+  "tokens_out": 925,
+  "tool_calls": 10,
+  "score_pct": "85",
+  "telemetry": {
+    "samples": 29,
+    "gpu_util_avg": 28.38,
+    "gpu_util_peak": 83.0,
+    "gpu_mem_peak_mb": 11168.0,
+    "gpu_mem_avg_mb": 11166.21,
+    "gpu_temp_peak_c": 56.0,
+    "gpu_temp_avg_c": 49.9,
+    "gpu_power_avg_w": 59.94,
+    "gpu_power_peak_w": 124.98,
+    "gpu_fan_peak_pct": 0.0,
+    "host_load_peak": 2.77
+  }
+}

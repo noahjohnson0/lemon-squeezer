@@ -1,0 +1,11 @@
+I'll create the requested `pwstrength.py` file with the specified scoring rules and explanation tokens.
+
+Here's a breakdown of what I'm going to write:
+
+1. Function definition with proper docstring
+2. Hardcoded blocklist for terrible passwords
+3. Helper functions for character classification and sequence detection
+4. Main scoring logic that implements your rules
+5. Proper handling of reasons list
+
+Let me put this together:

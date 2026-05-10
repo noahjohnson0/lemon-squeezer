@@ -1,0 +1,18 @@
+IMPORT_ERR invalid syntax (balance.py, line 172)
+{
+  "checks": [
+    {"name":"file:balance.py","pass":1,"weight":5,"note":""},
+    {"name":"compiles","pass":0,"weight":5,"note":""},
+    {"name":"case:eq1","pass":0,"weight":10,"note":"IMPORT_ERR invalid syntax (balance.py, line 172)"},
+    {"name":"case:eq2","pass":0,"weight":10,"note":""},
+    {"name":"case:eq3","pass":0,"weight":10,"note":""},
+    {"name":"case:eq4","pass":0,"weight":10,"note":""},
+    {"name":"case:eq5","pass":0,"weight":10,"note":""},
+    {"name":"case:eq6","pass":0,"weight":10,"note":""},
+    {"name":"case:eq7","pass":0,"weight":10,"note":""},
+    {"name":"raises_valueerror","pass":0,"weight":5,"note":"Traceback (most recent call last):"}
+  ],
+  "gained": 5,
+  "total": 85,
+  "score_pct": 5
+}

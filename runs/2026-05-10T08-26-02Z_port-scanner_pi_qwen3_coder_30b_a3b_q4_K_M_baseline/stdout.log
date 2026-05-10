@@ -1,0 +1,15 @@
+I've reviewed the implementation and it meets all the requirements:
+
+1. Uses only the standard `socket` module
+2. Uses `socket.AF_INET` + `socket.SOCK_STREAM` with `connect_ex` 
+3. Distinguishes refused connections (`ConnectionRefusedError`) from timeouts (`socket.timeout`) 
+4. Closes every socket properly using a `finally` block
+5. Handles at least 100 ports without leaking sockets
+6. Provides the required CLI interface that prints `<port> <state>` lines sorted by port
+
+The implementation correctly handles the three states:
+- "open" - when connection succeeds
+- "closed" - when connection is actively refused (RST)
+- "filtered" - for timeouts, host unreachable, or other socket errors
+
+The function works with any number of ports and properly closes sockets to avoid leaks.

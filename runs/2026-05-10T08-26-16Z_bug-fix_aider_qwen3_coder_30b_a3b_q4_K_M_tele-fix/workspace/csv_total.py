@@ -1,20 +1,19 @@
-"""Sum the 'amount' column of a CSV file.
-
-Usage: python csv_total.py <path>
-
-Currently broken: crashes on the header row and on any non-numeric value.
-"""
 import csv
 import sys
 
+def csv_total(filename):
+    total = 0
+    with open(filename, 'r') as file:
+        reader = csv.reader(file)
+        next(reader)  # Skip header row
+        for row in reader:
+            try:
+                amount = int(row[1])  # Assuming amount is in the second column
+                total += amount
+            except (ValueError, IndexError):
+                # Silently ignore invalid integers or missing columns
+                pass
+    print(total)
 
-def total(path):
-    s = 0
-    with open(path) as f:
-        for row in csv.reader(f):
-            s += int(row[1])
-    return s
-
-
-if __name__ == "__main__":
-    print(total(sys.argv[1]))
+if __name__ == '__main__':
+    csv_total(sys.argv[1])

@@ -1,0 +1,1 @@
+I'll help you fix the SQL injection vulnerability in `lookup(con, name)` by using parameterized queries. Let's examine the current code first:
