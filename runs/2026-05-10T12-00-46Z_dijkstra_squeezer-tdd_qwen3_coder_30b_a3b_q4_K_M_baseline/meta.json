@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-05-10T12-00-46Z_dijkstra_squeezer-tdd_qwen3_coder_30b_a3b_q4_K_M_baseline",
+  "ts": "2026-05-10T12-00-46Z",
+  "eval": "dijkstra",
+  "harness": "squeezer-tdd",
+  "model": "qwen3-coder:30b-a3b-q4_K_M",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 390,
+  "tokens_in": 60712,
+  "tokens_out": 6926,
+  "tool_calls": 17,
+  "score_pct": "100",
+  "telemetry": {
+    "samples": 264,
+    "gpu_util_avg": 39.6,
+    "gpu_util_peak": 96.0,
+    "gpu_mem_peak_mb": 11370.0,
+    "gpu_mem_avg_mb": 11369.0,
+    "gpu_temp_peak_c": 66.0,
+    "gpu_temp_avg_c": 51.34,
+    "gpu_power_avg_w": 40.1,
+    "gpu_power_peak_w": 97.8,
+    "gpu_fan_peak_pct": 30.0,
+    "host_load_peak": 4.32
+  }
+}

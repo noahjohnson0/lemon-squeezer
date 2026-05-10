@@ -1,0 +1,18 @@
+{
+  "pipeline": "verify",
+  "steps": [
+    {
+      "name": "verify",
+      "model": "qwen3:14b",
+      "tokens_in": 2103,
+      "tokens_out": 1854,
+      "tool_calls": 1,
+      "wall_s": 43.3,
+      "final": ""
+    }
+  ],
+  "primary_model": "qwen3:14b",
+  "critic_model": null,
+  "judge_model": null,
+  "rounds": 1
+}

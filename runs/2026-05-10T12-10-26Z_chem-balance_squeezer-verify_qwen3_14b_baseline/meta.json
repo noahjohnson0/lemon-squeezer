@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-05-10T12-10-26Z_chem-balance_squeezer-verify_qwen3_14b_baseline",
+  "ts": "2026-05-10T12-10-26Z",
+  "eval": "chem-balance",
+  "harness": "squeezer-verify",
+  "model": "qwen3:14b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 191,
+  "tokens_in": 832,
+  "tokens_out": 7890,
+  "tool_calls": 0,
+  "score_pct": "0",
+  "telemetry": {
+    "samples": 132,
+    "gpu_util_avg": 96.15,
+    "gpu_util_peak": 97.0,
+    "gpu_mem_peak_mb": 10428.0,
+    "gpu_mem_avg_mb": 10419.25,
+    "gpu_temp_peak_c": 68.0,
+    "gpu_temp_avg_c": 66.66,
+    "gpu_power_avg_w": 210.12,
+    "gpu_power_peak_w": 216.74,
+    "gpu_fan_peak_pct": 48.0,
+    "host_load_peak": 2.67
+  }
+}

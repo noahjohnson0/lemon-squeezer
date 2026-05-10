@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   loadRuns,
   loadInflight,
@@ -9,6 +9,8 @@ import {
 import Hero from "@/components/Hero";
 import StatsBar from "@/components/StatsBar";
 import LiveRuns from "@/components/LiveRuns";
+import Filters, { type FilterState } from "@/components/Filters";
+import HarnessGap from "@/components/HarnessGap";
 import Leaderboard from "@/components/Leaderboard";
 import Scatter3D from "@/components/Scatter3D";
 import HeatmapMatrix from "@/components/HeatmapMatrix";
@@ -21,6 +23,7 @@ export default function Page() {
   const [inflight, setInflight] = useState<Inflight | null>(null);
   const [selectedRunId, setSelectedRunId] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [filters, setFilters] = useState<FilterState>({ eval: "", harness: "", model: "" });
 
   useEffect(() => {
     let cancelled = false;
@@ -54,6 +57,17 @@ export default function Page() {
     };
   }, []);
 
+  const filtered = useMemo(
+    () =>
+      runs.filter(
+        (r) =>
+          (!filters.eval || r.eval === filters.eval) &&
+          (!filters.harness || r.harness === filters.harness) &&
+          (!filters.model || r.model === filters.model)
+      ),
+    [runs, filters]
+  );
+
   const selectedRun = selectedRunId
     ? runs.find((r) => r.run_id === selectedRunId) ?? null
     : null;
@@ -63,11 +77,13 @@ export default function Page() {
       <Hero runCount={runs.length} />
       <StatsBar runs={runs} />
       <LiveRuns data={inflight} />
-      <Scatter3D runs={runs} onSelect={(id) => setSelectedRunId(id)} />
-      <Leaderboard runs={runs} onSelectRun={(id) => setSelectedRunId(id)} />
-      <HeatmapMatrix runs={runs} onSelectRun={(id) => setSelectedRunId(id)} />
-      <HardwarePanel runs={runs} />
-      <EvalDeepDive runs={runs} onSelectRun={(id) => setSelectedRunId(id)} />
+      <Filters runs={runs} state={filters} onChange={setFilters} />
+      <HarnessGap runs={filtered} />
+      <Scatter3D runs={filtered} onSelect={(id) => setSelectedRunId(id)} />
+      <Leaderboard runs={filtered} onSelectRun={(id) => setSelectedRunId(id)} />
+      <HeatmapMatrix runs={filtered} onSelectRun={(id) => setSelectedRunId(id)} />
+      <HardwarePanel runs={filtered} />
+      <EvalDeepDive runs={filtered} onSelectRun={(id) => setSelectedRunId(id)} />
       <RunDrawer run={selectedRun} onClose={() => setSelectedRunId(null)} />
 
       <footer className="max-w-7xl mx-auto px-6 mt-16 mb-8 pt-6 border-t border-[var(--border)] text-xs text-[var(--muted)] flex flex-wrap gap-3 items-center justify-between">

@@ -1,0 +1,18 @@
+{
+  "pipeline": "verify",
+  "steps": [
+    {
+      "name": "verify",
+      "model": "qwen3:14b",
+      "tokens_in": 685,
+      "tokens_out": 4201,
+      "tool_calls": 0,
+      "wall_s": 103.2,
+      "final": "```python\n# dijkstra.py\nimport heapq\n\ndef shortest_path(graph: dict[str, list[tuple[str, float]]], src: str, dst: str) -> tuple[float, list[str]]:\n    \"\"\"Compute the shortest path from src to dst in a weighted directed graph.\"\"\"\n    if src == dst:\n        return (0.0, [src])\n    distances = {node: float('inf') for node in graph}\n    distances[src] = 0.0\n    heap = [(0.0, src, [src])]\n    while heap:\n        current_dist, current_node, path = heapq.heappop(heap)\n        if current_node == dst:\n            return (current_dist, path)\n        if current_dist > distances[current_node]:\n            continue\n        for neighbor, weight in graph[current_node]:\n            new_dist = current_dist + weight\n            if new_dist < distances[neighbor]:\n                distances[neighbor] = new_dist\n                new_path = path + [neighbor]\n                heapq.heappush(heap, (new_dist, neighbor, new_path))\n    return (float('inf'), [])\n```\n\n```python\n# test_dijkstra.py\nimport pytest\n\nfrom dijkstra import shortest_path\n\ndef test_shortest_path():\n    graph = {\n        'A': [('B', 1), ('C', 4)],\n        'B': [('C', 2), ('D', 5)],\n        'C': [('D', 1)],\n        'D': []\n    }\n    distance, path = shortest_path(graph, 'A', 'D')\n    assert distance == 4.0\n    assert path == ['A', 'B', 'C', 'D']\n\ndef test_same_node():\n    graph = {'A': []}\n    distance, path = shortest_path(graph, 'A', 'A')\n    assert distance == 0.0\n    assert path == ['A']\n\ndef test_no_path():\n    graph = {'A': [('B', 1)], 'B': []}\n    distance, path = shortest_path(graph, 'A', 'C')\n    assert distance == float('inf')\n    assert path == []\n\ndef test_property_path_validity():\n    graph = {\n        'X': [('Y', 3), ('Z', 2)],\n        'Y': [('Z', 1)],\n        'Z': []\n    }\n    distance, path = shortest_path(graph, 'X', 'Z')\n    assert distance == 2.0\n    assert path == ['X', 'Z']\n\n    # Check that the sum of the weights in the path equals the distance\n    total = 0.0\n    for i in range(len(path) - 1):\n        current = path[i]\n        next_node = path[i + 1]\n        found = False\n        for neighbor, weight in graph[current]:\n            if neighbor == next_node:\n                total += weight\n                found = True\n                break\n        if not found:\n            pytest.fail(f\"Edge {current} -> {next_node} not found in the graph\")\n    assert total == distance\n```"
+    }
+  ],
+  "primary_model": "qwen3:14b",
+  "critic_model": null,
+  "judge_model": null,
+  "rounds": 1
+}
