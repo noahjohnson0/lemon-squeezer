@@ -1,0 +1,13 @@
+
+══════ STEP: draft  (gpt-oss:20b) ══════
+[draft it=0] TOOL write_file {"path":"matops.py","content":"\"\"\"\nMatOps – basic linear algebra primitives implemented manually.\n\nThis module provides a few core operations such as dete
+[draft it=1] I’ve created **`matops.py`** implementing the requested linear‑algebra primitives:
+
+- `determinant(M)` – Gaussian elimination with partial pivoting.
+- `inverse(M)` – Gauss‑Jordan elimination on \([M | I]\).
+- `matmul(A, B)` – Standard row‑b
+[draft] done — 1 tools, 3080/2248 tok, 96.1s
+
+══════ STEP: critique-1  (gpt-oss:20b) ══════
+[critique-1 it=0] TOOL list_files {"dir":"."}
+[critique-1 it=1] TOOL read_file {"path":"matops.py"}
