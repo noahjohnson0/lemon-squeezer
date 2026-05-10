@@ -295,3 +295,5 @@ run_id,ts,eval,harness,model,tag,wall_s,tok_in,tok_out,tools,exit,score_pct
 2026-05-10T17-18-37Z_hamming-code_squeezer-critique_gpt_oss_20b_fill,2026-05-10T17-18-37Z,hamming-code,squeezer-critique,gpt-oss:20b,fill,437,16703,9304,10,0,100
 2026-05-10T17-26-00Z_julian-day_squeezer-critique_gpt_oss_20b_fill,2026-05-10T17-26-00Z,julian-day,squeezer-critique,gpt-oss:20b,fill,324,22599,6053,10,0,50
 2026-05-10T17-31-30Z_kalman-filter_squeezer-critique_gpt_oss_20b_fill,2026-05-10T17-31-30Z,kalman-filter,squeezer-critique,gpt-oss:20b,fill,172,9652,3977,5,0,100
+2026-05-10T17-34-29Z_kepler-orbit_squeezer-critique_gpt_oss_20b_fill,2026-05-10T17-34-29Z,kepler-orbit,squeezer-critique,gpt-oss:20b,fill,308,33989,6301,14,0,100
+2026-05-10T17-39-43Z_knapsack_squeezer-critique_gpt_oss_20b_fill,2026-05-10T17-39-43Z,knapsack,squeezer-critique,gpt-oss:20b,fill,114,4163,2630,3,0,50
