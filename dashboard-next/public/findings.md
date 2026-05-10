@@ -1,13 +1,13 @@
 # 🍋 Findings
 
-_236 runs · 26 evals · 7 harnesses · 10 models. Auto-generated._
+_241 runs · 26 evals · 7 harnesses · 10 models. Auto-generated._
 
 ## Harness scoreboard
 
 | harness | avg | cells |
 |---|---:|---:|
-| `aider` | **77.5** | 131 |
 | `squeezer-critique` | **77.2** | 6 |
+| `aider` | **76.5** | 136 |
 | `squeezer-architect` | **60.2** | 12 |
 | `squeezer-tdd` | **57.7** | 12 |
 | `squeezer-verify` | **52.2** | 12 |
@@ -18,10 +18,10 @@ _236 runs · 26 evals · 7 harnesses · 10 models. Auto-generated._
 
 | model | avg | cells |
 |---|---:|---:|
-| `mistral-small:24b` | **93.6** | 13 |
 | `qwen3:8b` | **88.7** | 3 |
 | `qwen2.5:14b` | **86.8** | 6 |
 | `gpt-oss:20b` | **84.1** | 35 |
+| `mistral-small:24b` | **82.2** | 18 |
 | `qwen3-coder:30b-a3b-q4_K_M` | **79.3** | 52 |
 | `llama3.1:8b` | **78.1** | 7 |
 | `qwen3:14b` | **60.1** | 59 |
@@ -36,11 +36,11 @@ _236 runs · 26 evals · 7 harnesses · 10 models. Auto-generated._
 | `sql-injection-fix` | `qwen3:14b` | 65% | 85% | **+20** |
 | `sql-injection-fix` | `gpt-oss:20b` | 85% | 100% | **+15** |
 | `bug-fix` | `qwen3:14b` | 100% | 100% | **+0** |
-| `kepler-orbit` | `qwen3-coder:30b-a3b-q4_K_M` | 100% | 100% | **+0** |
-| `bug-fix` | `qwen3-coder:30b-a3b-q4_K_M` | 100% | 100% | **+0** |
 | `cli-tool` | `qwen3:14b` | 100% | 100% | **+0** |
-| `sql-injection-fix` | `qwen3-coder:30b-a3b-q4_K_M` | 85% | 85% | **+0** |
+| `bug-fix` | `qwen3-coder:30b-a3b-q4_K_M` | 100% | 100% | **+0** |
 | `dijkstra` | `qwen3:14b` | 100% | 100% | **+0** |
+| `sql-injection-fix` | `qwen3-coder:30b-a3b-q4_K_M` | 85% | 85% | **+0** |
+| `kepler-orbit` | `qwen3-coder:30b-a3b-q4_K_M` | 100% | 100% | **+0** |
 | `dijkstra` | `qwen3-coder:30b-a3b-q4_K_M` | 100% | 100% | **+0** |
 | `wifi-stats` | `qwen3:14b` | 81% | 78% | **-3** |
 | `wifi-stats` | `qwen3-coder:30b-a3b-q4_K_M` | 91% | 83% | **-8** |

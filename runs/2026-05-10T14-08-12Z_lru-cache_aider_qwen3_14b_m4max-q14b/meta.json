@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-05-10T14-08-12Z_lru-cache_aider_qwen3_14b_m4max-q14b",
+  "ts": "2026-05-10T14-08-12Z",
+  "eval": "lru-cache",
+  "harness": "aider",
+  "model": "qwen3:14b",
+  "tag": "m4max-q14b",
+  "host": "m4max",
+  "extra_flags": [],
+  "exit_code": 124,
+  "wall_seconds": 600,
+  "tokens_in": 0,
+  "tokens_out": 0,
+  "tool_calls": 0,
+  "score_pct": "0",
+  "telemetry": {
+    "samples": 458,
+    "host_load_peak": 4.43,
+    "host_cpu_avg_pct": 16.11,
+    "host_cpu_peak_pct": 30.3,
+    "host_mem_peak_pct": 95.9,
+    "ollama_rss_peak_mb": 9798.0,
+    "ollama_rss_avg_mb": 9766.98
+  }
+}
