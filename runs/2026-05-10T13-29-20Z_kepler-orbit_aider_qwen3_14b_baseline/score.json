@@ -1,0 +1,15 @@
+{
+  "checks": [
+    {"name":"file:kepler.py","pass":1,"weight":5,"note":""},
+    {"name":"compiles","pass":1,"weight":5,"note":""},
+    {"name":"uses_rk4","pass":1,"weight":8,"note":""},
+    {"name":"energy_formula","pass":1,"weight":8,"note":"got=-0.5"},
+    {"name":"half_period","pass":1,"weight":12,"note":"got=(-1.000,-0.000)"},
+    {"name":"full_period","pass":1,"weight":14,"note":"got=(1.000,0.001)"},
+    {"name":"energy_drift","pass":1,"weight":14,"note":"drift=0.000000"},
+    {"name":"ellipse_apo","pass":1,"weight":12,"note":"r=1.500"}
+  ],
+  "gained": 78,
+  "total": 78,
+  "score_pct": 100
+}

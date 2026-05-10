@@ -209,3 +209,9 @@ run_id,ts,eval,harness,model,tag,wall_s,tok_in,tok_out,tools,exit,score_pct
 2026-05-10T13-13-56Z_chem-balance_squeezer-architect_qwen3_coder_30b_a3b_q4_K_M_baseline,2026-05-10T13-13-56Z,chem-balance,squeezer-architect,qwen3-coder:30b-a3b-q4_K_M,baseline,173,3132,3283,0,0,0
 2026-05-10T13-16-54Z_kepler-orbit_squeezer-architect_qwen3_coder_30b_a3b_q4_K_M_baseline,2026-05-10T13-16-54Z,kepler-orbit,squeezer-architect,qwen3-coder:30b-a3b-q4_K_M,baseline,116,18855,2191,5,0,100
 2026-05-10T13-18-55Z_dijkstra_squeezer-architect_qwen3_coder_30b_a3b_q4_K_M_baseline,2026-05-10T13-18-55Z,dijkstra,squeezer-architect,qwen3-coder:30b-a3b-q4_K_M,baseline,162,22550,2988,7,0,100
+2026-05-10T13-21-45Z_base64-codec_squeezer_qwen3_14b_baseline,2026-05-10T13-21-45Z,base64-codec,squeezer,qwen3:14b,baseline,400,631,16193,0,0,0
+2026-05-10T13-28-32Z_bug-fix_aider_mistral_small_24b_baseline,2026-05-10T13-28-32Z,bug-fix,aider,mistral-small:24b,baseline,43,694,202,0,0,100
+2026-05-10T13-29-20Z_kepler-orbit_aider_qwen3_14b_baseline,2026-05-10T13-29-20Z,kepler-orbit,aider,qwen3:14b,baseline,145,1000,4100,0,0,100
+2026-05-10T13-34-08Z_bug-fix_aider_qwen3_14b_m4max-q14b,2026-05-10T13-34-08Z,bug-fix,aider,qwen3:14b,m4max-q14b,19,730,471,0,0,100
+2026-05-10T13-34-31Z_cli-tool_aider_qwen3_14b_m4max-q14b,2026-05-10T13-34-31Z,cli-tool,aider,qwen3:14b,m4max-q14b,147,769,5000,0,0,54
+2026-05-10T13-37-04Z_refactor_aider_qwen3_14b_m4max-q14b,2026-05-10T13-37-04Z,refactor,aider,qwen3:14b,m4max-q14b,46,760,1200,0,0,66

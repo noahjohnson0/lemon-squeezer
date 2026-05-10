@@ -1,0 +1,5 @@
+energy_formula 1 got=-0.5
+half_period 1 got=(-1.000,-0.000)
+full_period 1 got=(1.000,0.001)
+energy_drift 1 drift=0.000000
+ellipse_apo 1 r=1.500

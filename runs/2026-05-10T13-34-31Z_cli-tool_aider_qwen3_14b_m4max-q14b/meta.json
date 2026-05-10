@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-05-10T13-34-31Z_cli-tool_aider_qwen3_14b_m4max-q14b",
+  "ts": "2026-05-10T13-34-31Z",
+  "eval": "cli-tool",
+  "harness": "aider",
+  "model": "qwen3:14b",
+  "tag": "m4max-q14b",
+  "host": "m4max",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 147,
+  "tokens_in": 769,
+  "tokens_out": 5000,
+  "tool_calls": 0,
+  "score_pct": "54",
+  "telemetry": {
+    "samples": 110,
+    "host_load_peak": 4.63,
+    "host_cpu_avg_pct": 18.48,
+    "host_cpu_peak_pct": 66.3,
+    "host_mem_peak_pct": 97.1,
+    "ollama_rss_peak_mb": 9797.0,
+    "ollama_rss_avg_mb": 9676.04
+  }
+}

@@ -38,14 +38,12 @@ pid=$$
 PEND
 
 # ────────────────────────── GPU serialization lock ──────────────────────────
-# The whole point of this benchmark is reproducible wall-clock + telemetry.
-# Concurrent runs against the same Ollama host destroy that — Ollama queues
-# requests, so wall_seconds includes wait-time and the GPU sampler captures
-# whichever run happens to be active at sample time, not necessarily ours.
-#
-# We use an atomic mkdir-based lock: only one eval-run holds the GPU at a time.
-# Multiple invocations queue automatically. Set LEMON_NO_LOCK=1 to bypass.
-LOCK="$LSQ_ROOT/.gpu.lock"
+# One lock PER HOST. M4 Max and 4070 are separate hardware; they shouldn't
+# block each other. Concurrent runs WITHIN a host are still serialized so
+# wall_seconds + per-second telemetry stay attributable to the run that owns
+# them. Atomic mkdir; stale locks reclaimed if owner pid is dead.
+# Set LEMON_NO_LOCK=1 to bypass entirely.
+LOCK="$LSQ_ROOT/.gpu.lock.${LEMON_HOST}"
 if [[ "${LEMON_NO_LOCK:-0}" != "1" ]]; then
   trap 'rm -rf "$PENDING_DIR" "$LOCK"' EXIT INT TERM
   WAITED=0
