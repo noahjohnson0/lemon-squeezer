@@ -1,27 +1,137 @@
 {
   "checks": [
-    {"name":"file:base64codec.py","pass":1,"weight":5,"note":""},
-    {"name":"compiles","pass":1,"weight":5,"note":""},
-    {"name":"no_stdlib_base64","pass":1,"weight":10,"note":""},
-    {"name":"enc1","pass":1,"weight":4,"note":"got ''"},
-    {"name":"rt1","pass":1,"weight":4,"note":"got b''"},
-    {"name":"enc2","pass":0,"weight":4,"note":"ERR ValueError('Invalid input length')"},
-    {"name":"rt2","pass":0,"weight":4,"note":"ERR ValueError('Invalid input length')"},
-    {"name":"enc3","pass":0,"weight":4,"note":"ERR IndexError('index out of range')"},
-    {"name":"rt3","pass":0,"weight":4,"note":"ERR IndexError('index out of range')"},
-    {"name":"enc4","pass":0,"weight":4,"note":"ERR ValueError('Invalid input length')"},
-    {"name":"rt4","pass":0,"weight":4,"note":"ERR ValueError('Invalid input length')"},
-    {"name":"enc5","pass":0,"weight":4,"note":"ERR ValueError('Invalid input length')"},
-    {"name":"rt5","pass":0,"weight":4,"note":"ERR ValueError('Invalid input length')"},
-    {"name":"enc6","pass":0,"weight":4,"note":"ERR IndexError('index out of range')"},
-    {"name":"rt6","pass":0,"weight":4,"note":"ERR IndexError('index out of range')"},
-    {"name":"enc7","pass":0,"weight":4,"note":"ERR ValueError('Invalid input length')"},
-    {"name":"rt7","pass":0,"weight":4,"note":"ERR ValueError('Invalid input length')"},
-    {"name":"enc8","pass":0,"weight":4,"note":"got 'AAAAABAACAADAAEAAFAAGAAH'"},
-    {"name":"rt8","pass":0,"weight":4,"note":"got b'\x00\x00\x00\x00\x00\x00\x00\x00\x08\x00\x0c\x00\x00\x00\x"},
-    {"name":"enc9","pass":0,"weight":4,"note":"ERR IndexError('index out of range')"},
-    {"name":"rt9","pass":0,"weight":4,"note":"ERR IndexError('index out of range')"},
-    {"name":"rejects_invalid","pass":1,"weight":4,"note":""}
+    {
+      "name": "file:base64codec.py",
+      "pass": 1,
+      "weight": 5,
+      "note": ""
+    },
+    {
+      "name": "compiles",
+      "pass": 1,
+      "weight": 5,
+      "note": ""
+    },
+    {
+      "name": "no_stdlib_base64",
+      "pass": 1,
+      "weight": 10,
+      "note": ""
+    },
+    {
+      "name": "enc1",
+      "pass": 1,
+      "weight": 4,
+      "note": "got ''"
+    },
+    {
+      "name": "rt1",
+      "pass": 1,
+      "weight": 4,
+      "note": "got b''"
+    },
+    {
+      "name": "enc2",
+      "pass": 0,
+      "weight": 4,
+      "note": "ERR ValueError('Invalid input length')"
+    },
+    {
+      "name": "rt2",
+      "pass": 0,
+      "weight": 4,
+      "note": "ERR ValueError('Invalid input length')"
+    },
+    {
+      "name": "enc3",
+      "pass": 0,
+      "weight": 4,
+      "note": "ERR IndexError('index out of range')"
+    },
+    {
+      "name": "rt3",
+      "pass": 0,
+      "weight": 4,
+      "note": "ERR IndexError('index out of range')"
+    },
+    {
+      "name": "enc4",
+      "pass": 0,
+      "weight": 4,
+      "note": "ERR ValueError('Invalid input length')"
+    },
+    {
+      "name": "rt4",
+      "pass": 0,
+      "weight": 4,
+      "note": "ERR ValueError('Invalid input length')"
+    },
+    {
+      "name": "enc5",
+      "pass": 0,
+      "weight": 4,
+      "note": "ERR ValueError('Invalid input length')"
+    },
+    {
+      "name": "rt5",
+      "pass": 0,
+      "weight": 4,
+      "note": "ERR ValueError('Invalid input length')"
+    },
+    {
+      "name": "enc6",
+      "pass": 0,
+      "weight": 4,
+      "note": "ERR IndexError('index out of range')"
+    },
+    {
+      "name": "rt6",
+      "pass": 0,
+      "weight": 4,
+      "note": "ERR IndexError('index out of range')"
+    },
+    {
+      "name": "enc7",
+      "pass": 0,
+      "weight": 4,
+      "note": "ERR ValueError('Invalid input length')"
+    },
+    {
+      "name": "rt7",
+      "pass": 0,
+      "weight": 4,
+      "note": "ERR ValueError('Invalid input length')"
+    },
+    {
+      "name": "enc8",
+      "pass": 0,
+      "weight": 4,
+      "note": "got 'AAAAABAACAADAAEAAFAAGAAH'"
+    },
+    {
+      "name": "rt8",
+      "pass": 0,
+      "weight": 4,
+      "note": "got b'\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x08\\x00\\x0c\\x00\\x00\\x00\\x"
+    },
+    {
+      "name": "enc9",
+      "pass": 0,
+      "weight": 4,
+      "note": "ERR IndexError('index out of range')"
+    },
+    {
+      "name": "rt9",
+      "pass": 0,
+      "weight": 4,
+      "note": "ERR IndexError('index out of range')"
+    },
+    {
+      "name": "rejects_invalid",
+      "pass": 1,
+      "weight": 4,
+      "note": ""
+    }
   ],
   "gained": 32,
   "total": 96,

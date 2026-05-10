@@ -1,16 +1,71 @@
 {
   "checks": [
-    {"name":"file:crc.py","pass":1,"weight":5,"note":""},
-    {"name":"compiles","pass":1,"weight":5,"note":""},
-    {"name":"no_stdlib_crc","pass":1,"weight":10,"note":""},
-    {"name":"c32_1","pass":1,"weight":8,"note":"got=cbf43926 want=cbf43926"},
-    {"name":"c32_2","pass":1,"weight":8,"note":"got=00000000 want=00000000"},
-    {"name":"c32_3","pass":1,"weight":8,"note":"got=e8b7be43 want=e8b7be43"},
-    {"name":"c32_4","pass":1,"weight":8,"note":"got=414fa339 want=414fa339"},
-    {"name":"c16_1","pass":1,"weight":8,"note":"got=31c3 want=31c3"},
-    {"name":"c16_2","pass":1,"weight":8,"note":"got=0000 want=0000"},
-    {"name":"c16_3","pass":1,"weight":8,"note":"got=58e5 want=58e5"},
-    {"name":"c16_4","pass":1,"weight":8,"note":"got=cbd6 want=cbd6"}
+    {
+      "name": "file:crc.py",
+      "pass": 1,
+      "weight": 5,
+      "note": ""
+    },
+    {
+      "name": "compiles",
+      "pass": 1,
+      "weight": 5,
+      "note": ""
+    },
+    {
+      "name": "no_stdlib_crc",
+      "pass": 1,
+      "weight": 10,
+      "note": ""
+    },
+    {
+      "name": "c32_1",
+      "pass": 1,
+      "weight": 8,
+      "note": "got=cbf43926 want=cbf43926"
+    },
+    {
+      "name": "c32_2",
+      "pass": 1,
+      "weight": 8,
+      "note": "got=00000000 want=00000000"
+    },
+    {
+      "name": "c32_3",
+      "pass": 1,
+      "weight": 8,
+      "note": "got=e8b7be43 want=e8b7be43"
+    },
+    {
+      "name": "c32_4",
+      "pass": 1,
+      "weight": 8,
+      "note": "got=414fa339 want=414fa339"
+    },
+    {
+      "name": "c16_1",
+      "pass": 1,
+      "weight": 8,
+      "note": "got=31c3 want=31c3"
+    },
+    {
+      "name": "c16_2",
+      "pass": 1,
+      "weight": 8,
+      "note": "got=0000 want=0000"
+    },
+    {
+      "name": "c16_3",
+      "pass": 1,
+      "weight": 8,
+      "note": "got=58e5 want=58e5"
+    },
+    {
+      "name": "c16_4",
+      "pass": 1,
+      "weight": 8,
+      "note": "got=cbd6 want=cbd6"
+    }
   ],
   "gained": 84,
   "total": 84,

@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# Re-derive each run's score_pct from its score.json (preferred) or by re-running
+# the rubric (fallback). Writes the corrected score back to meta.json. Useful when
+# meta.json contains "?" placeholders from transient parse errors.
+set -uo pipefail
+ROOT="${HOME}/repos/lemon-squeezer"
+N_TOTAL=0; N_FIXED=0; N_UNCHANGED=0; N_BROKEN=0
+for d in "$ROOT"/runs/*/; do
+  meta="$d/meta.json"
+  ws="$d/workspace"
+  score="$d/score.json"
+  [[ -f "$meta" && -d "$ws" ]] || continue
+  N_TOTAL=$((N_TOTAL+1))
+  rc=$(python3 - "$meta" "$score" "$ws" "$ROOT" <<'PY'
+import json, os, re, subprocess, sys
+meta_path, score_path, ws, root = sys.argv[1:5]
+
+def parse_score(path):
+    try:
+        raw = open(path, "rb").read().decode("utf-8", errors="replace")
+    except Exception:
+        return None
+    # Strip ANY backslash not followed by a valid JSON-escape char
+    repaired = re.sub(r'\\(?![\\"/bfnrtu])', "", raw)
+    for attempt in (raw, repaired):
+        try: return json.loads(attempt)
+        except Exception: continue
+    return None
+
+m = json.load(open(meta_path))
+ev = m.get("eval", "")
+parsed = parse_score(score_path) if os.path.exists(score_path) else None
+# Re-run rubric only if score.json missing or unparseable AND we have a rubric
+if parsed is None:
+    rubric = f"{root}/evals/{ev}/rubric.sh"
+    if os.path.exists(rubric):
+        proc = subprocess.run(["bash", rubric, ws], capture_output=True, text=True, timeout=120)
+        # write back the rubric output (for next time)
+        try: open(score_path, "w").write(proc.stdout)
+        except Exception: pass
+        parsed = parse_score(score_path)
+
+if parsed is None or "score_pct" not in parsed:
+    sys.exit(2)
+new = parsed["score_pct"]
+if isinstance(new, (int, float)): new = int(new)
+old = m.get("score_pct")
+try: old_n = int(old)
+except Exception: old_n = None
+if str(old_n) == str(new):
+    sys.exit(20)
+m["score_pct"] = new
+json.dump(m, open(meta_path, "w"), indent=2)
+sys.exit(10)
+PY
+echo $?)
+  case "$rc" in
+    10) N_FIXED=$((N_FIXED+1));;
+    20) N_UNCHANGED=$((N_UNCHANGED+1));;
+    *)  N_BROKEN=$((N_BROKEN+1));;
+  esac
+done
+echo "rescored: total=$N_TOTAL fixed=$N_FIXED unchanged=$N_UNCHANGED broken=$N_BROKEN"
+"$ROOT/bin/eval-export" >/dev/null 2>&1 || true

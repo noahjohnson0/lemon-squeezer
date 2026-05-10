@@ -1,11 +1,91 @@
 {
   "checks": [
-    {"name":"file:dates.py","pass":0,"weight":5,"note":""},
-    {"name":"compiles","pass":0,"weight":5,"note":""},
-    {"name":"e_2024","pass":0,"weight":5,"note":""},
-    {"name":"jd_2000_1_1","pass":0,"weight":5,"note":""}
+    {
+      "name": "file:dates.py",
+      "pass": 1,
+      "weight": 5,
+      "note": ""
+    },
+    {
+      "name": "compiles",
+      "pass": 1,
+      "weight": 5,
+      "note": ""
+    },
+    {
+      "name": "e_1900",
+      "pass": 0,
+      "weight": 7,
+      "note": "got=(1900, 4, 17) want=(1900, 4, 15)"
+    },
+    {
+      "name": "e_1961",
+      "pass": 0,
+      "weight": 7,
+      "note": "got=(1961, 4, 4) want=(1961, 4, 2)"
+    },
+    {
+      "name": "e_2000",
+      "pass": 0,
+      "weight": 7,
+      "note": "got=(2000, 3, 25) want=(2000, 4, 23)"
+    },
+    {
+      "name": "e_2024",
+      "pass": 0,
+      "weight": 7,
+      "note": "got=(2024, 3, 30) want=(2024, 3, 31)"
+    },
+    {
+      "name": "e_2025",
+      "pass": 0,
+      "weight": 7,
+      "note": "got=(2025, 4, 17) want=(2025, 4, 20)"
+    },
+    {
+      "name": "e_2026",
+      "pass": 0,
+      "weight": 7,
+      "note": "got=(2026, 4, 7) want=(2026, 4, 5)"
+    },
+    {
+      "name": "e_2038",
+      "pass": 0,
+      "weight": 7,
+      "note": "got=(2038, 3, 25) want=(2038, 4, 25)"
+    },
+    {
+      "name": "e_pre1583",
+      "pass": 1,
+      "weight": 7,
+      "note": ""
+    },
+    {
+      "name": "jd_2000_1_1",
+      "pass": 0,
+      "weight": 7,
+      "note": "got=731565.0 want=2451545.0"
+    },
+    {
+      "name": "jd_1858_11_17",
+      "pass": 0,
+      "weight": 7,
+      "note": "got=680020.5 want=2400000.5"
+    },
+    {
+      "name": "jd_1900_1_1",
+      "pass": 0,
+      "weight": 7,
+      "note": "got=695040.5 want=2415020.5"
+    },
+    {
+      "name": "jd_2026_5_10",
+      "pass": 0,
+      "weight": 7,
+      "note": "got=741190.5 want=2461170.5"
+    }
   ],
-  "gained": 0,
-  "total": 20,
-  "score_pct": 0
+  "gained": 17,
+  "total": 94,
+  "score_pct": 18
 }

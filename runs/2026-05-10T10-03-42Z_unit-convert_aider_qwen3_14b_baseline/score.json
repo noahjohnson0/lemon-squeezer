@@ -1,17 +1,77 @@
 {
   "checks": [
-    {"name":"file:convert.py","pass":1,"weight":5,"note":""},
-    {"name":"compiles","pass":1,"weight":5,"note":""},
-    {"name":"ft_in_to_cm","pass":1,"weight":7,"note":"got=170.1800 cm"},
-    {"name":"mile_to_km","pass":1,"weight":7,"note":"got=1.6093 km"},
-    {"name":"c_to_f","pass":1,"weight":7,"note":"got=212.0000 f"},
-    {"name":"f_to_c","pass":1,"weight":7,"note":"got=0.0000 c"},
-    {"name":"kg_to_lb","pass":1,"weight":7,"note":"got=2.2046 lb"},
-    {"name":"ft_in_to_m","pass":1,"weight":7,"note":"got=1.8034 m"},
-    {"name":"gal_to_l","pass":1,"weight":7,"note":"got=3.7854 l"},
-    {"name":"mph_to_kph","pass":1,"weight":7,"note":"got=96.5606 kph"},
-    {"name":"incompatible1","pass":1,"weight":7,"note":"expected error, got exit 1"},
-    {"name":"incompatible2","pass":1,"weight":7,"note":"expected error, got exit 1"}
+    {
+      "name": "file:convert.py",
+      "pass": 1,
+      "weight": 5,
+      "note": ""
+    },
+    {
+      "name": "compiles",
+      "pass": 1,
+      "weight": 5,
+      "note": ""
+    },
+    {
+      "name": "ft_in_to_cm",
+      "pass": 1,
+      "weight": 7,
+      "note": "got=170.1800 cm"
+    },
+    {
+      "name": "mile_to_km",
+      "pass": 1,
+      "weight": 7,
+      "note": "got=1.6093 km"
+    },
+    {
+      "name": "c_to_f",
+      "pass": 1,
+      "weight": 7,
+      "note": "got=212.0000 f"
+    },
+    {
+      "name": "f_to_c",
+      "pass": 1,
+      "weight": 7,
+      "note": "got=0.0000 c"
+    },
+    {
+      "name": "kg_to_lb",
+      "pass": 1,
+      "weight": 7,
+      "note": "got=2.2046 lb"
+    },
+    {
+      "name": "ft_in_to_m",
+      "pass": 1,
+      "weight": 7,
+      "note": "got=1.8034 m"
+    },
+    {
+      "name": "gal_to_l",
+      "pass": 1,
+      "weight": 7,
+      "note": "got=3.7854 l"
+    },
+    {
+      "name": "mph_to_kph",
+      "pass": 1,
+      "weight": 7,
+      "note": "got=96.5606 kph"
+    },
+    {
+      "name": "incompatible1",
+      "pass": 1,
+      "weight": 7,
+      "note": "expected error, got exit 1"
+    },
+    {
+      "name": "incompatible2",
+      "pass": 1,
+      "weight": 7,
+      "note": "expected error, got exit 1"
+    }
   ],
   "gained": 80,
   "total": 80,

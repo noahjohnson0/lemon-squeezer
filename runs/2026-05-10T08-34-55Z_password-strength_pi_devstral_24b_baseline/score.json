@@ -1,20 +1,95 @@
 {
   "checks": [
-    {"name":"file:pwstrength.py","pass":0,"weight":5,"note":""},
-    {"name":"case:1","pass":0,"weight":7,"note":""},
-    {"name":"case:2","pass":0,"weight":7,"note":""},
-    {"name":"case:3","pass":0,"weight":7,"note":""},
-    {"name":"case:4","pass":0,"weight":7,"note":""},
-    {"name":"case:5","pass":0,"weight":7,"note":""},
-    {"name":"case:6","pass":0,"weight":7,"note":""},
-    {"name":"case:7","pass":0,"weight":7,"note":""},
-    {"name":"case:8","pass":0,"weight":7,"note":""},
-    {"name":"case:9","pass":0,"weight":7,"note":""},
-    {"name":"case:10","pass":0,"weight":7,"note":""},
-    {"name":"case:11","pass":0,"weight":7,"note":""},
-    {"name":"case:12","pass":0,"weight":7,"note":""},
-    {"name":"case:13","pass":0,"weight":7,"note":""},
-    {"name":"compiles","pass":0,"weight":5,"note":""}
+    {
+      "name": "file:pwstrength.py",
+      "pass": 0,
+      "weight": 5,
+      "note": ""
+    },
+    {
+      "name": "case:1",
+      "pass": 0,
+      "weight": 7,
+      "note": ""
+    },
+    {
+      "name": "case:2",
+      "pass": 0,
+      "weight": 7,
+      "note": ""
+    },
+    {
+      "name": "case:3",
+      "pass": 0,
+      "weight": 7,
+      "note": ""
+    },
+    {
+      "name": "case:4",
+      "pass": 0,
+      "weight": 7,
+      "note": ""
+    },
+    {
+      "name": "case:5",
+      "pass": 0,
+      "weight": 7,
+      "note": ""
+    },
+    {
+      "name": "case:6",
+      "pass": 0,
+      "weight": 7,
+      "note": ""
+    },
+    {
+      "name": "case:7",
+      "pass": 0,
+      "weight": 7,
+      "note": ""
+    },
+    {
+      "name": "case:8",
+      "pass": 0,
+      "weight": 7,
+      "note": ""
+    },
+    {
+      "name": "case:9",
+      "pass": 0,
+      "weight": 7,
+      "note": ""
+    },
+    {
+      "name": "case:10",
+      "pass": 0,
+      "weight": 7,
+      "note": ""
+    },
+    {
+      "name": "case:11",
+      "pass": 0,
+      "weight": 7,
+      "note": ""
+    },
+    {
+      "name": "case:12",
+      "pass": 0,
+      "weight": 7,
+      "note": ""
+    },
+    {
+      "name": "case:13",
+      "pass": 0,
+      "weight": 7,
+      "note": ""
+    },
+    {
+      "name": "compiles",
+      "pass": 0,
+      "weight": 5,
+      "note": ""
+    }
   ],
   "gained": 0,
   "total": 101,

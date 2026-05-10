@@ -1,4 +1,3 @@
-IMPORT_ERR invalid syntax (balance.py, line 172)
 {
   "checks": [
     {"name":"file:balance.py","pass":1,"weight":5,"note":""},

@@ -11,7 +11,7 @@
   "tokens_in": 751,
   "tokens_out": 544,
   "tool_calls": 0,
-  "score_pct": "?",
+  "score_pct": 33,
   "telemetry": {
     "samples": 9,
     "gpu_util_avg": 53.0,

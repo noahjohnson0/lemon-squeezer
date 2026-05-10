@@ -11,7 +11,7 @@
   "tokens_in": 958,
   "tokens_out": 2000,
   "tool_calls": 0,
-  "score_pct": "?",
+  "score_pct": 100,
   "telemetry": {
     "samples": 112,
     "gpu_mem_peak_mb": 3.35,

@@ -1,11 +1,41 @@
 {
   "checks": [
-    {"name":"file:mywc.py","pass":1,"weight":5,"note":""},
-    {"name":"compiles","pass":1,"weight":10,"note":""},
-    {"name":"help:exits_with_output","pass":1,"weight":5,"note":""},
-    {"name":"help:has_usage","pass":0,"weight":5,"note":""},
-    {"name":"output:exact_format","pass":1,"weight":25,"note":"got: '3 10 48 __sample.txt'"},
-    {"name":"error:nonzero_on_missing","pass":1,"weight":5,"note":""}
+    {
+      "name": "file:mywc.py",
+      "pass": 1,
+      "weight": 5,
+      "note": ""
+    },
+    {
+      "name": "compiles",
+      "pass": 1,
+      "weight": 10,
+      "note": ""
+    },
+    {
+      "name": "help:exits_with_output",
+      "pass": 1,
+      "weight": 5,
+      "note": ""
+    },
+    {
+      "name": "help:has_usage",
+      "pass": 0,
+      "weight": 5,
+      "note": ""
+    },
+    {
+      "name": "output:exact_format",
+      "pass": 1,
+      "weight": 25,
+      "note": "got: '3 10 48 __sample.txt'"
+    },
+    {
+      "name": "error:nonzero_on_missing",
+      "pass": 1,
+      "weight": 5,
+      "note": ""
+    }
   ],
   "gained": 50,
   "total": 55,

@@ -1,11 +1,41 @@
 {
   "checks": [
-    {"name":"file:hamming.py","pass":1,"weight":5,"note":""},
-    {"name":"compiles","pass":1,"weight":5,"note":""},
-    {"name":"round_trip","pass":1,"weight":25,"note":"16/16"},
-    {"name":"single_bit_correct","pass":1,"weight":30,"note":"112/112"},
-    {"name":"zero_round_trip","pass":1,"weight":5,"note":""},
-    {"name":"max_round_trip","pass":1,"weight":5,"note":""}
+    {
+      "name": "file:hamming.py",
+      "pass": 1,
+      "weight": 5,
+      "note": ""
+    },
+    {
+      "name": "compiles",
+      "pass": 1,
+      "weight": 5,
+      "note": ""
+    },
+    {
+      "name": "round_trip",
+      "pass": 1,
+      "weight": 25,
+      "note": "16/16"
+    },
+    {
+      "name": "single_bit_correct",
+      "pass": 1,
+      "weight": 30,
+      "note": "112/112"
+    },
+    {
+      "name": "zero_round_trip",
+      "pass": 1,
+      "weight": 5,
+      "note": ""
+    },
+    {
+      "name": "max_round_trip",
+      "pass": 1,
+      "weight": 5,
+      "note": ""
+    }
   ],
   "gained": 75,
   "total": 75,

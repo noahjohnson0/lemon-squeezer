@@ -1,7 +1,17 @@
 {
   "checks": [
-    {"name":"file:stats.py","pass":1,"weight":5,"note":""},
-    {"name":"compiles","pass":1,"weight":5,"note":""}
+    {
+      "name": "file:stats.py",
+      "pass": 1,
+      "weight": 5,
+      "note": ""
+    },
+    {
+      "name": "compiles",
+      "pass": 1,
+      "weight": 5,
+      "note": ""
+    }
   ],
   "gained": 10,
   "total": 10,

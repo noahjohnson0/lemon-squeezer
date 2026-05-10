@@ -48,7 +48,7 @@ for eq, el, er in cases:
 print("---", ok, "/", len(cases))
 PY
 )
-  echo "$RES" | tail -20
+  echo "$RES" | tail -20 >&2
   for eq_idx in 1 2 3 4 5 6 7; do
     eq_line=$(echo "$RES" | sed -n "${eq_idx}p")
     if echo "$eq_line" | grep -q "^PASS"; then

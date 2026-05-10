@@ -1,16 +1,71 @@
 {
   "checks": [
-    {"name":"file:crc.py","pass":1,"weight":5,"note":""},
-    {"name":"compiles","pass":1,"weight":5,"note":""},
-    {"name":"no_stdlib_crc","pass":1,"weight":10,"note":""},
-    {"name":"c32_1","pass":0,"weight":8,"note":"got=8d1e8bd26ee9b8168babb30a9f want=cbf43926"},
-    {"name":"c32_2","pass":1,"weight":8,"note":"got=00000000 want=00000000"},
-    {"name":"c32_3","pass":0,"weight":8,"note":"got=8deadf675f want=e8b7be43"},
-    {"name":"c32_4","pass":0,"weight":8,"note":"got=8d1e8b82fa848506bf27a24b2758cc9871afd938e876d579b7ead593561afd326d8c39df32bc2df17a8c04ebb7147f want=414fa339"},
-    {"name":"c16_1","pass":0,"weight":8,"note":"got=30fe want=31c3"},
-    {"name":"c16_2","pass":1,"weight":8,"note":"got=0000 want=0000"},
-    {"name":"c16_3","pass":0,"weight":8,"note":"got=1401 want=58e5"},
-    {"name":"c16_4","pass":0,"weight":8,"note":"got=6d85 want=cbd6"}
+    {
+      "name": "file:crc.py",
+      "pass": 1,
+      "weight": 5,
+      "note": ""
+    },
+    {
+      "name": "compiles",
+      "pass": 1,
+      "weight": 5,
+      "note": ""
+    },
+    {
+      "name": "no_stdlib_crc",
+      "pass": 1,
+      "weight": 10,
+      "note": ""
+    },
+    {
+      "name": "c32_1",
+      "pass": 0,
+      "weight": 8,
+      "note": "got=8d1e8bd26ee9b8168babb30a9f want=cbf43926"
+    },
+    {
+      "name": "c32_2",
+      "pass": 1,
+      "weight": 8,
+      "note": "got=00000000 want=00000000"
+    },
+    {
+      "name": "c32_3",
+      "pass": 0,
+      "weight": 8,
+      "note": "got=8deadf675f want=e8b7be43"
+    },
+    {
+      "name": "c32_4",
+      "pass": 0,
+      "weight": 8,
+      "note": "got=8d1e8b82fa848506bf27a24b2758cc9871afd938e876d579b7ead593561afd326d8c39df32bc2df17a8c04ebb7147f want=414fa339"
+    },
+    {
+      "name": "c16_1",
+      "pass": 0,
+      "weight": 8,
+      "note": "got=30fe want=31c3"
+    },
+    {
+      "name": "c16_2",
+      "pass": 1,
+      "weight": 8,
+      "note": "got=0000 want=0000"
+    },
+    {
+      "name": "c16_3",
+      "pass": 0,
+      "weight": 8,
+      "note": "got=1401 want=58e5"
+    },
+    {
+      "name": "c16_4",
+      "pass": 0,
+      "weight": 8,
+      "note": "got=6d85 want=cbd6"
+    }
   ],
   "gained": 36,
   "total": 84,

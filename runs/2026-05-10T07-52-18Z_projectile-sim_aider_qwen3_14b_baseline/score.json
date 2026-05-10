@@ -1,15 +1,65 @@
 {
   "checks": [
-    {"name":"file:projectile.py","pass":1,"weight":5,"note":""},
-    {"name":"compiles","pass":1,"weight":5,"note":""},
-    {"name":"no_drag:range_correct","pass":1,"weight":15,"note":"got R=254.841998 want ~254.842 (analytic)"},
-    {"name":"no_drag:max_height_correct","pass":1,"weight":10,"note":"got H=63.710499 want ~63.711"},
-    {"name":"no_drag:flight_time_correct","pass":1,"weight":10,"note":"got T=7.20802 want ~7.207"},
-    {"name":"drag:range_smaller_than_nodrag","pass":1,"weight":10,"note":"got R=167.187566 (must be 50<R<254)"},
-    {"name":"drag:height_smaller_than_nodrag","pass":1,"weight":5,"note":"got H=49.866758"},
-    {"name":"heavy_drag:range_much_smaller","pass":1,"weight":10,"note":"got R3=17.088508, must be < R2=167.187566"},
-    {"name":"uses_rk4_pattern","pass":1,"weight":10,"note":""},
-    {"name":"output:6dp_format","pass":1,"weight":5,"note":""}
+    {
+      "name": "file:projectile.py",
+      "pass": 1,
+      "weight": 5,
+      "note": ""
+    },
+    {
+      "name": "compiles",
+      "pass": 1,
+      "weight": 5,
+      "note": ""
+    },
+    {
+      "name": "no_drag:range_correct",
+      "pass": 1,
+      "weight": 15,
+      "note": "got R=254.841998 want ~254.842 (analytic)"
+    },
+    {
+      "name": "no_drag:max_height_correct",
+      "pass": 1,
+      "weight": 10,
+      "note": "got H=63.710499 want ~63.711"
+    },
+    {
+      "name": "no_drag:flight_time_correct",
+      "pass": 1,
+      "weight": 10,
+      "note": "got T=7.20802 want ~7.207"
+    },
+    {
+      "name": "drag:range_smaller_than_nodrag",
+      "pass": 1,
+      "weight": 10,
+      "note": "got R=167.187566 (must be 50<R<254)"
+    },
+    {
+      "name": "drag:height_smaller_than_nodrag",
+      "pass": 1,
+      "weight": 5,
+      "note": "got H=49.866758"
+    },
+    {
+      "name": "heavy_drag:range_much_smaller",
+      "pass": 1,
+      "weight": 10,
+      "note": "got R3=17.088508, must be < R2=167.187566"
+    },
+    {
+      "name": "uses_rk4_pattern",
+      "pass": 1,
+      "weight": 10,
+      "note": ""
+    },
+    {
+      "name": "output:6dp_format",
+      "pass": 1,
+      "weight": 5,
+      "note": ""
+    }
   ],
   "gained": 85,
   "total": 85,

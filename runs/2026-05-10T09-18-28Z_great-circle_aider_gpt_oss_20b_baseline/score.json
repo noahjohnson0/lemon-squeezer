@@ -1,21 +1,101 @@
 {
   "checks": [
-    {"name":"file:geo.py","pass":1,"weight":5,"note":""},
-    {"name":"compiles","pass":1,"weight":5,"note":""},
-    {"name":"c1_dist","pass":1,"weight":6,"note":"got 5570.23"},
-    {"name":"c1_bear","pass":1,"weight":6,"note":"got 51.21"},
-    {"name":"c2_dist","pass":1,"weight":6,"note":"got 8274.63"},
-    {"name":"c2_bear","pass":1,"weight":6,"note":"got 303.36"},
-    {"name":"c3_dist","pass":1,"weight":6,"note":"got 2155.9"},
-    {"name":"c3_bear","pass":1,"weight":6,"note":"got 105.58"},
-    {"name":"c4_dist","pass":1,"weight":6,"note":"got 20015.11"},
-    {"name":"c4_bear","pass":1,"weight":6,"note":"got 90.0"},
-    {"name":"c5_dist","pass":1,"weight":6,"note":"got 10007.56"},
-    {"name":"c5_bear","pass":1,"weight":6,"note":"got 180.0"},
-    {"name":"c6_dist","pass":1,"weight":6,"note":"got 0.0"},
-    {"name":"c6_bear","pass":1,"weight":6,"note":"got 0.0"},
-    {"name":"c7_dist","pass":1,"weight":6,"note":"got 19729.36"},
-    {"name":"c7_bear","pass":1,"weight":6,"note":"got 297.13"}
+    {
+      "name": "file:geo.py",
+      "pass": 1,
+      "weight": 5,
+      "note": ""
+    },
+    {
+      "name": "compiles",
+      "pass": 1,
+      "weight": 5,
+      "note": ""
+    },
+    {
+      "name": "c1_dist",
+      "pass": 1,
+      "weight": 6,
+      "note": "got 5570.23"
+    },
+    {
+      "name": "c1_bear",
+      "pass": 1,
+      "weight": 6,
+      "note": "got 51.21"
+    },
+    {
+      "name": "c2_dist",
+      "pass": 1,
+      "weight": 6,
+      "note": "got 8274.63"
+    },
+    {
+      "name": "c2_bear",
+      "pass": 1,
+      "weight": 6,
+      "note": "got 303.36"
+    },
+    {
+      "name": "c3_dist",
+      "pass": 1,
+      "weight": 6,
+      "note": "got 2155.9"
+    },
+    {
+      "name": "c3_bear",
+      "pass": 1,
+      "weight": 6,
+      "note": "got 105.58"
+    },
+    {
+      "name": "c4_dist",
+      "pass": 1,
+      "weight": 6,
+      "note": "got 20015.11"
+    },
+    {
+      "name": "c4_bear",
+      "pass": 1,
+      "weight": 6,
+      "note": "got 90.0"
+    },
+    {
+      "name": "c5_dist",
+      "pass": 1,
+      "weight": 6,
+      "note": "got 10007.56"
+    },
+    {
+      "name": "c5_bear",
+      "pass": 1,
+      "weight": 6,
+      "note": "got 180.0"
+    },
+    {
+      "name": "c6_dist",
+      "pass": 1,
+      "weight": 6,
+      "note": "got 0.0"
+    },
+    {
+      "name": "c6_bear",
+      "pass": 1,
+      "weight": 6,
+      "note": "got 0.0"
+    },
+    {
+      "name": "c7_dist",
+      "pass": 1,
+      "weight": 6,
+      "note": "got 19729.36"
+    },
+    {
+      "name": "c7_bear",
+      "pass": 1,
+      "weight": 6,
+      "note": "got 297.13"
+    }
   ],
   "gained": 94,
   "total": 94,
