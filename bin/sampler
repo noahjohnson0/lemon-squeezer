@@ -10,8 +10,9 @@ set -u
 ACTION="${1:?usage: sampler start|stop ...}"
 RUN_DIR="${2:?run_dir required}"
 
-# Defaults overridable via env
-SSH_TARGET="${SAMPLER_SSH_TARGET:-user@localhost}"
+# Defaults overridable via env. SAMPLER_SSH_TARGET points at the GPU host;
+# leave unset to skip remote-GPU telemetry and only sample local host load.
+SSH_TARGET="${SAMPLER_SSH_TARGET:-}"
 SAMPLE_INTERVAL="${SAMPLER_INTERVAL:-1}"
 
 case "$ACTION" in
@@ -21,20 +22,27 @@ case "$ACTION" in
     echo "ts,gpu_util_pct,gpu_mem_used_mb,gpu_temp_c,gpu_power_w,gpu_fan_pct,host_load1" > "$csv"
     touch "$flag"
     (
-      # Try to use SSH multiplexing for low-overhead per-sample queries.
-      ctl="$RUN_DIR/.sshctl"
-      ssh -o ControlMaster=yes -o ControlPersist=60 -o ControlPath="$ctl" -fN "$SSH_TARGET" 2>/dev/null
+      ctl=""
+      if [[ -n "$SSH_TARGET" ]]; then
+        # SSH multiplexing for low-overhead per-sample nvidia-smi queries.
+        ctl="$RUN_DIR/.sshctl"
+        ssh -o ControlMaster=yes -o ControlPersist=60 -o ControlPath="$ctl" -fN "$SSH_TARGET" 2>/dev/null
+      fi
       while [[ -f "$flag" ]]; do
         ts=$(date +%s)
-        gpu="$(ssh -o ControlPath="$ctl" "$SSH_TARGET" \
-          'nvidia-smi --query-gpu=utilization.gpu,memory.used,temperature.gpu,power.draw,fan.speed --format=csv,noheader,nounits' 2>/dev/null \
-          | tr -d ' \r' | head -1)"
+        gpu=",,,,"  # default: empty fields
+        if [[ -n "$ctl" ]]; then
+          gpu="$(ssh -o ControlPath="$ctl" "$SSH_TARGET" \
+            'nvidia-smi --query-gpu=utilization.gpu,memory.used,temperature.gpu,power.draw,fan.speed --format=csv,noheader,nounits' 2>/dev/null \
+            | tr -d ' \r' | head -1)"
+          [[ -z "$gpu" ]] && gpu=",,,,"
+        fi
         load=$(uptime | awk -F'load averages?: ' '{print $2}' | awk '{print $1}' | tr -d ',')
         echo "${ts},${gpu},${load}" >> "$csv"
         sleep "$SAMPLE_INTERVAL"
       done
-      ssh -o ControlPath="$ctl" -O exit "$SSH_TARGET" 2>/dev/null
-      rm -f "$ctl"
+      [[ -n "$ctl" ]] && ssh -o ControlPath="$ctl" -O exit "$SSH_TARGET" 2>/dev/null
+      [[ -n "$ctl" ]] && rm -f "$ctl"
     ) </dev/null >/dev/null 2>&1 &
     SAMPLER_PID=$!
     disown $SAMPLER_PID 2>/dev/null

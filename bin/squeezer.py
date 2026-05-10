@@ -125,7 +125,8 @@ def main():
     p.add_argument("--prompt-file", required=True)
     p.add_argument("--workspace", required=True)
     p.add_argument("--run-dir", required=True)
-    p.add_argument("--base-url", default=os.environ.get("OLLAMA_API_BASE", "http://localhost:11434") + "/v1")
+    p.add_argument("--base-url", default=(os.environ.get("OLLAMA_API_BASE") or "http://localhost:11434") + "/v1",
+                   help="Override via $OLLAMA_API_BASE (e.g. http://192.168.x.x:11434 for a remote Ollama host)")
     p.add_argument("--max-iter", type=int, default=24)
     args = p.parse_args()
 

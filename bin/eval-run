@@ -2,6 +2,7 @@
 # eval-run <harness> <eval-name> <model> <tag> [-- harness-flags...]
 # Generic runner. Dispatches to bin/harnesses/<harness>.sh for the actual invocation.
 set -euo pipefail
+[ -f "$HOME/.config/lemon-squeezer.env" ] && . "$HOME/.config/lemon-squeezer.env"
 
 HARNESS="${1:?usage: eval-run <harness> <eval> <model> <tag> [-- flags...]}"
 EVAL="${2:?eval required}"

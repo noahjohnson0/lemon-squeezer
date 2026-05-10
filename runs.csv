@@ -61,3 +61,5 @@ run_id,ts,eval,harness,model,tag,wall_s,tok_in,tok_out,tools,exit,score_pct
 2026-05-10T08-00-42Z_projectile-sim_aider_devstral_24b_baseline,2026-05-10T08-00-42Z,projectile-sim,aider,devstral:24b,baseline,497,2723,1645,0,0,58
 2026-05-10T08-00-59Z_sql-injection-fix_aider_gpt_oss_20b_baseline,2026-05-10T08-00-59Z,sql-injection-fix,aider,gpt-oss:20b,baseline,139,886,247,0,0,65
 2026-05-10T08-02-17Z_chem-balance_pi_qwen3_14b_baseline,2026-05-10T08-02-17Z,chem-balance,pi,qwen3:14b,baseline,271,1960,7905,0,0,0
+2026-05-10T08-03-20Z_password-strength_aider_gpt_oss_20b_baseline,2026-05-10T08-03-20Z,password-strength,aider,gpt-oss:20b,baseline,440,1000,2400,0,0,93
+2026-05-10T08-10-42Z_port-scanner_aider_gpt_oss_20b_baseline,2026-05-10T08-10-42Z,port-scanner,aider,gpt-oss:20b,baseline,60,944,1100,0,0,100

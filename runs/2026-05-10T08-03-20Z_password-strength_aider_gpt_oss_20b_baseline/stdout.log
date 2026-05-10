@@ -6,3 +6,474 @@ Model: ollama_chat/gpt-oss:20b with whole edit format
 Git repo: .git with 0 files
 Repo-map: using 4096 tokens, auto refresh
 
+
+--------------
+► **THINKING**
+
+We need to create pwstrength.py with function score(password: str) -> tuple[int,
+list[str]].
+
+Implement scoring rules.
+
+We need to return reasons list with tokens. At least one token when applicable. 
+For each rule, we need to add appropriate reasons.
+
+Let's design:
+
+- blocklist: list of strings lowercased.
+
+- Determine classes: lower, upper, digit, symbol (non-alphanumeric). Count 
+classes present.
+
+- Determine repeats: check if any character repeated more than 3 times 
+consecutively. If yes, add "repeats".
+
+- Determine sequence: check for any sequence of length >=4 that is ascending or 
+descending? The spec says "obvious sequence (e.g. 1234, abcd, qwer, wxyz) of 
+length >=4 anywhere". So we need to detect sequences of consecutive characters 
+in ASCII order. For letters, case-insensitive? Probably case-insensitive. For 
+digits, ascending. For qwer, wxyz are keyboard sequences. But we can approximate
+by checking if any substring of length >=4 where each char's ord difference is 
+1. Also maybe descending? Not specified. We'll just check ascending.
+
+Also check for sequences like "abcd" or "1234". We'll implement ascending 
+sequences of length >=4.
+
+Also maybe "qwer" is not strictly consecutive in ASCII but keyboard. But we can 
+ignore that complexity.
+
+Return score and reasons.
+
+Scoring:
+
+- If empty or len<8 or in blocklist: score 0. reasons: "too-short" if len<8, 
+"in-blocklist" if blocklist. Also maybe "too-short" if empty. Also maybe 
+"missing-lower" etc? But spec says reasons list should contain at least one of 
+these tokens when applicable. So for score 0, we can include "too-short" or 
+"in-blocklist" accordingly. If both, include both.
+
+- For score 1: length 8-11 and uses <3 classes. So if len between 8 and 11 
+inclusive and class_count <3. reasons: missing classes accordingly. Also maybe 
+"too-short"? No. So we add missing class tokens.
+
+- Score 2: length >=12 with <3 classes OR length 8-11 with >=3 classes. So if 
+len>=12 and class_count<3 OR len between 8-11 and class_count>=3. reasons: 
+missing classes if <3. Also maybe "repeats" if repeats? Not specified. But we 
+can add repeats if present.
+
+- Score 3: length >=12 with >=3 classes AND no repeats >3. So if len>=12 and 
+class_count>=3 and not repeats. reasons: missing classes if any? But 
+class_count>=3 so none. Also maybe "repeats" if repeats? But rule says no 
+repeats. So if repeats present, score would be lower. So we don't add repeats.
+
+- Score 4: length >=16 with all 4 classes AND no repeats AND no sequence. So if 
+len>=16 and class_count==4 and not repeats and not sequence. reasons: missing 
+classes if any? But class_count==4 so none. Also maybe "sequence" if sequence 
+present. But rule says no sequence. So if sequence present, score lower.
+
+We need to compute repeats and sequence regardless.
+
+Implementation steps:
+
+- Compute reasons list empty.
+
+- Compute repeats flag: iterate over password, count consecutive same char. If 
+>3, set repeats=True.
+
+- Compute sequence flag: iterate over substrings of length 4 to len(password). 
+For each substring, check if all consecutive ascending by 1. For letters, 
+case-insensitive? We'll convert to lower. For digits, same. For other 
+characters, maybe skip. We'll just check ord difference.
+
+- Compute class presence: lower, upper, digit, symbol. Count.
+
+- Determine score:
+
+If password empty or len<8 or blocklist: score=0. Add reasons accordingly.
+
+Else if len>=16 and class_count==4 and not repeats and not sequence: score=4. 
+Add "sequence" if sequence? But rule says no sequence. So if sequence present, 
+we wouldn't reach 4. So we don't add.
+
+Else if len>=12 and class_count>=3 and not repeats: score=3. Add "repeats" if 
+repeats? But rule says no repeats. So if repeats, lower.
+
+Else if (len>=12 and class_count<3) or (8<=len<=11 and class_count>=3): score=2.
+Add missing class tokens if class_count<3.
+
+Else if 8<=len<=11 and class_count<3: score=1. Add missing class tokens.
+
+Else: default? Shouldn't happen.
+
+Also if repeats present, we might add "repeats" to reasons for scores 1,2,3? But
+spec says reasons list should contain at least one of these tokens when 
+applicable. So if repeats present, we should add "repeats" regardless of score? 
+Probably yes. Similarly if sequence present, add "sequence" if applicable. But 
+for score 4, sequence would disqualify. So we don't add.
+
+Also missing class tokens: "missing-lower", "missing-upper", "missing-digit", 
+"missing-symbol".
+
+Also "too-short" if len<8.
+
+Also "in-blocklist" if blocklist.
+
+Edge: if password empty, len=0, we add "too-short" and maybe "in-blocklist"? Not
+in blocklist. So just "too-short".
+
+Return score, reasons.
+
+Let's implement.
+
+Also ensure function signature: def score(password: str) -> tuple[int, 
+list[str]].
+
+Return tuple.
+
+Let's write file.
+
+------------
+► **ANSWER**
+
+pwstrength.py
+
+```
+#!/usr/bin/env python3
+
+"""
+
+Password strength scoring module.
+
+
+
+Provides a single function `score(password: str) -> tuple[int, list[str]]`
+
+that evaluates a password according to the following rules:
+
+
+
+* 0 – terrible
+
+* 1 – weak
+
+* 2 – fair
+
+* 3 – strong
+
+* 4 – excellent
+
+
+
+The function returns a tuple containing the numeric score and a list of
+
+reason tokens that explain why the password received that score.
+
+"""
+
+
+
+from __future__ import annotations
+
+
+
+import string
+
+from typing import List, Tuple
+
+
+
+# Hard‑coded blocklist of common passwords (case‑insensitive)
+
+_BLOCKLIST = {
+
+    "password",
+
+    "123456",
+
+    "12345678",
+
+    "qwerty",
+
+    "letmein",
+
+    "admin",
+
+    "welcome",
+
+    "iloveyou",
+
+    "monkey",
+
+    "dragon",
+
+}
+
+
+
+
+
+def _has_repeats(pwd: str) -> bool:
+
+    """
+
+    Return True if any character is repeated more than 3 times consecutively.
+
+    """
+
+    if not pwd:
+
+        return False
+
+    count = 1
+
+    prev = pwd[0]
+
+    for ch in pwd[1:]:
+
+        if ch == prev:
+
+            count += 1
+
+            if count > 3:
+
+                return True
+
+        else:
+
+            prev = ch
+
+            count = 1
+
+    return False
+
+
+
+
+
+def _has_sequence(pwd: str) -> bool:
+
+    """
+
+    Return True if the password contains an ascending sequence of
+
+    at least 4 consecutive characters (e.g. 'abcd', '1234', 'qwer').
+
+    The check is case‑insensitive for alphabetic characters.
+
+    """
+
+    if len(pwd) < 4:
+
+        return False
+
+
+
+    # Normalize to lowercase for alphabetic comparison
+
+    pwd_lower = pwd.lower()
+
+
+
+    for i in range(len(pwd_lower) - 3):
+
+        seq = pwd_lower[i : i + 4]
+
+        # Check if all characters are alphabetic or digits
+
+        if all(c.isalpha() or c.isdigit() for c in seq):
+
+            # Verify ascending by 1 in Unicode code point
+
+            if all(ord(seq[j + 1]) - ord(seq[j]) == 1 for j in range(3)):
+
+                return True
+
+    return False
+
+
+
+
+
+def _class_counts(pwd: str) -> Tuple[bool, bool, bool, bool]:
+
+    """
+
+    Return a tuple of booleans indicating the presence of each
+
+    character class: lower, upper, digit, symbol.
+
+    """
+
+    has_lower = has_upper = has_digit = has_symbol = False
+
+    for ch in pwd:
+
+        if ch.islower():
+
+            has_lower = True
+
+        elif ch.isupper():
+
+            has_upper = True
+
+        elif ch.isdigit():
+
+            has_digit = True
+
+        else:
+
+            # Any non-alphanumeric character is considered a symbol
+
+            has_symbol = True
+
+    return has_lower, has_upper, has_digit, has_symbol
+
+
+
+
+
+def score(password: str) -> Tuple[int, List[str]]:
+
+    """
+
+    Evaluate the strength of *password* and return a tuple
+
+    `(score, reasons)`.
+
+
+
+    *score* is an integer in the range 0..4 inclusive.
+
+    *reasons* is a list of lowercase, hyphenated tokens that
+
+    explain why the password received that score.  At least one
+
+    token will be present for scores 0–3; for score 4 the list
+
+    may be empty if the password meets all criteria.
+
+    """
+
+    reasons: List[str] = []
+
+
+
+    pwd = password or ""
+
+    length = len(pwd)
+
+
+
+    # Basic checks that immediately set score to 0
+
+    if length == 0 or length < 8:
+
+        reasons.append("too-short")
+
+    if pwd.lower() in _BLOCKLIST:
+
+        reasons.append("in-blocklist")
+
+
+
+    if reasons:
+
+        # If any of the above conditions are true, score is 0
+
+        return 0, reasons
+
+
+
+    # Determine character classes
+
+    has_lower, has_upper, has_digit, has_symbol = _class_counts(pwd)
+
+    class_count = sum([has_lower, has_upper, has_digit, has_symbol])
+
+
+
+    # Detect repeats and sequences
+
+    repeats = _has_repeats(pwd)
+
+    sequence = _has_sequence(pwd)
+
+
+
+    # Build missing class tokens if needed
+
+    if not has_lower:
+
+        reasons.append("missing-lower")
+
+    if not has_upper:
+
+        reasons.append("missing-upper")
+
+    if not has_digit:
+
+        reasons.append("missing-digit")
+
+    if not has_symbol:
+
+        reasons.append("missing-symbol")
+
+
+
+    # Add repeats and sequence tokens if applicable
+
+    if repeats:
+
+        reasons.append("repeats")
+
+    if sequence:
+
+        reasons.append("sequence")
+
+
+
+    # Scoring logic
+
+    if length >= 16 and class_count == 4 and not repeats and not sequence:
+
+        # Excellent
+
+        return 4, [r for r in reasons if r not in ("repeats", "sequence")]
+
+
+
+    if length >= 12 and class_count >= 3 and not repeats:
+
+        # Strong
+
+        return 3, [r for r in reasons if r not in ("repeats", "sequence")]
+
+
+
+    if (length >= 12 and class_count < 3) or (8 <= length <= 11 and class_count 
+>= 3):
+
+        # Fair
+
+        return 2, reasons
+
+
+
+    if 8 <= length <= 11 and class_count < 3:
+
+        # Weak
+
+        return 1, reasons
+
+
+
+    # Fallback (should not normally reach here)
+
+    return 0, reasons
+
+```
+
+Tokens: 1.0k sent, 2.4k received.
+
+pwstrength.py
+Applied edit to pwstrength.py

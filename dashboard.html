@@ -350,20 +350,30 @@ function renderLeaderboard(runs) {
   const models = unique(runs.map(r => r.model));
   const best = bestPer(runs, r => `${r.eval}|${r.harness}|${r.model}`);
   const thead = document.querySelector("#leaderboard thead tr");
-  thead.innerHTML = '<th>harness</th><th>model</th>' + evals.map(e => `<th>${e}</th>`).join("") + '<th class="num">avg</th>';
-  let rows = "", n = 0;
+  thead.innerHTML = '<th>#</th><th>harness</th><th>model</th>' + evals.map(e => `<th>${e}</th>`).join("") + '<th class="num">avg</th><th class="num" title="number of evals this combination has been tested on">n</th>';
+  // Build (harness, model) rows with avg, then sort desc.
+  const allRows = [];
+  let n = 0;
   for (const h of harnesses) for (const m of models) {
-    const cells = evals.map(e => {
-      const r = best.get(`${e}|${h}|${m}`);
+    const cellRuns = evals.map(e => best.get(`${e}|${h}|${m}`));
+    const present = cellRuns.filter(Boolean);
+    if (!present.length) continue; // skip totally untested combos
+    n += present.length;
+    const avg = Math.round(present.reduce((s,r) => s + r.score_pct, 0) / present.length);
+    allRows.push({ harness: h, model: m, cellRuns, avg, count: present.length });
+  }
+  // Rank: avg desc, ties broken by more-evaluated, then by harness/model alphabetic
+  allRows.sort((a, b) => (b.avg - a.avg) || (b.count - a.count) || a.harness.localeCompare(b.harness) || a.model.localeCompare(b.model));
+  let rows = "";
+  allRows.forEach((row, idx) => {
+    const cells = row.cellRuns.map(r => {
       if (!r) return `<td class="cell"><span class="cell-inner score empty">–</span></td>`;
-      n++;
       return `<td class="cell"><span class="cell-inner score ${scoreClass(r.score_pct)}" data-runid="${r.run_id}" title="${r.tag} · ${r.wall_seconds}s · ${r.tokens_in}/${r.tokens_out} tok">${r.score_pct}</span></td>`;
     }).join("");
-    const avgRuns = evals.map(e => best.get(`${e}|${h}|${m}`)).filter(Boolean);
-    const avg = avgRuns.length ? Math.round(avgRuns.reduce((s,r)=>s+r.score_pct,0)/avgRuns.length) : null;
-    const avgCell = avg !== null ? `<span class="cell-inner score ${scoreClass(avg)}">${avg}</span>` : `<span class="cell-inner score empty">–</span>`;
-    rows += `<tr><td><span class="chip ${h}">${h}</span></td><td>${m}</td>${cells}<td class="cell">${avgCell}</td></tr>`;
-  }
+    const rank = idx + 1;
+    const medal = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : `${rank}`;
+    rows += `<tr><td class="num" style="color:var(--muted);font-weight:600;">${medal}</td><td><span class="chip ${row.harness}">${row.harness}</span></td><td>${row.model}</td>${cells}<td class="cell"><span class="cell-inner score ${scoreClass(row.avg)}">${row.avg}</span></td><td class="num" style="color:var(--muted);">${row.count}/${evals.length}</td></tr>`;
+  });
   document.querySelector("#leaderboard tbody").innerHTML = rows;
   document.getElementById("lb-cell-count").textContent = `${n} cells`;
   document.querySelectorAll("#leaderboard .cell-inner[data-runid]").forEach(el => {
