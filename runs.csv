@@ -309,3 +309,4 @@ run_id,ts,eval,harness,model,tag,wall_s,tok_in,tok_out,tools,exit,score_pct
 2026-05-10T18-43-22Z_unit-convert_squeezer-critique_gpt_oss_20b_fill,2026-05-10T18-43-22Z,unit-convert,squeezer-critique,gpt-oss:20b,fill,961,40631,18372,16,0,23
 2026-05-10T18-59-29Z_wifi-stats_squeezer-critique_gpt_oss_20b_fill,2026-05-10T18-59-29Z,wifi-stats,squeezer-critique,gpt-oss:20b,fill,520,72455,11646,30,0,72
 2026-05-10T19-08-14Z_base64-codec_aider_qwen3_8b_fill,2026-05-10T19-08-14Z,base64-codec,aider,qwen3:8b,fill,601,0,0,0,124,0
+2026-05-10T19-18-21Z_chem-balance_aider_qwen3_8b_fill,2026-05-10T19-18-21Z,chem-balance,aider,qwen3:8b,fill,600,0,0,0,124,0

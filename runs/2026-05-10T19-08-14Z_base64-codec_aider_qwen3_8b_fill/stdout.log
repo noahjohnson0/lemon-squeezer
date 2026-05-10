@@ -3082,3 +3082,6 @@ The LLM did not conform to the edit format.
 https://aider.chat/docs/troubleshooting/edit-errors.html
 
 No filename provided before ``` in file listing
+litellm.APIConnectionError: Ollama_chatException - litellm.Timeout: Connection 
+timed out after 600.0 seconds.
+Retrying in 0.2 seconds...
