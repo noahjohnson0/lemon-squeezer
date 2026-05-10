@@ -330,3 +330,4 @@ run_id,ts,eval,harness,model,tag,wall_s,tok_in,tok_out,tools,exit,score_pct
 2026-05-10T22-34-10Z_solar-position_aider_qwen3_8b_fill,2026-05-10T22-34-10Z,solar-position,aider,qwen3:8b,fill,600,0,0,0,124,0
 2026-05-10T22-44-15Z_sql-injection-fix_aider_qwen3_8b_fill,2026-05-10T22-44-15Z,sql-injection-fix,aider,qwen3:8b,fill,600,0,0,0,124,65
 2026-05-10T22-54-22Z_unit-convert_aider_qwen3_8b_fill,2026-05-10T22-54-22Z,unit-convert,aider,qwen3:8b,fill,600,0,0,0,124,0
+2026-05-10T23-04-28Z_wifi-stats_aider_qwen3_8b_fill,2026-05-10T23-04-28Z,wifi-stats,aider,qwen3:8b,fill,600,0,0,0,124,0
