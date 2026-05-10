@@ -285,3 +285,4 @@ run_id,ts,eval,harness,model,tag,wall_s,tok_in,tok_out,tools,exit,score_pct
 2026-05-10T16-23-36Z_wifi-stats_aider_qwen2_5_14b_fill,2026-05-10T16-23-36Z,wifi-stats,aider,qwen2.5:14b,fill,41,799,879,0,0,9
 2026-05-10T16-24-23Z_base64-codec_squeezer-critique_gpt_oss_20b_fill,2026-05-10T16-24-23Z,base64-codec,squeezer-critique,gpt-oss:20b,fill,766,8976,17665,6,0,75
 2026-05-10T16-37-15Z_bug-fix_squeezer-critique_gpt_oss_20b_fill,2026-05-10T16-37-15Z,bug-fix,squeezer-critique,gpt-oss:20b,fill,67,8308,1511,8,0,100
+2026-05-10T16-38-27Z_chem-balance_squeezer-critique_gpt_oss_20b_fill,2026-05-10T16-38-27Z,chem-balance,squeezer-critique,gpt-oss:20b,fill,766,56066,17391,21,0,100

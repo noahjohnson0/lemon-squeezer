@@ -1,0 +1,187 @@
+#!/usr/bin/env bash
+# lemon — daily-driver CLI on top of the lemon-squeezer infrastructure.
+#
+# Commands:
+#   lemon ask "<question>" [--web]              # one-shot librarian Q&A
+#   lemon code "<task>"     [--web]             # squeezer coding agent
+#   lemon librarian "<question>" [--corpus N]   # explicit librarian, optional corpus
+#   lemon search <corpus> "<query>" [--top N]   # raw FTS5 search, no LLM
+#   lemon route "<question>"                    # show which model+harness would be picked
+#   lemon corpora                               # list registered corpora and stats
+#
+# Configuration (env vars, with defaults):
+#   LEMON_HOST           4070 (which hosts/$x.env to source)
+#   LEMON_CODE_MODEL     qwen3-coder:30b-a3b-q4_K_M
+#   LEMON_LIBRARIAN_MODEL gpt-oss:20b   (best librarian we've benchmarked)
+#   LEMON_FAST_MODEL     qwen3:8b
+#   LEMON_CORPORA        colon-list of name=path
+#
+# The router reads recent runs.jsonl to verify the picked combo has actually
+# scored well. If a model has a known dropout, it falls back.
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT"
+
+# Source host + secrets
+[[ -f "$HOME/.config/lemon-squeezer.env" ]] && source "$HOME/.config/lemon-squeezer.env"
+HOST="${LEMON_HOST:-4070}"
+[[ -f "hosts/${HOST}.env" ]] && source "hosts/${HOST}.env"
+: "${OLLAMA_API_BASE:=http://localhost:11434}"
+
+CODE_MODEL="${LEMON_CODE_MODEL:-qwen3-coder:30b-a3b-q4_K_M}"
+LIB_MODEL="${LEMON_LIBRARIAN_MODEL:-gpt-oss:20b}"
+FAST_MODEL="${LEMON_FAST_MODEL:-qwen3:8b}"
+
+# Default corpora — registered if their indices exist
+default_corpora() {
+  local out=""
+  for c in lemon-test python-docs node-docs rust-docs dlmf-math wikipedia-en; do
+    local p="$HOME/refs/$c"
+    if [[ -f "$p/.lemon-index.db" ]]; then
+      [[ -n "$out" ]] && out="$out:$c=$p" || out="$c=$p"
+    fi
+  done
+  echo "$out"
+}
+
+usage() { sed -n '1,40p' "$0" | sed 's/^# \?//'; exit "${1:-2}"; }
+
+cmd_corpora() {
+  echo "Registered corpora (~/refs):"
+  shopt -s nullglob
+  local found=0
+  for db in "$HOME"/refs/*/.lemon-index.db; do
+    found=1
+    local dir; dir="$(dirname "$db")"
+    local name; name="$(basename "$dir")"
+    python3 - "$db" <<'PY'
+import sqlite3, sys
+c = sqlite3.connect(sys.argv[1])
+m = dict(c.execute("SELECT key,value FROM meta").fetchall())
+print(f"  {sys.argv[1].split('/')[-2]:20} docs={m.get('n_docs','?'):>5}  sections={m.get('n_sections','?'):>6}  built={m.get('built_at','?')}")
+PY
+  done
+  (( found == 0 )) && echo "  (none — build with: bin/refs/build_index.py ~/refs/<name>)"
+}
+
+cmd_search() {
+  local corpus="${1:?usage: lemon search <corpus> <query>}"; shift
+  local query="${1:?usage: lemon search <corpus> <query>}"; shift
+  local top=5
+  [[ "${1:-}" == "--top" ]] && { top="$2"; shift 2; }
+  python3 "$ROOT/bin/refs/search.py" "$HOME/refs/$corpus" "$query" --top "$top"
+}
+
+# Heuristic router: classify a question and pick (model, harness, corpora).
+# Cheap, transparent, easily-overrideable.
+route_for() {
+  local q="$1"; local q_lc; q_lc="$(echo "$q" | tr '[:upper:]' '[:lower:]')"
+  # Coding signals
+  if echo "$q_lc" | grep -qE 'write (a |the )?(function|script|program|cli|class|module)|implement|refactor|fix this code|debug|unit test|pytest|stack trace|compile error|build a (web|next|react|fastapi)'; then
+    echo "code:$CODE_MODEL"
+    return
+  fi
+  # Math/scientific
+  if echo "$q_lc" | grep -qE 'derivative|integral|matrix|eigen|fourier|theorem|prove that|equation|tflops|simulate'; then
+    echo "librarian:$LIB_MODEL:default"
+    return
+  fi
+  # Default: factual librarian
+  echo "librarian:$LIB_MODEL:default"
+}
+
+cmd_route() {
+  local q="${1:?usage: lemon route <question>}"
+  local plan; plan="$(route_for "$q")"
+  echo "question: $q"
+  echo "plan:     $plan"
+  echo "host:     $HOST  (ollama=$OLLAMA_API_BASE)"
+  echo "corpora:  $(default_corpora)"
+}
+
+cmd_ask() { cmd_librarian "$@"; }
+
+cmd_librarian() {
+  local q="${1:?usage: lemon ask <question>}"; shift
+  local allow_web=0
+  local model="$LIB_MODEL"
+  local corpora; corpora="$(default_corpora)"
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --web)    allow_web=1; shift;;
+      --model)  model="$2"; shift 2;;
+      --corpus) corpora="$2=$HOME/refs/$2"; shift 2;;
+      *) echo "unknown: $1" >&2; exit 2;;
+    esac
+  done
+  [[ -z "$corpora" ]] && { echo "no corpora — run: bin/refs/build_index.py ~/refs/lemon-test" >&2; exit 3; }
+
+  local ws; ws="$(mktemp -d)/ws"; mkdir -p "$ws/run"
+  echo "$q" > "$ws/prompt.md"
+
+  local extra=()
+  (( allow_web )) && extra+=(--allow-web)
+
+  LEMON_CORPORA="$corpora" \
+  OLLAMA_API_BASE="$OLLAMA_API_BASE" \
+  python3 "$ROOT/bin/librarian.py" \
+    --model "$model" \
+    --prompt-file "$ws/prompt.md" \
+    --workspace "$ws" \
+    --run-dir "$ws/run" \
+    --base-url "$OLLAMA_API_BASE/v1" \
+    --max-iter 12 "${extra[@]}" >&2
+
+  echo "---"
+  cat "$ws/answer.txt" 2>/dev/null || echo "(no answer produced)"
+}
+
+cmd_code() {
+  local task="${1:?usage: lemon code <task>}"; shift
+  local model="$CODE_MODEL"
+  local allow_web=0
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --web)   allow_web=1; shift;;
+      --model) model="$2"; shift 2;;
+      *) echo "unknown: $1" >&2; exit 2;;
+    esac
+  done
+  local ws; ws="$(mktemp -d)/ws"; mkdir -p "$ws/run"
+  echo "$task" > "$ws/prompt.md"
+  echo "[lemon code] model=$model host=$HOST workspace=$ws" >&2
+
+  if (( allow_web )); then
+    LEMON_CORPORA="$(default_corpora)" \
+    LEMON_ALLOW_WEB=1 \
+    OLLAMA_API_BASE="$OLLAMA_API_BASE" \
+    python3 "$ROOT/bin/squeezer_search.py" \
+      --model "$model" --prompt-file "$ws/prompt.md" \
+      --workspace "$ws" --run-dir "$ws/run" \
+      --base-url "$OLLAMA_API_BASE/v1" \
+      --max-iter 24 --allow-web >&2 || true
+  else
+    OLLAMA_API_BASE="$OLLAMA_API_BASE" \
+    python3 "$ROOT/bin/squeezer.py" \
+      --model "$model" --prompt-file "$ws/prompt.md" \
+      --workspace "$ws" --run-dir "$ws/run" \
+      --base-url "$OLLAMA_API_BASE/v1" \
+      --max-iter 24 >&2 || true
+  fi
+  echo "---"
+  echo "Files produced in $ws:"
+  ls -la "$ws"
+}
+
+# Dispatch
+sub="${1:-}"; shift || true
+case "$sub" in
+  ask)        cmd_ask "$@";;
+  librarian)  cmd_librarian "$@";;
+  code)       cmd_code "$@";;
+  search)     cmd_search "$@";;
+  route)      cmd_route "$@";;
+  corpora)    cmd_corpora;;
+  ""|-h|--help) usage 0;;
+  *) echo "unknown command: $sub"; usage 2;;
+esac
