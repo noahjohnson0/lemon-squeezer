@@ -1,0 +1,27 @@
+{
+  "pipeline": "critique",
+  "steps": [
+    {
+      "name": "draft",
+      "model": "gpt-oss:20b",
+      "tokens_in": 2525,
+      "tokens_out": 1875,
+      "tool_calls": 1,
+      "wall_s": 78.8,
+      "final": "`crc.py` has been added to the workspace. It implements:\n\n* **crc32_ieee** \u2013 CRC\u201132 IEEE 802.3 / zlib algorithm (poly `0x04C11DB7`, reflected `0xEDB88320`, init `0xFFFFFFFF`, xor\u2010out `0xFFFFFFFF`).\n* **crc16_xmodem** \u2013 CRC\u201116 XMODEM algorithm (poly `0x1021`, init `0x0000`, no reflection, no xor\u2011out).\n\nBoth functions use straightforward bit\u2011shift loops, avoiding external libraries such as `binascii`, `zlib`, or `crcmod`.\n\nA small CLI is provided:\n\n```\n$ python3 crc.py <crc32|crc16> <ascii_string>\n```\n\nIt prints the computed CRC as a lowercase hex string, zero\u2011padded to:\n* 8 digits for CRC\u201132,\n* 4 digits for CRC\u201116.\n\nThe script is fully self\u2011contained and does not rely on any third\u2011party modules."
+    },
+    {
+      "name": "critique-1",
+      "model": "gpt-oss:20b",
+      "tokens_in": 3101,
+      "tokens_out": 1119,
+      "tool_calls": 2,
+      "wall_s": 49.6,
+      "final": "OK: nothing to fix"
+    }
+  ],
+  "primary_model": "gpt-oss:20b",
+  "critic_model": "gpt-oss:20b",
+  "judge_model": null,
+  "rounds": 1
+}

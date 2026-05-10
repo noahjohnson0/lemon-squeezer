@@ -286,3 +286,6 @@ run_id,ts,eval,harness,model,tag,wall_s,tok_in,tok_out,tools,exit,score_pct
 2026-05-10T16-24-23Z_base64-codec_squeezer-critique_gpt_oss_20b_fill,2026-05-10T16-24-23Z,base64-codec,squeezer-critique,gpt-oss:20b,fill,766,8976,17665,6,0,75
 2026-05-10T16-37-15Z_bug-fix_squeezer-critique_gpt_oss_20b_fill,2026-05-10T16-37-15Z,bug-fix,squeezer-critique,gpt-oss:20b,fill,67,8308,1511,8,0,100
 2026-05-10T16-38-27Z_chem-balance_squeezer-critique_gpt_oss_20b_fill,2026-05-10T16-38-27Z,chem-balance,squeezer-critique,gpt-oss:20b,fill,766,56066,17391,21,0,100
+2026-05-10T16-51-19Z_cli-tool_squeezer-critique_gpt_oss_20b_fill,2026-05-10T16-51-19Z,cli-tool,squeezer-critique,gpt-oss:20b,fill,521,24936,11492,17,0,100
+2026-05-10T17-00-06Z_crc-checksum_squeezer-critique_gpt_oss_20b_fill,2026-05-10T17-00-06Z,crc-checksum,squeezer-critique,gpt-oss:20b,fill,128,5626,2994,3,0,100
+2026-05-10T17-02-21Z_dijkstra_squeezer-critique_gpt_oss_20b_fill,2026-05-10T17-02-21Z,dijkstra,squeezer-critique,gpt-oss:20b,fill,115,10853,2719,7,0,100

@@ -1,0 +1,27 @@
+{
+  "pipeline": "critique",
+  "steps": [
+    {
+      "name": "draft",
+      "model": "gpt-oss:20b",
+      "tokens_in": 6427,
+      "tokens_out": 1429,
+      "tool_calls": 4,
+      "wall_s": 60.8,
+      "final": "The **`dijkstra.py`** module has been added to the workspace and implements the requested `shortest_path` function using Dijkstra\u2019s algorithm with a priority queue. It follows the provided specification, handles edge cases, validates non\u2011negative weights, and reconstructs the path. A small demo is included under `if __name__ == \"__main__\":` for standalone testing. The file passes a syntax check."
+    },
+    {
+      "name": "critique-1",
+      "model": "gpt-oss:20b",
+      "tokens_in": 4426,
+      "tokens_out": 1290,
+      "tool_calls": 3,
+      "wall_s": 54.8,
+      "final": "OK: nothing to fix"
+    }
+  ],
+  "primary_model": "gpt-oss:20b",
+  "critic_model": "gpt-oss:20b",
+  "judge_model": null,
+  "rounds": 1
+}

@@ -19,24 +19,38 @@ from __future__ import annotations
 import argparse, re, sqlite3, sys, time
 from pathlib import Path
 
-# Markdown heading split (H1/H2/H3). Anything not under a heading is "preamble".
-HEAD_RE = re.compile(r"^(#{1,3})\s+(.+?)\s*$", re.MULTILINE)
+# Heading detection — supports two formats:
+#   Markdown:   # / ## / ### at start of line
+#   Sphinx-text: a line of text immediately followed by a line of  =====, *****,
+#                -----, ^^^^^ or """""  whose length is >= the text length-3.
+#                (Sphinx text-builder output uses these.)
+MD_HEAD_RE     = re.compile(r"^(#{1,3})\s+(.+?)\s*$", re.MULTILINE)
+SPHINX_HEAD_RE = re.compile(r"^(.+)\n([=*\-^\"~+]{3,})\s*$", re.MULTILINE)
 
 
 def split_sections(text: str) -> list[tuple[str, str]]:
-    """Yield (section_title, section_body) tuples. First chunk before any heading
-    is labelled 'preamble'."""
-    parts = []
-    matches = list(HEAD_RE.finditer(text))
-    if not matches:
+    """Return [(section_title, body), ...]. First chunk before any heading is
+    labelled 'preamble'. Empty-body sections are dropped."""
+    cuts: list[tuple[int, int, str]] = []  # (start, end_of_heading, title)
+    for m in MD_HEAD_RE.finditer(text):
+        cuts.append((m.start(), m.end(), m.group(2).strip()))
+    for m in SPHINX_HEAD_RE.finditer(text):
+        title = m.group(1).strip()
+        underline = m.group(2)
+        # Heuristic: underline length should be >= len(title)-3 (allow some slack)
+        if len(underline) + 3 < len(title): continue
+        # Skip "decorations" — purely punctuation / empty title
+        if not title or all(c in "=*-^\"~+ \t" for c in title): continue
+        cuts.append((m.start(), m.end(), title))
+    cuts.sort()
+    if not cuts:
         return [("preamble", text.strip())]
-    if matches[0].start() > 0:
-        parts.append(("preamble", text[: matches[0].start()].strip()))
-    for i, m in enumerate(matches):
-        title = m.group(2).strip()
-        start = m.end()
-        end = matches[i + 1].start() if i + 1 < len(matches) else len(text)
-        body = text[start:end].strip()
+    parts = []
+    if cuts[0][0] > 0:
+        parts.append(("preamble", text[: cuts[0][0]].strip()))
+    for i, (start, hend, title) in enumerate(cuts):
+        body_end = cuts[i + 1][0] if i + 1 < len(cuts) else len(text)
+        body = text[hend:body_end].strip()
         parts.append((title, body))
     return [(t, b) for t, b in parts if b]
 
