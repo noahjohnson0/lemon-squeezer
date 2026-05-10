@@ -1,0 +1,147 @@
+#!/usr/bin/env python3
+"""queue-fill — produce a prioritised eval-run script for a target host.
+
+Reads runs.jsonl, computes the gap between what's been tested and what we'd
+ideally have, and emits a bash script that fills that gap in a smart order:
+
+  1. Top-tier (harness × model) rows that are CLOSE TO COMPLETE — finishing
+     these gives us full per-eval avgs for our best performers.
+  2. Mid-tier rows that are sparse but the model is competitive elsewhere.
+  3. Pipeline harnesses on top models — high info per run since pipeline
+     wins/losses are the alchemy story.
+
+Skips:
+  - Cells already tested non-zero. (Re-running a 0% to confirm it's still 0%
+    is low-info; only re-run if exit was non-zero AND we have time budget.)
+  - Combos with avg < 20% across 5+ tested evals (e.g. phi4 / granite — proven
+    incapable on this hardware; running them on more evals just costs GPU.)
+  - Eval slots already at 100% for the (harness, model). No point re-running.
+
+Usage:
+    bin/queue-fill --host 4070 [--max N] > /tmp/q.sh
+    bash /tmp/q.sh                       # or nohup it
+"""
+from __future__ import annotations
+import argparse, json, os, sys
+from collections import defaultdict
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+RUNS = ROOT / "runs.jsonl"
+
+# Combos that are known dead ends — keep them in the data but don't expand.
+DROPOUT_AVG = 20  # if avg < this AND tested ≥ 5 evals, stop expanding
+TOP_HARNESSES = ["aider", "squeezer", "squeezer-tdd", "squeezer-verify",
+                 "squeezer-critique", "squeezer-architect", "pi"]
+# Pipelines slow down the queue — only run them on the biggest models.
+PIPELINE_HARNESSES = {"squeezer-tdd", "squeezer-verify", "squeezer-critique",
+                      "squeezer-architect", "squeezer-ensemble"}
+PIPELINE_MODEL_WHITELIST = {
+    "qwen3:14b",
+    "qwen3-coder:30b-a3b-q4_K_M",
+    "gpt-oss:20b",
+    "qwen2.5:14b",
+    "qwen2.5-coder:14b",
+}
+
+def load_runs(host: str) -> list[dict]:
+    runs = []
+    for line in RUNS.read_text().splitlines():
+        if not line.strip(): continue
+        try:
+            r = json.loads(line)
+            r.setdefault("host", "4070")
+            if r["host"] != host: continue
+            sp = r.get("score_pct")
+            if isinstance(sp, str):
+                try: r["score_pct"] = int(sp)
+                except: continue
+            if not isinstance(r.get("score_pct"), int): continue
+            runs.append(r)
+        except Exception:
+            pass
+    return runs
+
+
+def main():
+    p = argparse.ArgumentParser()
+    p.add_argument("--host", default="4070")
+    p.add_argument("--max", type=int, default=300, help="cap total runs in the script")
+    p.add_argument("--include-dropouts", action="store_true",
+                   help="also queue runs for combos that have <20% avg")
+    p.add_argument("--also-pipelines", action="store_true", default=True)
+    p.add_argument("--no-pipelines", dest="also_pipelines", action="store_false")
+    args = p.parse_args()
+
+    runs = load_runs(args.host)
+    # All evals known to the system
+    all_evals = sorted({r["eval"] for r in runs})
+
+    # Best score per (eval, harness, model)
+    best: dict[tuple[str, str, str], dict] = {}
+    for r in runs:
+        k = (r["eval"], r.get("harness", "pi"), r.get("model", ""))
+        if k not in best or best[k]["score_pct"] < r["score_pct"]:
+            best[k] = r
+
+    # Per (harness, model): set of evals already tested + avg
+    combo_evals: dict[tuple[str, str], set[str]] = defaultdict(set)
+    combo_scores: dict[tuple[str, str], list[int]] = defaultdict(list)
+    combo_perfect: dict[tuple[str, str], set[str]] = defaultdict(set)
+    for (e, h, m), r in best.items():
+        combo_evals[(h, m)].add(e)
+        combo_scores[(h, m)].append(r["score_pct"])
+        if r["score_pct"] == 100:
+            combo_perfect[(h, m)].add(e)
+
+    # Models present in any 4070 run
+    seen_models = sorted({m for (_, m) in combo_evals})
+
+    # Build candidate runs
+    candidates: list[tuple[float, str, str, str]] = []  # (priority_score, harness, eval, model)
+    for h in TOP_HARNESSES:
+        for m in seen_models:
+            tested = combo_evals.get((h, m), set())
+            scores = combo_scores.get((h, m), [])
+            avg = sum(scores) / max(1, len(scores))
+            # Dropout filter
+            if not args.include_dropouts and len(scores) >= 5 and avg < DROPOUT_AVG:
+                continue
+            # Pipeline-on-small-model filter
+            if h in PIPELINE_HARNESSES and m not in PIPELINE_MODEL_WHITELIST:
+                continue
+            # Don't queue pipelines if user disabled
+            if not args.also_pipelines and h in PIPELINE_HARNESSES:
+                continue
+            for e in all_evals:
+                if e in tested: continue   # already tested
+                # Priority components:
+                #   - Higher avg → finish strong rows first
+                #   - Higher coverage → close to complete = small wins fast
+                #   - Pipeline runs cost more → slight penalty
+                cov = len(tested) / max(1, len(all_evals))
+                pri = (avg / 100) + cov * 0.5
+                if h in PIPELINE_HARNESSES:
+                    pri -= 0.05
+                candidates.append((-pri, h, e, m))   # negative so sort ascending == highest first
+
+    candidates.sort()
+    candidates = candidates[: args.max]
+
+    # Emit script
+    print("#!/usr/bin/env bash")
+    print("set -u")
+    print(f"# Auto-generated by queue-fill --host {args.host}. {len(candidates)} runs queued.")
+    print(f"# Skips dropouts (combos <{DROPOUT_AVG}% avg over ≥5 evals) "
+          f"and combos already-tested for an eval.")
+    print()
+    for _pri, h, e, m in candidates:
+        print(f'echo "═══ $(date +%T) | {h} {e} {m} @ {args.host}"')
+        print(f'~/repos/lemon-squeezer/bin/eval-run --host {args.host} '
+              f'{h} {e} {m} fill 2>&1 | tail -2')
+    print(f'echo "═══ queue-fill done $(date +%T) — {len(candidates)} runs attempted"')
+    print(f"# {len(candidates)} runs queued for host={args.host}", file=sys.stderr)
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+# auto-push — periodic git commit + push so the live dashboard stays current
+# without manual intervention. Useful while long-running tournaments are filling
+# the matrix overnight or across days.
+#
+# Behaviour:
+#   - Every $INTERVAL seconds (default 600, i.e. 10 min):
+#     * Strip nested .git dirs that aider leaves in run workspaces.
+#     * If runs.jsonl line count has grown since last commit, stage everything,
+#       commit with a count summary, push.
+#     * Skip silently when nothing's changed.
+#   - Survives Mac sleep/wake (the loop just resumes).
+#   - Stop with `pkill -f bin/auto-push` or kill the saved PID.
+#
+# Usage:
+#   nohup bin/auto-push > /tmp/auto-push.log 2>&1 &
+#   disown
+#
+# Configuration via env:
+#   AUTO_PUSH_INTERVAL=600    # seconds between cycles
+#   AUTO_PUSH_MIN_NEW=1       # require at least N new runs before committing
+set -uo pipefail
+ROOT="$HOME/repos/lemon-squeezer"
+INTERVAL="${AUTO_PUSH_INTERVAL:-600}"
+MIN_NEW="${AUTO_PUSH_MIN_NEW:-1}"
+
+cd "$ROOT"
+echo "[auto-push] starting in $ROOT (interval=${INTERVAL}s, min_new=${MIN_NEW})"
+
+last_count=$(wc -l < runs.jsonl | tr -d ' ' || echo 0)
+echo "[auto-push] starting with $last_count runs"
+
+while true; do
+  sleep "$INTERVAL"
+  # Strip aider's nested .git dirs first — they break `git add -A`.
+  find runs -mindepth 3 -name '.git' -type d -exec rm -rf {} + 2>/dev/null || true
+  cur_count=$(wc -l < runs.jsonl 2>/dev/null | tr -d ' ' || echo 0)
+  delta=$((cur_count - last_count))
+  if (( delta < MIN_NEW )); then
+    echo "[$(date +%T)] no new runs (have=$cur_count, last=$last_count) — skip"
+    continue
+  fi
+  if ! git diff --quiet -- runs.jsonl 2>/dev/null || git status --porcelain runs/ | grep -q .; then
+    git add -A 2>/dev/null
+    msg="auto: +$delta runs (now $cur_count) — $(date -u +%Y-%m-%dT%H:%MZ)"
+    if git commit -q -m "$msg" 2>&1 | tail -1; then
+      if git push origin main 2>&1 | tail -1; then
+        echo "[$(date +%T)] pushed: +$delta (now $cur_count)"
+        last_count=$cur_count
+      else
+        echo "[$(date +%T)] push failed — will retry next cycle"
+      fi
+    else
+      echo "[$(date +%T)] nothing to commit"
+    fi
+  else
+    last_count=$cur_count
+  fi
+done
