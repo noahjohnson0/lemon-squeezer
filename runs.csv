@@ -304,3 +304,4 @@ run_id,ts,eval,harness,model,tag,wall_s,tok_in,tok_out,tools,exit,score_pct
 2026-05-10T18-09-04Z_port-scanner_squeezer-critique_gpt_oss_20b_fill,2026-05-10T18-09-04Z,port-scanner,squeezer-critique,gpt-oss:20b,fill,270,13115,6273,7,0,100
 2026-05-10T18-13-40Z_projectile-sim_squeezer-critique_gpt_oss_20b_fill,2026-05-10T18-13-40Z,projectile-sim,squeezer-critique,gpt-oss:20b,fill,511,28882,11761,11,0,100
 2026-05-10T18-22-18Z_refactor_squeezer-critique_gpt_oss_20b_fill,2026-05-10T18-22-18Z,refactor,squeezer-critique,gpt-oss:20b,fill,110,6416,2567,6,0,100
+2026-05-10T18-24-13Z_regression-ci_squeezer-critique_gpt_oss_20b_fill,2026-05-10T18-24-13Z,regression-ci,squeezer-critique,gpt-oss:20b,fill,286,30177,6485,11,0,100

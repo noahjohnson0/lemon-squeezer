@@ -18,3 +18,9 @@
 ══════ STEP: critique-1  (gpt-oss:20b) ══════
 [critique-1 it=0] TOOL list_files {"dir":"."}
 [critique-1 it=1] TOOL read_file {"path":"stats.py"}
+[critique-1 it=2] TOOL run_bash {"command":"python - \u003c\u003c'PY'\nimport stats\nprint(stats.linreg([0,1,2],[0,1,2]))\nprint(stats.mean_ci95([1,2,3,4,5]))\nPY","timeout":120}
+[critique-1 it=3] OK: nothing to fix
+[critique-1] done — 3 tools, 5170/2041 tok, 88.4s
+[pipeline] critic happy after round 1; halting refinement
+
+══════ PIPELINE DONE — 2 steps, 30177/6485 tok total ══════
