@@ -1,19 +1,19 @@
-import csv
 import sys
 
-def total(path):
-    s = 0
-    skip_header = True
-    with open(path) as f:
-        for row in csv.reader(f):
-            if skip_header:
-                skip_header = False
+def main():
+    filename = sys.argv[1]
+    total = 0
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+        for line in lines[1:]:  # Skip header row
+            parts = line.strip().split(',');
+            if len(parts) < 2:
                 continue
             try:
-                s += int(row[1])
+                total += int(parts[1])
             except (ValueError, IndexError):
                 pass
-    return s
+    print(total)
 
-if __name__ == "__main__":
-    print(total(sys.argv[1]))
+if __name__ == '__main__':
+    main()

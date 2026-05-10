@@ -164,7 +164,7 @@ def pipeline_critique(args, user_prompt: str, ws: Path, run_dir: Path) -> list[d
     for r in range(rounds):
         c = run_step(f"critique-{r+1}", critic, CRITIC_PROMPT, user_prompt, ws, run_dir, args.base_url, allow_write=False)
         steps.append(c)
-        if "OK: nothing to fix" in (c.get("final") or "").upper():
+        if "ok: nothing to fix" in (c.get("final") or "").lower():
             print(f"[pipeline] critic happy after round {r+1}; halting refinement", flush=True)
             break
         refine_input = (
