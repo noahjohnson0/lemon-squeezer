@@ -1,0 +1,5 @@
+energy_formula 1 got=-0.5
+half_period 0 NameError("name 'k' is not defined")
+full_period 0 NameError("name 'k' is not defined")
+energy_drift 0 NameError("name 'k' is not defined")
+ellipse_apo 0 NameError("name 'k' is not defined")

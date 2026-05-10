@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-05-10T13-58-06Z_knapsack_aider_qwen3_14b_m4max-q14b",
+  "ts": "2026-05-10T13-58-06Z",
+  "eval": "knapsack",
+  "harness": "aider",
+  "model": "qwen3:14b",
+  "tag": "m4max-q14b",
+  "host": "m4max",
+  "extra_flags": [],
+  "exit_code": 124,
+  "wall_seconds": 600,
+  "tokens_in": 0,
+  "tokens_out": 0,
+  "tool_calls": 0,
+  "score_pct": "0",
+  "telemetry": {
+    "samples": 456,
+    "host_load_peak": 8.61,
+    "host_cpu_avg_pct": 16.91,
+    "host_cpu_peak_pct": 85.9,
+    "host_mem_peak_pct": 99.8,
+    "ollama_rss_peak_mb": 9791.0,
+    "ollama_rss_avg_mb": 234.7
+  }
+}

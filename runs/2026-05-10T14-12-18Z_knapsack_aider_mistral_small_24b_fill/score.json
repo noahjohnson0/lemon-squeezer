@@ -1,0 +1,16 @@
+{
+  "checks": [
+    {"name":"file:knapsack.py","pass":1,"weight":5,"note":""},
+    {"name":"compiles","pass":1,"weight":5,"note":""},
+    {"name":"k1","pass":1,"weight":9,"note":"ok"},
+    {"name":"k2","pass":1,"weight":9,"note":"ok"},
+    {"name":"k3","pass":1,"weight":9,"note":"ok"},
+    {"name":"k4","pass":1,"weight":9,"note":"ok"},
+    {"name":"k5","pass":1,"weight":9,"note":"ok"},
+    {"name":"k6","pass":1,"weight":9,"note":"ok"},
+    {"name":"k7","pass":1,"weight":9,"note":"ok"}
+  ],
+  "gained": 73,
+  "total": 73,
+  "score_pct": 100
+}

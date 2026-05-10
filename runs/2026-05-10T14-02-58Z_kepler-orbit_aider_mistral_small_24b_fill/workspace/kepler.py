@@ -20,7 +20,7 @@ def simulate(x0: float, y0: float, vx0: float, vy0: float,
         k3 = dydt(t0 + 0.5 * dt, (y0[i] + 0.5 * dt * k2[i] for i in range(4)))
         k4 = dydt(t0 + dt, (y0[i] + dt * k3[i] for i in range(4)))
 
-        return tuple(y0[i] + dt / 6 * sum([k[j][i] for j in range(4)]) for i in range(4))
+        return tuple(y0[i] + dt / 6 * sum([k[j][i] for j in [k1,k2,k3,k4]]) for i in range(4))
 
     y = [x0, y0, vx0, vy0]
     t = 0.0
