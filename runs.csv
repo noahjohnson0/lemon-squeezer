@@ -237,6 +237,12 @@ run_id,ts,eval,harness,model,tag,wall_s,tok_in,tok_out,tools,exit,score_pct
 2026-05-10T14-13-17Z_levenshtein_aider_mistral_small_24b_fill,2026-05-10T14-13-17Z,levenshtein,aider,mistral-small:24b,fill,119,783,855,0,0,100
 2026-05-10T14-15-23Z_lru-cache_aider_mistral_small_24b_fill,2026-05-10T14-15-23Z,lru-cache,aider,mistral-small:24b,fill,38,784,234,0,0,100
 2026-05-10T14-16-09Z_matrix-ops_aider_mistral_small_24b_fill,2026-05-10T14-16-09Z,matrix-ops,aider,mistral-small:24b,fill,125,799,896,0,0,41
+2026-05-10T14-18-18Z_crc-checksum_aider_qwen3_14b_m4max-q14b,2026-05-10T14-18-18Z,crc-checksum,aider,qwen3:14b,m4max-q14b,600,0,0,0,124,0
 2026-05-10T14-18-20Z_password-strength_aider_mistral_small_24b_fill,2026-05-10T14-18-20Z,password-strength,aider,mistral-small:24b,fill,87,972,594,0,0,86
 2026-05-10T14-19-53Z_port-scanner_aider_mistral_small_24b_fill,2026-05-10T14-19-53Z,port-scanner,aider,mistral-small:24b,fill,45,863,278,0,0,75
 2026-05-10T14-20-44Z_projectile-sim_aider_mistral_small_24b_fill,2026-05-10T14-20-44Z,projectile-sim,aider,mistral-small:24b,fill,339,3925,1602,0,0,23
+2026-05-10T14-26-29Z_refactor_aider_mistral_small_24b_fill,2026-05-10T14-26-29Z,refactor,aider,mistral-small:24b,fill,52,724,255,0,0,66
+2026-05-10T14-27-28Z_regression-ci_aider_mistral_small_24b_fill,2026-05-10T14-27-28Z,regression-ci,aider,mistral-small:24b,fill,47,767,293,0,0,100
+2026-05-10T14-28-21Z_solar-position_aider_mistral_small_24b_fill,2026-05-10T14-28-21Z,solar-position,aider,mistral-small:24b,fill,439,5400,2400,0,0,11
+2026-05-10T14-28-24Z_hamming-code_aider_qwen3_14b_m4max-q14b,2026-05-10T14-28-24Z,hamming-code,aider,qwen3:14b,m4max-q14b,176,0,0,0,143,0
+2026-05-10T14-35-45Z_sql-injection-fix_aider_mistral_small_24b_fill,2026-05-10T14-35-45Z,sql-injection-fix,aider,mistral-small:24b,fill,48,803,289,0,0,20
