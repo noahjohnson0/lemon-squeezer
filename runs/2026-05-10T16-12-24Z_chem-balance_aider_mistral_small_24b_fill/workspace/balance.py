@@ -1,0 +1,82 @@
+import re
+from collections import defaultdict
+import numpy as np
+from sympy import Matrix
+
+def parse_formula(formula):
+    # Regular expression to match elements and their counts
+    pattern = re.compile(r'([A-Z][a-z]*)(\d*)|\(([^)]+)\)(\d*)')
+    stack = []
+    result = defaultdict(int)
+
+    def parse_group(group, count):
+        for element, sub_count in group:
+            if sub_count == '':
+                sub_count = 1
+            else:
+                sub_count = int(sub_count)
+            result[element] += sub_count * count
+
+    i = 0
+    while i < len(formula):
+        match = pattern.match(formula, i)
+        if not match:
+            break
+        element, count, group, group_count = match.groups()
+        if group:
+            group_formula = parse_group(group, int(group_count) if group_count else 1)
+            stack.append((group_formula, int(count) if count else 1))
+        elif element:
+            if count == '':
+                count = 1
+            else:
+                count = int(count)
+            result[element] += count
+
+        i = match.end()
+
+    return dict(result)
+
+def parse_side(side):
+    formulas = side.split(' + ')
+    counts = defaultdict(int)
+    for formula in formulas:
+        parsed_formula = parse_formula(formula)
+        for element, count in parsed_formula.items():
+            counts[element] += count
+    return counts
+
+def balance(equation: str) -> tuple[list[int], list[int]]:
+    lhs, rhs = equation.split(' -> ')
+    lhs_counts = parse_side(lhs)
+    rhs_counts = parse_side(rhs)
+
+    elements = sorted(set(lhs_counts.keys()).union(rhs_counts.keys()))
+    element_matrix = []
+
+    for element in elements:
+        row = []
+        if element in lhs_counts:
+            row.append(lhs_counts[element])
+        else:
+            row.append(0)
+        if element in rhs_counts:
+            row.append(-rhs_counts[element])
+        else:
+            row.append(0)
+        element_matrix.append(row)
+
+    matrix = Matrix(element_matrix).T
+    null_space = matrix.nullspace()
+
+    if not null_space:
+        raise ValueError("Equation cannot be balanced")
+
+    coefficients = null_space[0]
+    gcd = int(coefficients.gcd())
+    coefficients = [int(coeff / gcd) for coeff in coefficients]
+
+    lhs_coefficients = coefficients[:len(lhs_counts)]
+    rhs_coefficients = coefficients[len(lhs_counts):]
+
+    return (lhs_coefficients, rhs_coefficients)

@@ -1,0 +1,15 @@
+{
+  "checks": [
+    {"name":"file:kalman.py","pass":1,"weight":5,"note":""},
+    {"name":"compiles","pass":1,"weight":5,"note":""},
+    {"name":"init","pass":1,"weight":11,"note":""},
+    {"name":"cov_2x2","pass":1,"weight":11,"note":""},
+    {"name":"converge_pos","pass":0,"weight":11,"note":"LinAlgError('0-dimensional array given. Array must be at least two-dimensional')"},
+    {"name":"converge_vel","pass":0,"weight":11,"note":"LinAlgError('0-dimensional array given. Array must be at least two-dimensional')"},
+    {"name":"predict_advances","pass":1,"weight":11,"note":"p0=0.0 p1=3.0"},
+    {"name":"predict_grows_cov","pass":1,"weight":11,"note":""}
+  ],
+  "gained": 54,
+  "total": 76,
+  "score_pct": 71
+}

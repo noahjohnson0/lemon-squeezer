@@ -1,0 +1,31 @@
+{
+  "checks": [
+    {"name":"file:levenshtein.py","pass":1,"weight":5,"note":""},
+    {"name":"compiles","pass":1,"weight":5,"note":""},
+    {"name":"d1","pass":1,"weight":5,"note":"got=3 want=3"},
+    {"name":"d2","pass":1,"weight":5,"note":"got=3 want=3"},
+    {"name":"d3","pass":1,"weight":5,"note":"got=3 want=3"},
+    {"name":"d4","pass":1,"weight":5,"note":"got=0 want=0"},
+    {"name":"d5","pass":1,"weight":5,"note":"got=1 want=1"},
+    {"name":"d6","pass":1,"weight":5,"note":"got=5 want=5"},
+    {"name":"d7","pass":1,"weight":5,"note":"got=2 want=2"},
+    {"name":"d8","pass":1,"weight":5,"note":"got=2 want=2"},
+    {"name":"d9","pass":1,"weight":5,"note":"got=0 want=0"},
+    {"name":"d10","pass":1,"weight":5,"note":"got=3 want=3"},
+    {"name":"p1_count","pass":1,"weight":4,"note":"got_ops=3 want=3"},
+    {"name":"p1_recon","pass":1,"weight":4,"note":"got='sitting' want='sitting'"},
+    {"name":"p2_count","pass":1,"weight":4,"note":"got_ops=3 want=3"},
+    {"name":"p2_recon","pass":1,"weight":4,"note":"got='abc' want='abc'"},
+    {"name":"p3_count","pass":1,"weight":4,"note":"got_ops=3 want=3"},
+    {"name":"p3_recon","pass":1,"weight":4,"note":"got='' want=''"},
+    {"name":"p4_count","pass":1,"weight":4,"note":"got_ops=0 want=0"},
+    {"name":"p4_recon","pass":1,"weight":4,"note":"got='abc' want='abc'"},
+    {"name":"p5_count","pass":1,"weight":4,"note":"got_ops=1 want=1"},
+    {"name":"p5_recon","pass":1,"weight":4,"note":"got='abd' want='abd'"},
+    {"name":"p6_count","pass":1,"weight":4,"note":"got_ops=5 want=5"},
+    {"name":"p6_recon","pass":1,"weight":4,"note":"got='execution' want='execution'"}
+  ],
+  "gained": 108,
+  "total": 108,
+  "score_pct": 100
+}

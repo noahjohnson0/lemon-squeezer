@@ -1,0 +1,17 @@
+{
+  "checks": [
+    {"name":"file:balance.py","pass":1,"weight":5,"note":""},
+    {"name":"compiles","pass":1,"weight":5,"note":""},
+    {"name":"case:eq1","pass":0,"weight":10,"note":"ERR H2 + O2 -> H2O ValueError('Equation cannot be balanced')"},
+    {"name":"case:eq2","pass":0,"weight":10,"note":"ERR CH4 + O2 -> CO2 + H2O AttributeError("'MutableDenseMatrix' object has no attribute 'gcd'")"},
+    {"name":"case:eq3","pass":0,"weight":10,"note":"ERR C2H6 + O2 -> CO2 + H2O AttributeError("'MutableDenseMatrix' object has no attribute 'gcd'")"},
+    {"name":"case:eq4","pass":0,"weight":10,"note":"ERR Fe + Cl2 -> FeCl3 ValueError('Equation cannot be balanced')"},
+    {"name":"case:eq5","pass":0,"weight":10,"note":"ERR Al + HCl -> AlCl3 + H2 AttributeError("'MutableDenseMatrix' object has no attribute 'gcd'")"},
+    {"name":"case:eq6","pass":0,"weight":10,"note":"ERR Al2(SO4)3 + NaOH -> Al(OH)3 + Na2SO4 ValueError('not enough values to unpack (expected 2, got 1)')"},
+    {"name":"case:eq7","pass":0,"weight":10,"note":"ERR KMnO4 + HCl -> KCl + MnCl2 + H2O + Cl2 AttributeError("'MutableDenseMatrix' object has no attribute 'gcd'")"},
+    {"name":"raises_valueerror","pass":1,"weight":5,"note":""}
+  ],
+  "gained": 15,
+  "total": 85,
+  "score_pct": 17
+}

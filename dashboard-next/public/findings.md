@@ -1,15 +1,16 @@
 # 🍋 Findings
 
-_256 runs · 26 evals · 7 harnesses · 10 models. Auto-generated._
+_274 runs · 29 evals · 8 harnesses · 10 models. Auto-generated._
 
 ## Harness scoreboard
 
 | harness | avg | cells |
 |---|---:|---:|
 | `squeezer-critique` | **77.2** | 6 |
-| `aider` | **75.3** | 148 |
+| `aider` | **75.1** | 153 |
 | `squeezer-architect` | **60.2** | 12 |
 | `squeezer-tdd` | **57.7** | 12 |
+| `qa` | **57.3** | 12 |
 | `squeezer-verify` | **52.2** | 12 |
 | `pi` | **45.1** | 31 |
 | `squeezer` | **21.7** | 3 |
@@ -19,12 +20,12 @@ _256 runs · 26 evals · 7 harnesses · 10 models. Auto-generated._
 | model | avg | cells |
 |---|---:|---:|
 | `qwen3:8b` | **88.7** | 3 |
-| `gpt-oss:20b` | **84.1** | 35 |
-| `qwen2.5:14b` | **79.8** | 12 |
-| `qwen3-coder:30b-a3b-q4_K_M` | **79.3** | 52 |
+| `gpt-oss:20b` | **82.6** | 38 |
 | `llama3.1:8b` | **78.1** | 7 |
-| `mistral-small:24b` | **73.9** | 24 |
-| `qwen3:14b` | **60.1** | 59 |
+| `qwen3-coder:30b-a3b-q4_K_M` | **77.9** | 55 |
+| `qwen2.5:14b` | **76.9** | 17 |
+| `mistral-small:24b` | **70.0** | 27 |
+| `qwen3:14b` | **60.6** | 62 |
 | `devstral:24b` | **48.3** | 16 |
 | `phi4:14b` | **11.6** | 8 |
 | `granite3.3:8b` | **10.0** | 8 |
@@ -35,13 +36,13 @@ _256 runs · 26 evals · 7 harnesses · 10 models. Auto-generated._
 |---|---|---:|---:|---:|
 | `sql-injection-fix` | `qwen3:14b` | 65% | 85% | **+20** |
 | `sql-injection-fix` | `gpt-oss:20b` | 85% | 100% | **+15** |
-| `bug-fix` | `qwen3-coder:30b-a3b-q4_K_M` | 100% | 100% | **+0** |
 | `kepler-orbit` | `qwen3-coder:30b-a3b-q4_K_M` | 100% | 100% | **+0** |
+| `bug-fix` | `qwen3-coder:30b-a3b-q4_K_M` | 100% | 100% | **+0** |
 | `dijkstra` | `qwen3:14b` | 100% | 100% | **+0** |
 | `cli-tool` | `qwen3:14b` | 100% | 100% | **+0** |
+| `sql-injection-fix` | `qwen3-coder:30b-a3b-q4_K_M` | 85% | 85% | **+0** |
 | `dijkstra` | `qwen3-coder:30b-a3b-q4_K_M` | 100% | 100% | **+0** |
 | `bug-fix` | `qwen3:14b` | 100% | 100% | **+0** |
-| `sql-injection-fix` | `qwen3-coder:30b-a3b-q4_K_M` | 85% | 85% | **+0** |
 | `wifi-stats` | `qwen3:14b` | 81% | 78% | **-3** |
 | `wifi-stats` | `qwen3-coder:30b-a3b-q4_K_M` | 91% | 83% | **-8** |
 | `chem-balance` | `qwen3:14b` | 11% | 0% | **-11** |
