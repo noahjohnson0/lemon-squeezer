@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Show all runs as a table.
+python3 - "$HOME/lemon-squeezer/runs.jsonl" <<'PY'
+import json, sys, os
+path=sys.argv[1]
+if not os.path.exists(path):
+    print("no runs yet"); sys.exit(0)
+rows=[]
+for line in open(path):
+    line=line.strip()
+    if not line: continue
+    try: rows.append(json.loads(line))
+    except: pass
+if not rows:
+    print("no runs yet"); sys.exit(0)
+cols=[("ts","%-22s"),("eval","%-12s"),("model","%-22s"),("tag","%-22s"),
+      ("wall_seconds","%6s"),("tokens_in","%9s"),("tokens_out","%9s"),
+      ("tool_calls","%6s"),("score_pct","%6s")]
+print(" ".join(f%c[0] for c,f in cols))
+print(" ".join(f%("-"*len(c[0])) for c,f in cols))
+for r in rows:
+    print(" ".join(f%str(r.get(c,"")) for c,f in cols))
+PY

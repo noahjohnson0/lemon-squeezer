@@ -1,0 +1,10 @@
+
+## Notes
+
+* The backend uses the `airport -I` command (no `sudo` required) to gather Wi‑Fi information. If that command fails, it falls back to `system_profiler SPAirPortDataType`.
+* CORS is enabled on the backend to allow the Next.js frontend to fetch data from a different port.
+* The frontend uses an absolute URL (`http://localhost:8000/api/wifi`) as required by the hygiene guidelines.
+
+## License
+
+MIT

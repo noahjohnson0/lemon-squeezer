@@ -1,0 +1,1 @@
+Warning: Model "gpt-oss:20b" not found for provider "ollama". Using custom model id.

@@ -1,0 +1,15 @@
+{
+  "run_id": "2026-05-10T06-09-19Z_bug-fix_pi_devstral_24b_baseline",
+  "ts": "2026-05-10T06-09-19Z",
+  "eval": "bug-fix",
+  "harness": "pi",
+  "model": "devstral:24b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 24,
+  "tokens_in": 1762,
+  "tokens_out": 87,
+  "tool_calls": 0,
+  "score_pct": "27"
+}

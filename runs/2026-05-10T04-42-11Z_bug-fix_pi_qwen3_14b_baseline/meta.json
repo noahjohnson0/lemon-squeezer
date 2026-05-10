@@ -1,0 +1,15 @@
+{
+  "run_id": "2026-05-10T04-42-11Z_bug-fix_pi_qwen3_14b_baseline",
+  "ts": "2026-05-10T04-42-11Z",
+  "eval": "bug-fix",
+  "harness": "pi",
+  "model": "qwen3:14b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 105,
+  "tokens_in": 22709,
+  "tokens_out": 4205,
+  "tool_calls": 6,
+  "score_pct": "27"
+}

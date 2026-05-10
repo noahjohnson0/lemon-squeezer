@@ -1,0 +1,13 @@
+{
+  "checks": [
+    {"name":"file:orders.py","pass":1,"weight":5,"note":""},
+    {"name":"compiles","pass":1,"weight":10,"note":""},
+    {"name":"defines:customer_total","pass":0,"weight":15,"note":""},
+    {"name":"removes:hardcoded_per_customer","pass":0,"weight":10,"note":"still has per-customer named totals"},
+    {"name":"uses:customer_total","pass":0,"weight":10,"note":""},
+    {"name":"output:identical","pass":1,"weight":25,"note":""}
+  ],
+  "gained": 40,
+  "total": 75,
+  "score_pct": 53
+}

@@ -1,0 +1,8 @@
+I'll help you fix the `csv_total.py` script according to your requirements. First, let's read the current content of the file to understand what needs to be changed.
+
+Then I'll make the necessary modifications to:
+1. Skip the header row
+2. Ignore rows with invalid integer amounts
+3. Ensure it sums correctly to 100 for the provided data.csv
+
+Let me check the content first:

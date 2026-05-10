@@ -1,0 +1,11 @@
+{
+  "checks": [
+    {"name":"file:csv_total.py","pass":1,"weight":5,"note":""},
+    {"name":"compiles","pass":0,"weight":10,"note":""},
+    {"name":"outputs:100","pass":0,"weight":30,"note":"got: ''"},
+    {"name":"generalizes","pass":0,"weight":10,"note":""}
+  ],
+  "gained": 5,
+  "total": 55,
+  "score_pct": 9
+}

@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+# eval-run <harness> <eval-name> <model> <tag> [-- harness-flags...]
+# Generic runner. Dispatches to bin/harnesses/<harness>.sh for the actual invocation.
+set -euo pipefail
+
+HARNESS="${1:?usage: eval-run <harness> <eval> <model> <tag> [-- flags...]}"
+EVAL="${2:?eval required}"
+MODEL="${3:?model required}"
+TAG="${4:?tag required}"
+shift 4
+if [[ "${1:-}" == "--" ]]; then shift; fi
+EXTRA_FLAGS=("$@")
+
+ROOT="$HOME/lemon-squeezer"
+EVAL_DIR="$ROOT/evals/$EVAL"
+HARNESS_SCRIPT="$ROOT/bin/harnesses/$HARNESS.sh"
+[[ -d "$EVAL_DIR" ]] || { echo "no such eval: $EVAL_DIR" >&2; exit 1; }
+[[ -f "$HARNESS_SCRIPT" ]] || { echo "no such harness: $HARNESS_SCRIPT" >&2; exit 1; }
+
+PROMPT_FILE="$EVAL_DIR/prompt.md"
+RUBRIC="$EVAL_DIR/rubric.sh"
+SETUP="$EVAL_DIR/setup.sh"
+
+TS="$(date -u +%Y-%m-%dT%H-%M-%SZ)"
+SAFE_MODEL="${MODEL//[^A-Za-z0-9]/_}"
+RUN_ID="${TS}_${EVAL}_${HARNESS}_${SAFE_MODEL}_${TAG}"
+RUN_DIR="$ROOT/runs/$RUN_ID"
+WS="$RUN_DIR/workspace"
+mkdir -p "$WS"
+
+echo "▶ run_id:  $RUN_ID"
+echo "  harness: $HARNESS"
+echo "  eval:    $EVAL  | model: $MODEL  | tag: $TAG"
+echo "  flags:   ${EXTRA_FLAGS[*]:-(none)}"
+echo
+
+# Optional setup: drop starter files into the workspace before the harness runs
+if [[ -f "$SETUP" ]]; then
+  ( cd "$WS" && bash "$SETUP" "$WS" "$EVAL_DIR" )
+fi
+
+START=$(date +%s)
+set +e
+( source "$HARNESS_SCRIPT" \
+  && harness_run "$WS" "$PROMPT_FILE" "$MODEL" "$RUN_DIR" \
+       ${EXTRA_FLAGS[@]+"${EXTRA_FLAGS[@]}"} \
+  ) >"$RUN_DIR/stdout.log" 2>"$RUN_DIR/stderr.log"
+EXIT=$?
+set -e
+WALL=$(( $(date +%s) - START ))
+
+# Harness should have populated tokens_in/tokens_out/tool_calls files if available
+TOKENS_IN=$(cat "$RUN_DIR/tokens_in" 2>/dev/null || echo 0)
+TOKENS_OUT=$(cat "$RUN_DIR/tokens_out" 2>/dev/null || echo 0)
+TOOL_CALLS=$(cat "$RUN_DIR/tool_calls" 2>/dev/null || echo 0)
+
+# Score
+SCORE="?"
+if [[ -f "$RUBRIC" ]]; then
+  bash "$RUBRIC" "$WS" > "$RUN_DIR/score.json" 2>"$RUN_DIR/score.err" || true
+  SCORE=$(python3 -c "import json; print(json.load(open('$RUN_DIR/score.json')).get('score_pct','?'))" 2>/dev/null || echo "?")
+fi
+
+# Meta
+python3 - <<PY > "$RUN_DIR/meta.json"
+import json
+print(json.dumps({
+  "run_id": "$RUN_ID",
+  "ts": "$TS",
+  "eval": "$EVAL",
+  "harness": "$HARNESS",
+  "model": "$MODEL",
+  "tag": "$TAG",
+  "extra_flags": $(printf '%s\n' ${EXTRA_FLAGS[@]+"${EXTRA_FLAGS[@]}"} | python3 -c "import sys,json; print(json.dumps([l.rstrip() for l in sys.stdin if l.strip()]))"),
+  "exit_code": $EXIT,
+  "wall_seconds": $WALL,
+  "tokens_in": $TOKENS_IN,
+  "tokens_out": $TOKENS_OUT,
+  "tool_calls": $TOOL_CALLS,
+  "score_pct": "$SCORE"
+}, indent=2))
+PY
+
+cat "$RUN_DIR/meta.json" | python3 -c "import json,sys; print(json.dumps(json.load(sys.stdin)))" >> "$ROOT/runs.jsonl"
+
+# Auto-update CSV + RUNS.md after each run
+"$ROOT/bin/eval-export" >/dev/null 2>&1 || true
+
+echo "✓ ${WALL}s | exit=$EXIT | tok in/out=$TOKENS_IN/$TOKENS_OUT | tools=$TOOL_CALLS | score=${SCORE}%"
+echo "  $RUN_DIR"

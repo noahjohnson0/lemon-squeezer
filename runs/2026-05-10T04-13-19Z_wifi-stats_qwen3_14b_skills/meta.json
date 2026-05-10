@@ -1,0 +1,14 @@
+{
+  "run_id": "2026-05-10T04-13-19Z_wifi-stats_qwen3_14b_skills",
+  "ts": "2026-05-10T04-13-19Z",
+  "eval": "wifi-stats",
+  "model": "qwen3:14b",
+  "tag": "skills",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 54,
+  "tokens_in": 5837,
+  "tokens_out": 2336,
+  "tool_calls": 3,
+  "score_pct": 33
+}

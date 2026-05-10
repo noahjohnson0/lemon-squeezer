@@ -1,0 +1,18 @@
+{
+  "run_id": "2026-05-10T06-14-52Z_wifi-stats_pi_devstral_24b_sysprompt",
+  "ts": "2026-05-10T06-14-52Z",
+  "eval": "wifi-stats",
+  "harness": "pi",
+  "model": "devstral:24b",
+  "tag": "sysprompt",
+  "extra_flags": [
+    "--append-system-prompt",
+    "/Users/noahjohnson0/pi-evals/configs/general-hygiene.md"
+  ],
+  "exit_code": 0,
+  "wall_seconds": 407,
+  "tokens_in": 16766,
+  "tokens_out": 2903,
+  "tool_calls": 4,
+  "score_pct": 48
+}

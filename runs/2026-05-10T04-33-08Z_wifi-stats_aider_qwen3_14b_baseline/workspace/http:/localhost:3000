@@ -1,0 +1,9 @@
+
+The app will automatically refresh every 3 seconds to show updated Wi-Fi stats.
+
+## Notes
+
+- The Python backend runs on `http://localhost:8000`
+- The frontend runs on `http://localhost:3000`
+- Wi-Fi info is retrieved using macOS's `airport` command
+- No sudo required for basic Wi-Fi info

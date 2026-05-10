@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>pi-evals dashboard</title>
+<style>
+  :root {
+    --bg: #0d1117; --panel: #161b22; --border: #30363d;
+    --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff;
+    --good: #3fb950; --mid: #d29922; --bad: #f85149;
+  }
+  body { font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--bg); color: var(--text); margin: 0; padding: 24px; }
+  h1 { font-size: 18px; margin: 0 0 4px; }
+  h2 { font-size: 14px; margin: 28px 0 8px; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+  .meta { color: var(--muted); font-size: 12px; margin-bottom: 24px; }
+  table { border-collapse: collapse; width: 100%; font-size: 12px; margin-bottom: 12px; }
+  th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-weight: normal; text-transform: uppercase; font-size: 10px; letter-spacing: 0.05em; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .score { display: inline-block; padding: 2px 8px; border-radius: 3px; font-weight: bold; min-width: 32px; text-align: center; }
+  .score.good { background: rgba(63,185,80,0.18); color: var(--good); }
+  .score.mid  { background: rgba(210,153,34,0.18); color: var(--mid); }
+  .score.bad  { background: rgba(248,81,73,0.18); color: var(--bad); }
+  .row-best { background: rgba(63,185,80,0.06); }
+  .toolbar { display: flex; gap: 12px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+  .toolbar label { color: var(--muted); font-size: 11px; }
+  select { background: var(--panel); color: var(--text); border: 1px solid var(--border); padding: 4px 8px; border-radius: 3px; font-family: inherit; font-size: 12px; }
+  .matrix th, .matrix td { text-align: center; }
+  .matrix .model-cell { text-align: left; color: var(--muted); }
+  .panel { background: var(--panel); border: 1px solid var(--border); padding: 16px; border-radius: 6px; margin-bottom: 16px; }
+  .stat { display: inline-block; margin-right: 24px; }
+  .stat .v { font-size: 18px; font-weight: bold; color: var(--accent); }
+  .stat .l { color: var(--muted); font-size: 11px; }
+  .bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; min-width: 80px; }
+  .bar > span { display: block; height: 100%; background: var(--accent); }
+  details { margin-bottom: 8px; }
+  summary { cursor: pointer; color: var(--muted); }
+  .chip { display: inline-block; padding: 1px 6px; background: var(--border); border-radius: 3px; font-size: 11px; margin-right: 4px; }
+  .empty { color: var(--muted); font-style: italic; padding: 16px; text-align: center; }
+</style>
+</head>
+<body>
+
+<h1>pi-evals</h1>
+<div class="meta" id="meta">loading…</div>
+
+<div class="panel">
+  <div class="stat"><div class="v" id="stat-runs">–</div><div class="l">runs</div></div>
+  <div class="stat"><div class="v" id="stat-evals">–</div><div class="l">evals</div></div>
+  <div class="stat"><div class="v" id="stat-models">–</div><div class="l">models</div></div>
+  <div class="stat"><div class="v" id="stat-best">–</div><div class="l">best score</div></div>
+  <div class="stat"><div class="v" id="stat-wall">–</div><div class="l">total compute (min)</div></div>
+</div>
+
+<div class="toolbar">
+  <label>auto-refresh:
+    <select id="refresh">
+      <option value="0">off</option>
+      <option value="2000" selected>2s</option>
+      <option value="5000">5s</option>
+      <option value="10000">10s</option>
+    </select>
+  </label>
+  <span class="meta" id="ago"></span>
+</div>
+
+<h2>matrix — best score per (eval × harness × model)</h2>
+<div id="matrix-wrap"></div>
+
+<h2>per-eval ranking</h2>
+<div id="per-eval"></div>
+
+<h2>recent runs</h2>
+<div id="recent"></div>
+
+<script>
+async function load() {
+  const r = await fetch('runs.jsonl?t=' + Date.now());
+  if (!r.ok) { document.getElementById('meta').textContent = 'no runs.jsonl yet'; return; }
+  const text = await r.text();
+  const runs = text.trim().split('\n').filter(Boolean).map(l => JSON.parse(l));
+  runs.forEach(x => x.score_pct = parseInt(x.score_pct, 10));
+  runs.sort((a,b) => a.ts.localeCompare(b.ts));
+  render(runs);
+  document.getElementById('ago').textContent = 'refreshed at ' + new Date().toLocaleTimeString();
+}
+
+function scoreClass(s) { return s >= 80 ? 'good' : s >= 50 ? 'mid' : 'bad'; }
+function scoreCell(s) { return `<span class="score ${scoreClass(s)}">${isFinite(s)?s:'–'}</span>`; }
+
+function render(runs) {
+  const evals = [...new Set(runs.map(r=>r.eval))].sort();
+  const models = [...new Set(runs.map(r=>r.model))].sort();
+  const harnesses = [...new Set(runs.map(r=>r.harness||'pi'))].sort();
+  const totalWall = runs.reduce((s,r) => s + (r.wall_seconds||0), 0);
+  const best = runs.reduce((m,r) => isFinite(r.score_pct) && r.score_pct > m ? r.score_pct : m, 0);
+
+  document.getElementById('meta').textContent = runs.length + ' runs · ' + evals.length + ' evals · ' + models.length + ' models · last ' + (runs.at(-1)?.ts || '?');
+  document.getElementById('stat-runs').textContent = runs.length;
+  document.getElementById('stat-evals').textContent = evals.length;
+  document.getElementById('stat-models').textContent = models.length;
+  document.getElementById('stat-best').textContent = best + '%';
+  document.getElementById('stat-wall').textContent = (totalWall/60).toFixed(1);
+
+  // best score per (eval, harness, model)
+  const bestMap = new Map();
+  for (const r of runs) {
+    if (!isFinite(r.score_pct)) continue;
+    const k = `${r.eval}|${r.harness||'pi'}|${r.model}`;
+    if (!bestMap.has(k) || bestMap.get(k).score_pct < r.score_pct) bestMap.set(k, r);
+  }
+
+  // matrix: rows = (harness, model), cols = evals
+  let html = '<table class="matrix"><thead><tr><th>harness</th><th>model</th>';
+  for (const e of evals) html += `<th>${e}</th>`;
+  html += '</tr></thead><tbody>';
+  for (const h of harnesses) {
+    for (const m of models) {
+      const cells = evals.map(e => {
+        const v = bestMap.get(`${e}|${h}|${m}`);
+        return v ? `<td class="num">${scoreCell(v.score_pct)}</td>` : '<td class="num"><span class="score">–</span></td>';
+      }).join('');
+      html += `<tr><td>${h}</td><td class="model-cell">${m}</td>${cells}</tr>`;
+    }
+  }
+  html += '</tbody></table>';
+  document.getElementById('matrix-wrap').innerHTML = html;
+
+  // per-eval ranking
+  let pe = '';
+  for (const e of evals) {
+    pe += `<details open><summary><strong>${e}</strong></summary><table><thead><tr><th>harness</th><th>model</th><th>tag</th><th class="num">score</th><th class="num">wall_s</th><th class="num">tok in/out</th></tr></thead><tbody>`;
+    const rows = [...bestMap.values()].filter(v => v.eval === e).sort((a,b) => b.score_pct - a.score_pct);
+    for (const r of rows) {
+      pe += `<tr><td>${r.harness||'pi'}</td><td class="model-cell">${r.model}</td><td><span class="chip">${r.tag||''}</span></td><td class="num">${scoreCell(r.score_pct)}</td><td class="num">${r.wall_seconds||''}</td><td class="num">${r.tokens_in||0}/${r.tokens_out||0}</td></tr>`;
+    }
+    pe += '</tbody></table></details>';
+  }
+  document.getElementById('per-eval').innerHTML = pe;
+
+  // recent 15
+  const recent = runs.slice(-15).reverse();
+  let rh = '<table><thead><tr><th>ts</th><th>eval</th><th>harness</th><th>model</th><th>tag</th><th class="num">score</th><th class="num">wall_s</th><th class="num">tools</th></tr></thead><tbody>';
+  for (const r of recent) {
+    rh += `<tr><td>${(r.ts||'').replace('Z','').replace('T',' ')}</td><td>${r.eval}</td><td>${r.harness||'pi'}</td><td class="model-cell">${r.model}</td><td><span class="chip">${r.tag||''}</span></td><td class="num">${scoreCell(r.score_pct)}</td><td class="num">${r.wall_seconds||''}</td><td class="num">${r.tool_calls||0}</td></tr>`;
+  }
+  rh += '</tbody></table>';
+  document.getElementById('recent').innerHTML = rh;
+}
+
+let timer = null;
+function setupRefresh() {
+  if (timer) clearInterval(timer);
+  const v = parseInt(document.getElementById('refresh').value, 10);
+  if (v > 0) timer = setInterval(load, v);
+}
+document.getElementById('refresh').addEventListener('change', setupRefresh);
+load(); setupRefresh();
+</script>
+</body>
+</html>

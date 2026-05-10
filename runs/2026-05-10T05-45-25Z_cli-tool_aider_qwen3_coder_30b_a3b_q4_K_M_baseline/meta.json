@@ -1,0 +1,15 @@
+{
+  "run_id": "2026-05-10T05-45-25Z_cli-tool_aider_qwen3_coder_30b_a3b_q4_K_M_baseline",
+  "ts": "2026-05-10T05-45-25Z",
+  "eval": "cli-tool",
+  "harness": "aider",
+  "model": "qwen3-coder:30b-a3b-q4_K_M",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 19,
+  "tokens_in": 767,
+  "tokens_out": 243,
+  "tool_calls": 0,
+  "score_pct": 100
+}

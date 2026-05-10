@@ -1,0 +1,8 @@
+Implemented robust CSV summation:
+
+- Skip header row.
+- Use `newline=''` for correct CSV parsing.
+- Safely handle missing columns.
+- Ignore rows with non‑integer amounts.
+
+Now `python csv_total.py data.csv` will output exactly `100`.

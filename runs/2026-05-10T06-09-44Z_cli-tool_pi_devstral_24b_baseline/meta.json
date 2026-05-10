@@ -1,0 +1,15 @@
+{
+  "run_id": "2026-05-10T06-09-44Z_cli-tool_pi_devstral_24b_baseline",
+  "ts": "2026-05-10T06-09-44Z",
+  "eval": "cli-tool",
+  "harness": "pi",
+  "model": "devstral:24b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 51,
+  "tokens_in": 1804,
+  "tokens_out": 410,
+  "tool_calls": 0,
+  "score_pct": "0"
+}

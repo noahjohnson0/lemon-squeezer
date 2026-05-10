@@ -1,0 +1,15 @@
+{
+  "run_id": "2026-05-10T06-23-52Z_refactor_pi_qwen3_14b_baseline",
+  "ts": "2026-05-10T06-23-52Z",
+  "eval": "refactor",
+  "harness": "pi",
+  "model": "qwen3:14b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 104,
+  "tokens_in": 1809,
+  "tokens_out": 4429,
+  "tool_calls": 0,
+  "score_pct": "53"
+}

@@ -1,0 +1,18 @@
+{
+  "run_id": "2026-05-10T06-10-46Z_wifi-stats_pi_qwen3_coder_30b_a3b_q4_K_M_sysprompt",
+  "ts": "2026-05-10T06-10-46Z",
+  "eval": "wifi-stats",
+  "harness": "pi",
+  "model": "qwen3-coder:30b-a3b-q4_K_M",
+  "tag": "sysprompt",
+  "extra_flags": [
+    "--append-system-prompt",
+    "/Users/noahjohnson0/pi-evals/configs/general-hygiene.md"
+  ],
+  "exit_code": 0,
+  "wall_seconds": 165,
+  "tokens_in": 24290,
+  "tokens_out": 2703,
+  "tool_calls": 6,
+  "score_pct": 79
+}

@@ -1,0 +1,45 @@
+```python
+#!/usr/bin/env python3
+"""
+A tiny `wc` clone that prints <lines> <words> <chars> <path>.
+"""
+import sys
+import argparse
+
+def count_file(path: str):
+    try:
+        with open(path, "r", encoding="utf-8", errors="surrogateescape") as f:
+            text = f.read()
+    except FileNotFoundError:
+        sys.stderr.write(f"Error: file '{path}' not found\n")
+        sys.exit(1)
+    except OSError as e:
+        sys.stderr.write(f"Error reading {path}: {e}\n")
+        sys.exit(1)
+
+    lines = text.count("\n")
+    words = len(text.split())
+    chars = len(text)
+    return lines, words, chars
+
+def build_parser():
+    parser = argparse.ArgumentParser(
+        description="Simple wc clone: counts lines, words, chars.",
+        add_help=True
+    )
+    parser.add_argument(
+        "path",
+        metavar="FILE",
+        help="Path to the text file to inspect"
+    )
+    return parser
+
+def main():
+    parser = build_parser()
+    args = parser.parse_args()
+    lines, words, chars = count_file(args.path)
+    print(f"{lines} {words} {chars} {args.path}")
+
+if __name__ == "__main__":
+    main()
+```

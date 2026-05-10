@@ -1,0 +1,15 @@
+{
+  "run_id": "2026-05-10T05-40-21Z_bug-fix_aider_gpt_oss_20b_baseline",
+  "ts": "2026-05-10T05-40-21Z",
+  "eval": "bug-fix",
+  "harness": "aider",
+  "model": "gpt-oss:20b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 50,
+  "tokens_in": 781,
+  "tokens_out": 551,
+  "tool_calls": 0,
+  "score_pct": "100"
+}

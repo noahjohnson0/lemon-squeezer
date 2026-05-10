@@ -1,0 +1,18 @@
+# Python bytecode in eval workspaces
+__pycache__/
+*.pyc
+*.pyo
+
+# Aider sidecar files inside run workspaces
+.aider.tags.cache.v4/
+.aider.input.history
+.aider.llm.history
+
+# OS / editor cruft
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# Local server logs
+/tmp/agent-evals-server.log

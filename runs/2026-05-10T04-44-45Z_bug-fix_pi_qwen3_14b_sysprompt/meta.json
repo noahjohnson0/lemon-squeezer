@@ -1,0 +1,18 @@
+{
+  "run_id": "2026-05-10T04-44-45Z_bug-fix_pi_qwen3_14b_sysprompt",
+  "ts": "2026-05-10T04-44-45Z",
+  "eval": "bug-fix",
+  "harness": "pi",
+  "model": "qwen3:14b",
+  "tag": "sysprompt",
+  "extra_flags": [
+    "--append-system-prompt",
+    "/Users/noahjohnson0/pi-evals/configs/general-hygiene.md"
+  ],
+  "exit_code": 0,
+  "wall_seconds": 81,
+  "tokens_in": 13625,
+  "tokens_out": 3303,
+  "tool_calls": 3,
+  "score_pct": "9"
+}

@@ -1,0 +1,15 @@
+{
+  "run_id": "2026-05-10T06-23-12Z_refactor_aider_qwen3_14b_baseline",
+  "ts": "2026-05-10T06-23-12Z",
+  "eval": "refactor",
+  "harness": "aider",
+  "model": "qwen3:14b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 40,
+  "tokens_in": 760,
+  "tokens_out": 1500,
+  "tool_calls": 0,
+  "score_pct": "100"
+}

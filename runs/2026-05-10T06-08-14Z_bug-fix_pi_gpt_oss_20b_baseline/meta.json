@@ -1,0 +1,15 @@
+{
+  "run_id": "2026-05-10T06-08-14Z_bug-fix_pi_gpt_oss_20b_baseline",
+  "ts": "2026-05-10T06-08-14Z",
+  "eval": "bug-fix",
+  "harness": "pi",
+  "model": "gpt-oss:20b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 42,
+  "tokens_in": 10511,
+  "tokens_out": 910,
+  "tool_calls": 4,
+  "score_pct": "100"
+}

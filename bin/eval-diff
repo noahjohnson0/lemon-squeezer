@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# pi-eval-diff <run_id_a> <run_id_b>
+# Side-by-side check pass/fail comparison.
+set -euo pipefail
+A="$HOME/lemon-squeezer/runs/${1:?run_id A required}/score.json"
+B="$HOME/lemon-squeezer/runs/${2:?run_id B required}/score.json"
+python3 - "$A" "$B" <<'PY'
+import json, sys
+a=json.load(open(sys.argv[1])); b=json.load(open(sys.argv[2]))
+ac={c['name']:c for c in a['checks']}
+bc={c['name']:c for c in b['checks']}
+names=sorted(set(ac)|set(bc))
+print(f"{'check':<38} {'A':>4}  {'B':>4}  Δ")
+print("-"*60)
+for n in names:
+    av=ac.get(n,{}).get('pass','-')
+    bv=bc.get(n,{}).get('pass','-')
+    sym=lambda v:'✓' if v==1 else ('✗' if v==0 else '-')
+    delta=''
+    if av!=bv and av!='-' and bv!='-':
+        delta='⬆' if bv>av else '⬇'
+    print(f"{n:<38} {sym(av):>4}  {sym(bv):>4}  {delta}")
+print()
+print(f"score:  A={a['score_pct']}%  B={b['score_pct']}%  Δ={b['score_pct']-a['score_pct']:+d}")
+PY

@@ -1,0 +1,11 @@
+.
+├── backend/
+│   ├── main.py
+│   └── requirements.txt
+├── frontend/
+│   ├── app/
+│   │   ├── page.tsx
+│   │   └── layout.tsx
+│   ├── package.json
+│   └── tsconfig.json
+└── README.md

@@ -1,0 +1,15 @@
+{
+  "run_id": "2026-05-10T06-31-25Z_refactor_pi_devstral_24b_baseline",
+  "ts": "2026-05-10T06-31-25Z",
+  "eval": "refactor",
+  "harness": "pi",
+  "model": "devstral:24b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 94,
+  "tokens_in": 6405,
+  "tokens_out": 738,
+  "tool_calls": 2,
+  "score_pct": "53"
+}

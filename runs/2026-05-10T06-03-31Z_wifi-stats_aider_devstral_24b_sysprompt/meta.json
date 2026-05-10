@@ -1,0 +1,18 @@
+{
+  "run_id": "2026-05-10T06-03-31Z_wifi-stats_aider_devstral_24b_sysprompt",
+  "ts": "2026-05-10T06-03-31Z",
+  "eval": "wifi-stats",
+  "harness": "aider",
+  "model": "devstral:24b",
+  "tag": "sysprompt",
+  "extra_flags": [
+    "--read",
+    "/Users/noahjohnson0/pi-evals/configs/general-hygiene.md"
+  ],
+  "exit_code": 0,
+  "wall_seconds": 184,
+  "tokens_in": 1200,
+  "tokens_out": 1200,
+  "tool_calls": 0,
+  "score_pct": 83
+}

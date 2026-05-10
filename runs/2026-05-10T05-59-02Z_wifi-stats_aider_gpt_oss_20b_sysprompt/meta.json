@@ -1,0 +1,18 @@
+{
+  "run_id": "2026-05-10T05-59-02Z_wifi-stats_aider_gpt_oss_20b_sysprompt",
+  "ts": "2026-05-10T05-59-02Z",
+  "eval": "wifi-stats",
+  "harness": "aider",
+  "model": "gpt-oss:20b",
+  "tag": "sysprompt",
+  "extra_flags": [
+    "--read",
+    "/Users/noahjohnson0/pi-evals/configs/general-hygiene.md"
+  ],
+  "exit_code": 0,
+  "wall_seconds": 269,
+  "tokens_in": 1300,
+  "tokens_out": 6200,
+  "tool_calls": 0,
+  "score_pct": 94
+}

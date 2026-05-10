@@ -1,0 +1,15 @@
+{
+  "run_id": "2026-05-10T07-03-39Z_chem-balance_aider_qwen3_14b_baseline",
+  "ts": "2026-05-10T07-03-39Z",
+  "eval": "chem-balance",
+  "harness": "aider",
+  "model": "qwen3:14b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 314,
+  "tokens_in": 2605,
+  "tokens_out": 13500,
+  "tool_calls": 0,
+  "score_pct": "?"
+}

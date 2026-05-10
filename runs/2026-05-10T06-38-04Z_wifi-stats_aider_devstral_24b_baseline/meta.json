@@ -1,0 +1,15 @@
+{
+  "run_id": "2026-05-10T06-38-04Z_wifi-stats_aider_devstral_24b_baseline",
+  "ts": "2026-05-10T06-38-04Z",
+  "eval": "wifi-stats",
+  "harness": "aider",
+  "model": "devstral:24b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 191,
+  "tokens_in": 778,
+  "tokens_out": 1300,
+  "tool_calls": 0,
+  "score_pct": 70
+}

@@ -1,0 +1,15 @@
+{
+  "run_id": "2026-05-10T06-31-08Z_refactor_aider_devstral_24b_baseline",
+  "ts": "2026-05-10T06-31-08Z",
+  "eval": "refactor",
+  "harness": "aider",
+  "model": "devstral:24b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 16,
+  "tokens_in": 722,
+  "tokens_out": 21,
+  "tool_calls": 0,
+  "score_pct": "53"
+}
