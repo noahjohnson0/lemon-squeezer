@@ -14,6 +14,12 @@ export type Telemetry = {
   gpu_power_peak_w?: number;
   gpu_fan_peak_pct?: number;
   host_load_peak?: number;
+  // Mac-side fields (populated when host == m4max et al)
+  host_cpu_avg_pct?: number;
+  host_cpu_peak_pct?: number;
+  host_mem_peak_pct?: number;
+  ollama_rss_peak_mb?: number;
+  ollama_rss_avg_mb?: number;
 };
 
 export type Run = {
@@ -23,6 +29,7 @@ export type Run = {
   harness: string;
   model: string;
   tag: string;
+  host?: string;          // "4070", "m4max", etc.
   exit_code: number;
   wall_seconds: number;
   tokens_in: number;
@@ -78,6 +85,7 @@ export async function loadRuns(): Promise<Run[]> {
       o.score_pct =
         typeof o.score_pct === "string" ? parseInt(o.score_pct, 10) : o.score_pct;
       o.harness ||= "pi";
+      o.host ||= "4070"; // legacy runs were all 4070
       runs.push(o);
     } catch {
       /* skip malformed line */

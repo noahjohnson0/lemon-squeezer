@@ -19,8 +19,12 @@ case "$ACTION" in
   start)
     csv="$RUN_DIR/metrics.csv"
     flag="$RUN_DIR/.sampling"
-    echo "ts,gpu_util_pct,gpu_mem_used_mb,gpu_temp_c,gpu_power_w,gpu_fan_pct,host_load1" > "$csv"
+    # Schema: GPU columns (filled when SAMPLER_SSH_TARGET is set + nvidia-smi works),
+    # host_load1 always, plus mac_cpu_pct + mac_mem_used_pct + ollama_rss_mb when we
+    # detect we're on macOS (so the M4 Max profile gets meaningful telemetry too).
+    echo "ts,gpu_util_pct,gpu_mem_used_mb,gpu_temp_c,gpu_power_w,gpu_fan_pct,host_load1,host_cpu_pct,host_mem_used_pct,ollama_rss_mb" > "$csv"
     touch "$flag"
+    IS_MAC=0; [[ "$(uname -s)" == "Darwin" ]] && IS_MAC=1
     (
       while [[ -f "$flag" ]]; do
         ts=$(date +%s)
@@ -32,7 +36,27 @@ case "$ACTION" in
           [[ -z "$gpu" ]] && gpu=",,,,"
         fi
         load=$(uptime | awk -F'load averages?: ' '{print $2}' | awk '{print $1}' | tr -d ',')
-        echo "${ts},${gpu},${load}" >> "$csv"
+        host_cpu=""; host_mem=""; ollama_rss=""
+        if (( IS_MAC )); then
+          # CPU usage from top — total = 100 - idle%
+          host_cpu="$(top -l 1 -n 0 2>/dev/null | awk -F'[, ]+' '/^CPU usage:/ {for (i=1;i<=NF;i++) if ($i=="idle") {gsub("%","",$(i-1)); printf "%.1f", 100 - $(i-1); exit}}')"
+          # Memory used % via vm_stat — pages * 16384 bytes (M-series)
+          host_mem="$(vm_stat 2>/dev/null | awk '
+            /Pages free/                {free=$3+0}
+            /Pages active/              {active=$3+0}
+            /Pages inactive/            {inactive=$3+0}
+            /Pages speculative/         {spec=$3+0}
+            /Pages wired down/          {wired=$4+0}
+            /Pages occupied by compressor/ {comp=$5+0}
+            END {used=active+inactive+wired+comp; total=used+free+spec; if(total>0) printf "%.1f", 100*used/total}
+          ')"
+          # Ollama RSS in MB if running
+          ollama_pid=$(pgrep -f 'ollama runner|ollama serve' 2>/dev/null | head -1)
+          if [[ -n "$ollama_pid" ]]; then
+            ollama_rss=$(ps -o rss= -p "$ollama_pid" 2>/dev/null | awk '{printf "%.0f", $1/1024}')
+          fi
+        fi
+        echo "${ts},${gpu},${load},${host_cpu},${host_mem},${ollama_rss}" >> "$csv"
         sleep "$SAMPLE_INTERVAL"
       done
     ) </dev/null >/dev/null 2>&1 &
@@ -79,6 +103,12 @@ add("gpu_power_avg_w",  lambda v: sum(v)/len(v), "gpu_power_w")
 add("gpu_power_peak_w", max,                     "gpu_power_w")
 add("gpu_fan_peak_pct", max,                     "gpu_fan_pct")
 add("host_load_peak",   max,                     "host_load1")
+# Mac-side aggregates (only present when we sampled on darwin)
+add("host_cpu_avg_pct", lambda v: sum(v)/len(v), "host_cpu_pct")
+add("host_cpu_peak_pct", max,                    "host_cpu_pct")
+add("host_mem_peak_pct", max,                    "host_mem_used_pct")
+add("ollama_rss_peak_mb", max,                   "ollama_rss_mb")
+add("ollama_rss_avg_mb",  lambda v: sum(v)/len(v), "ollama_rss_mb")
 
 if os.path.exists(meta_path):
     m = json.load(open(meta_path))

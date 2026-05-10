@@ -58,6 +58,7 @@ export default function RunDrawer({
                 <div className="flex items-center gap-2 flex-wrap mb-2">
                   <span className={`chip ${run.harness}`}>{run.harness}</span>
                   <span className="chip">{run.tag}</span>
+                  {run.host && <span className="chip" title="hardware host">{run.host}</span>}
                   <span
                     className={`score-${scoreClass(run.score_pct)} px-3 py-1 rounded font-bold tabular-nums`}
                   >

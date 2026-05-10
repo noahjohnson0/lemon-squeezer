@@ -23,7 +23,7 @@ export default function Page() {
   const [inflight, setInflight] = useState<Inflight | null>(null);
   const [selectedRunId, setSelectedRunId] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [filters, setFilters] = useState<FilterState>({ eval: "", harness: "", model: "" });
+  const [filters, setFilters] = useState<FilterState>({ eval: "", harness: "", model: "", host: "" });
 
   useEffect(() => {
     let cancelled = false;
@@ -63,7 +63,8 @@ export default function Page() {
         (r) =>
           (!filters.eval || r.eval === filters.eval) &&
           (!filters.harness || r.harness === filters.harness) &&
-          (!filters.model || r.model === filters.model)
+          (!filters.model || r.model === filters.model) &&
+          (!filters.host || (r.host ?? "4070") === filters.host)
       ),
     [runs, filters]
   );

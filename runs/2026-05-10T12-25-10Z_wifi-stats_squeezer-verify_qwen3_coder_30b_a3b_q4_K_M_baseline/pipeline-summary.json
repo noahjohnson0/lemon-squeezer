@@ -1,0 +1,18 @@
+{
+  "pipeline": "verify",
+  "steps": [
+    {
+      "name": "verify",
+      "model": "qwen3-coder:30b-a3b-q4_K_M",
+      "tokens_in": 19831,
+      "tokens_out": 3206,
+      "tool_calls": 7,
+      "wall_s": 157.3,
+      "final": "Now, let's run the tests to make sure our implementation works properly. Let me create a test file for the backend:"
+    }
+  ],
+  "primary_model": "qwen3-coder:30b-a3b-q4_K_M",
+  "critic_model": null,
+  "judge_model": null,
+  "rounds": 1
+}

@@ -6,6 +6,20 @@ set -euo pipefail
 
 LSQ_ROOT="${HOME}/repos/lemon-squeezer"
 
+# --host <name> selects a host profile from hosts/<name>.env (sourced before
+# anything else). Profiles set OLLAMA_API_BASE / SAMPLER_SSH_TARGET / LEMON_HOST
+# so a single eval-run invocation can target the M4 Max, the 4070, or whatever
+# else without leaking config into the repo.
+if [[ "${1:-}" == "--host" ]]; then
+  HOST_NAME="${2:?--host requires a profile name}"
+  HOST_FILE="$LSQ_ROOT/hosts/${HOST_NAME}.env"
+  [[ -f "$HOST_FILE" ]] || { echo "no host profile: $HOST_FILE" >&2; exit 1; }
+  . "$HOST_FILE"
+  shift 2
+fi
+# Default host name if nothing set it (legacy runs were all 4070).
+: "${LEMON_HOST:=4070}"
+
 # Parse the args eagerly so we can register a pending entry before grabbing the lock.
 # (Reparsed below for the actual run.)
 PRE_HARNESS="${1:-?}"; PRE_EVAL="${2:-?}"; PRE_MODEL="${3:-?}"; PRE_TAG="${4:-?}"
@@ -157,6 +171,7 @@ print(json.dumps({
   "harness": "$HARNESS",
   "model": "$MODEL",
   "tag": "$TAG",
+  "host": "$LEMON_HOST",
   "extra_flags": $(printf '%s\n' ${EXTRA_FLAGS[@]+"${EXTRA_FLAGS[@]}"} | python3 -c "import sys,json; print(json.dumps([l.rstrip() for l in sys.stdin if l.strip()]))"),
   "exit_code": $EXIT,
   "wall_seconds": $WALL,
