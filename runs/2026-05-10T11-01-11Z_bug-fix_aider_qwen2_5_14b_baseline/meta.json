@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-05-10T11-01-11Z_bug-fix_aider_qwen2_5_14b_baseline",
+  "ts": "2026-05-10T11-01-11Z",
+  "eval": "bug-fix",
+  "harness": "aider",
+  "model": "qwen2.5:14b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 15,
+  "tokens_in": 726,
+  "tokens_out": 162,
+  "tool_calls": 0,
+  "score_pct": "100",
+  "telemetry": {
+    "samples": 11,
+    "gpu_util_avg": 37.27,
+    "gpu_util_peak": 60.0,
+    "gpu_mem_peak_mb": 11247.0,
+    "gpu_mem_avg_mb": 9499.0,
+    "gpu_temp_peak_c": 53.0,
+    "gpu_temp_avg_c": 48.73,
+    "gpu_power_avg_w": 71.82,
+    "gpu_power_peak_w": 131.57,
+    "gpu_fan_peak_pct": 30.0,
+    "host_load_peak": 2.67
+  }
+}

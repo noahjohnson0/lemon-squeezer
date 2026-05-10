@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-05-10T11-11-48Z_dijkstra_aider_phi4_14b_baseline",
+  "ts": "2026-05-10T11-11-48Z",
+  "eval": "dijkstra",
+  "harness": "aider",
+  "model": "phi4:14b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 115,
+  "tokens_in": 6662,
+  "tokens_out": 1964,
+  "tool_calls": 0,
+  "score_pct": "0",
+  "telemetry": {
+    "samples": 80,
+    "gpu_util_avg": 37.91,
+    "gpu_util_peak": 98.0,
+    "gpu_mem_peak_mb": 10578.0,
+    "gpu_mem_avg_mb": 9889.3,
+    "gpu_temp_peak_c": 58.0,
+    "gpu_temp_avg_c": 50.48,
+    "gpu_power_avg_w": 100.1,
+    "gpu_power_peak_w": 153.06,
+    "gpu_fan_peak_pct": 30.0,
+    "host_load_peak": 5.26
+  }
+}

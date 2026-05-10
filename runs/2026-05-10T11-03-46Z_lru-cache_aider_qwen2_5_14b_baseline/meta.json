@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-05-10T11-03-46Z_lru-cache_aider_qwen2_5_14b_baseline",
+  "ts": "2026-05-10T11-03-46Z",
+  "eval": "lru-cache",
+  "harness": "aider",
+  "model": "qwen2.5:14b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 42,
+  "tokens_in": 2911,
+  "tokens_out": 759,
+  "tool_calls": 0,
+  "score_pct": "100",
+  "telemetry": {
+    "samples": 30,
+    "gpu_util_avg": 45.73,
+    "gpu_util_peak": 97.0,
+    "gpu_mem_peak_mb": 11247.0,
+    "gpu_mem_avg_mb": 10180.13,
+    "gpu_temp_peak_c": 54.0,
+    "gpu_temp_avg_c": 50.37,
+    "gpu_power_avg_w": 103.76,
+    "gpu_power_peak_w": 132.4,
+    "gpu_fan_peak_pct": 30.0,
+    "host_load_peak": 3.85
+  }
+}

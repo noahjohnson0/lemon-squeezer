@@ -1,0 +1,15 @@
+{
+  "checks": [
+    {"name":"file:kalman.py","pass":1,"weight":5,"note":""},
+    {"name":"compiles","pass":1,"weight":5,"note":""},
+    {"name":"init","pass":1,"weight":11,"note":""},
+    {"name":"cov_2x2","pass":1,"weight":11,"note":""},
+    {"name":"converge_pos","pass":1,"weight":11,"note":"got_p=49.839"},
+    {"name":"converge_vel","pass":1,"weight":11,"note":"got_v=0.891"},
+    {"name":"predict_advances","pass":1,"weight":11,"note":"p0=0.0 p1=3.0"},
+    {"name":"predict_grows_cov","pass":1,"weight":11,"note":""}
+  ],
+  "gained": 76,
+  "total": 76,
+  "score_pct": 100
+}

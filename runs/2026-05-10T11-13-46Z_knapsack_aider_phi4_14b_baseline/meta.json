@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-05-10T11-13-46Z_knapsack_aider_phi4_14b_baseline",
+  "ts": "2026-05-10T11-13-46Z",
+  "eval": "knapsack",
+  "harness": "aider",
+  "model": "phi4:14b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 95,
+  "tokens_in": 5553,
+  "tokens_out": 1606,
+  "tool_calls": 0,
+  "score_pct": "0",
+  "telemetry": {
+    "samples": 67,
+    "gpu_util_avg": 40.34,
+    "gpu_util_peak": 100.0,
+    "gpu_mem_peak_mb": 10640.0,
+    "gpu_mem_avg_mb": 9770.31,
+    "gpu_temp_peak_c": 60.0,
+    "gpu_temp_avg_c": 50.45,
+    "gpu_power_avg_w": 103.22,
+    "gpu_power_peak_w": 143.16,
+    "gpu_fan_peak_pct": 30.0,
+    "host_load_peak": 3.58
+  }
+}

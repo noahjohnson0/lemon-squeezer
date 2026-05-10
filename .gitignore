@@ -1,21 +1,22 @@
-# Python bytecode in eval workspaces
-__pycache__/
-*.pyc
-*.pyo
 
-# Aider sidecar files inside run workspaces
-.aider.tags.cache.v4/
+__pycache__/
 .aider.input.history
 .aider.llm.history
-
-# OS / editor cruft
+.aider.tags.cache.v4/
 .DS_Store
-*.swp
 .idea/
 .vscode/
-
-# Local server logs
-/tmp/agent-evals-server.log
-runs/**/workspace/.git/
+*.pyc
+*.pyo
+*.swp
 /inflight.json
 /pending/
+/tmp/agent-evals-server.log
+# Aider sidecar files inside run workspaces
+# Local server logs
+# OS / editor cruft
+# Python bytecode in eval workspaces
+dashboard-next/.next/
+dashboard-next/node_modules/
+dashboard-next/out/
+runs/**/workspace/.git/

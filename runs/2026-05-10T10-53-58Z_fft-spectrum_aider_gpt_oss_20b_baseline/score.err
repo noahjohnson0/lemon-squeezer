@@ -1,0 +1,7 @@
+dom_50hz 1 got=49.805 expected~49.805
+dom_440hz 1 got=439.453
+dom_dc_reject 1 got=49.805
+spec_len 1 got=513
+spec_first_dc 1 got=0.0
+spec_last_nyq 1 got=500.0
+empty_raises 1

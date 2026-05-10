@@ -1,0 +1,19 @@
+enc1 1 got ''
+rt1 1 got b''
+enc2 0 ERR ValueError('Invalid base64 string length')
+rt2 0 ERR ValueError('Invalid base64 string length')
+enc3 0 ERR ValueError('Invalid base64 string length')
+rt3 0 ERR ValueError('Invalid base64 string length')
+enc4 1 got 'Zm9v'
+rt4 1 got b'foo'
+enc5 0 ERR ValueError('Invalid base64 string length')
+rt5 0 ERR ValueError('Invalid base64 string length')
+enc6 0 ERR ValueError('Invalid base64 string length')
+rt6 0 ERR ValueError('Invalid base64 string length')
+enc7 1 got 'Zm9vYmFy'
+rt7 1 got b'foobar'
+enc8 0 ERR ValueError('Invalid base64 string length')
+rt8 0 ERR ValueError('Invalid base64 string length')
+enc9 0 ERR ValueError('Invalid base64 string length')
+rt9 0 ERR ValueError('Invalid base64 string length')
+rejects_invalid 1

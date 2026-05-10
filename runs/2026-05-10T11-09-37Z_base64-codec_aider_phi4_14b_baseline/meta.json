@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-05-10T11-09-37Z_base64-codec_aider_phi4_14b_baseline",
+  "ts": "2026-05-10T11-09-37Z",
+  "eval": "base64-codec",
+  "harness": "aider",
+  "model": "phi4:14b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 128,
+  "tokens_in": 6458,
+  "tokens_out": 2232,
+  "tool_calls": 0,
+  "score_pct": "0",
+  "telemetry": {
+    "samples": 89,
+    "gpu_util_avg": 40.55,
+    "gpu_util_peak": 99.0,
+    "gpu_mem_peak_mb": 10706.0,
+    "gpu_mem_avg_mb": 9957.0,
+    "gpu_temp_peak_c": 61.0,
+    "gpu_temp_avg_c": 51.67,
+    "gpu_power_avg_w": 103.66,
+    "gpu_power_peak_w": 130.78,
+    "gpu_fan_peak_pct": 30.0,
+    "host_load_peak": 2.4
+  }
+}

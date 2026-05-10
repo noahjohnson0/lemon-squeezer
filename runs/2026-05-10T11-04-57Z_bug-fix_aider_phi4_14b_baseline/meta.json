@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-05-10T11-04-57Z_bug-fix_aider_phi4_14b_baseline",
+  "ts": "2026-05-10T11-04-57Z",
+  "eval": "bug-fix",
+  "harness": "aider",
+  "model": "phi4:14b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 99,
+  "tokens_in": 5533,
+  "tokens_out": 1452,
+  "tool_calls": 0,
+  "score_pct": "27",
+  "telemetry": {
+    "samples": 69,
+    "gpu_util_avg": 36.91,
+    "gpu_util_peak": 100.0,
+    "gpu_mem_peak_mb": 11247.0,
+    "gpu_mem_avg_mb": 9893.64,
+    "gpu_temp_peak_c": 61.0,
+    "gpu_temp_avg_c": 50.9,
+    "gpu_power_avg_w": 91.98,
+    "gpu_power_peak_w": 155.96,
+    "gpu_fan_peak_pct": 30.0,
+    "host_load_peak": 3.74
+  }
+}

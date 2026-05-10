@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-05-10T10-54-30Z_matrix-ops_aider_gpt_oss_20b_baseline",
+  "ts": "2026-05-10T10-54-30Z",
+  "eval": "matrix-ops",
+  "harness": "aider",
+  "model": "gpt-oss:20b",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 54,
+  "tokens_in": 864,
+  "tokens_out": 1200,
+  "tool_calls": 0,
+  "score_pct": "89",
+  "telemetry": {
+    "samples": 38,
+    "gpu_util_avg": 36.55,
+    "gpu_util_peak": 56.0,
+    "gpu_mem_peak_mb": 11345.0,
+    "gpu_mem_avg_mb": 11214.32,
+    "gpu_temp_peak_c": 61.0,
+    "gpu_temp_avg_c": 58.21,
+    "gpu_power_avg_w": 44.83,
+    "gpu_power_peak_w": 86.06,
+    "gpu_fan_peak_pct": 0.0,
+    "host_load_peak": 2.59
+  }
+}
