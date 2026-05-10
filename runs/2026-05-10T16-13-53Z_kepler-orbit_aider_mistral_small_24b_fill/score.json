@@ -1,0 +1,15 @@
+{
+  "checks": [
+    {"name":"file:kepler.py","pass":1,"weight":5,"note":""},
+    {"name":"compiles","pass":1,"weight":5,"note":""},
+    {"name":"uses_rk4","pass":1,"weight":8,"note":""},
+    {"name":"energy_formula","pass":1,"weight":8,"note":"got=-0.5"},
+    {"name":"half_period","pass":0,"weight":12,"note":"TypeError("'int' object is not subscriptable")"},
+    {"name":"full_period","pass":0,"weight":14,"note":"TypeError("'int' object is not subscriptable")"},
+    {"name":"energy_drift","pass":0,"weight":14,"note":"TypeError("'int' object is not subscriptable")"},
+    {"name":"ellipse_apo","pass":0,"weight":12,"note":"TypeError("'int' object is not subscriptable")"}
+  ],
+  "gained": 26,
+  "total": 78,
+  "score_pct": 33
+}

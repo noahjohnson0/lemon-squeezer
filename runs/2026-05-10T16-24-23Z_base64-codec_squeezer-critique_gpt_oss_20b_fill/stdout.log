@@ -1,0 +1,4 @@
+
+══════ STEP: draft  (gpt-oss:20b) ══════
+[draft it=0] TOOL list_files {"dir":"."}
+[draft it=1] TOOL write_file {"path":"base64codec.py","content":"\"\"\"\nBase64 encoder/decoder (RFC 4648) without using the standard `base64` module.\n\nThis module provides two functions:

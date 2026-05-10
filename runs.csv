@@ -273,3 +273,13 @@ run_id,ts,eval,harness,model,tag,wall_s,tok_in,tok_out,tools,exit,score_pct
 2026-05-10T16-11-39Z_needle-haystack_qa_mistral_small_24b_rag,2026-05-10T16-11-39Z,needle-haystack,qa,mistral-small:24b,rag,6,4096,6,0,0,22
 2026-05-10T16-11-51Z_wiki-rag_qa_mistral_small_24b_rag,2026-05-10T16-11-51Z,wiki-rag,qa,mistral-small:24b,rag,26,1233,199,0,0,91
 2026-05-10T16-12-24Z_chem-balance_aider_mistral_small_24b_fill,2026-05-10T16-12-24Z,chem-balance,aider,mistral-small:24b,fill,82,873,572,0,0,?
+2026-05-10T16-13-53Z_kepler-orbit_aider_mistral_small_24b_fill,2026-05-10T16-13-53Z,kepler-orbit,aider,mistral-small:24b,fill,253,4166,1268,0,0,?
+2026-05-10T16-18-13Z_dijkstra_aider_qwen2_5_14b_fill,2026-05-10T16-18-13Z,dijkstra,aider,qwen2.5:14b,fill,24,753,358,0,0,100
+2026-05-10T16-18-43Z_port-scanner_aider_qwen2_5_14b_fill,2026-05-10T16-18-43Z,port-scanner,aider,qwen2.5:14b,fill,20,887,330,0,0,75
+2026-05-10T16-19-09Z_projectile-sim_aider_qwen2_5_14b_fill,2026-05-10T16-19-09Z,projectile-sim,aider,qwen2.5:14b,fill,34,960,731,0,0,23
+2026-05-10T16-20-49Z_refactor_aider_qwen2_5_14b_fill,2026-05-10T16-20-49Z,refactor,aider,qwen2.5:14b,fill,15,756,244,0,0,?
+2026-05-10T16-21-09Z_regression-ci_aider_qwen2_5_14b_fill,2026-05-10T16-21-09Z,regression-ci,aider,qwen2.5:14b,fill,21,784,363,0,0,100
+2026-05-10T16-21-35Z_solar-position_aider_qwen2_5_14b_fill,2026-05-10T16-21-35Z,solar-position,aider,qwen2.5:14b,fill,25,1100,461,0,0,11
+2026-05-10T16-22-05Z_sql-injection-fix_aider_qwen2_5_14b_fill,2026-05-10T16-22-05Z,sql-injection-fix,aider,qwen2.5:14b,fill,18,828,293,0,0,100
+2026-05-10T16-22-29Z_unit-convert_aider_qwen2_5_14b_fill,2026-05-10T16-22-29Z,unit-convert,aider,qwen2.5:14b,fill,61,894,1400,0,0,30
+2026-05-10T16-23-36Z_wifi-stats_aider_qwen2_5_14b_fill,2026-05-10T16-23-36Z,wifi-stats,aider,qwen2.5:14b,fill,41,799,879,0,0,9

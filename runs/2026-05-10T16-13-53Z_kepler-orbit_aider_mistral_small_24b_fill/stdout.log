@@ -169,3 +169,8 @@ k4[j][i]] for j in range(4)) for i in range(4))
 
 Tokens: 3.2k sent, 658 received.
 Applied edit to kepler.py
+litellm.APIConnectionError: Ollama_chatException - {"error":"llama runner process has terminated: CUDA error: shared object initialization failed\nCUDA error"}
+Retrying in 0.2 seconds...
+Summarization failed for model ollama_chat/mistral-small:24b: cannot schedule new futures after shutdown
+Summarization failed for model ollama_chat/mistral-small:24b: cannot schedule new futures after shutdown
+summarizer unexpectedly failed for all models
