@@ -68,3 +68,6 @@ run_id,ts,eval,harness,model,tag,wall_s,tok_in,tok_out,tools,exit,score_pct
 2026-05-10T08-15-52Z_port-scanner_aider_devstral_24b_baseline,2026-05-10T08-15-52Z,port-scanner,aider,devstral:24b,baseline,291,861,367,0,0,85
 2026-05-10T08-19-45Z_port-scanner_pi_qwen3_14b_baseline,2026-05-10T08-19-45Z,port-scanner,pi,qwen3:14b,baseline,127,5844,2016,1,0,100
 2026-05-10T08-20-28Z_bug-fix_aider_qwen3_coder_30b_a3b_q4_K_M_tele-verify,2026-05-10T08-20-28Z,bug-fix,aider,qwen3-coder:30b-a3b-q4_K_M,tele-verify,77,728,148,0,0,100
+2026-05-10T08-21-55Z_chem-balance_pi_qwen3_coder_30b_a3b_q4_K_M_baseline,2026-05-10T08-21-55Z,chem-balance,pi,qwen3-coder:30b-a3b-q4_K_M,baseline,89,2258,1484,0,0,0
+2026-05-10T08-23-26Z_sql-injection-fix_pi_qwen3_coder_30b_a3b_q4_K_M_baseline,2026-05-10T08-23-26Z,sql-injection-fix,pi,qwen3-coder:30b-a3b-q4_K_M,baseline,23,7966,421,2,0,85
+2026-05-10T08-23-52Z_password-strength_pi_qwen3_coder_30b_a3b_q4_K_M_baseline,2026-05-10T08-23-52Z,password-strength,pi,qwen3-coder:30b-a3b-q4_K_M,baseline,128,5561,868,2,0,93

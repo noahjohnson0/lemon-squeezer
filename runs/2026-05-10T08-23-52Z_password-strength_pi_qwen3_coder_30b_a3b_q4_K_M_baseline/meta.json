@@ -1,0 +1,19 @@
+{
+  "run_id": "2026-05-10T08-23-52Z_password-strength_pi_qwen3_coder_30b_a3b_q4_K_M_baseline",
+  "ts": "2026-05-10T08-23-52Z",
+  "eval": "password-strength",
+  "harness": "pi",
+  "model": "qwen3-coder:30b-a3b-q4_K_M",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 128,
+  "tokens_in": 5561,
+  "tokens_out": 868,
+  "tool_calls": 2,
+  "score_pct": "93",
+  "telemetry": {
+    "samples": 123,
+    "host_load_peak": 3.85
+  }
+}

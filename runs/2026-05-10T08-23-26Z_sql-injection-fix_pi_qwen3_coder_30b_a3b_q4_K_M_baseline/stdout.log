@@ -1,0 +1,9 @@
+The fix I implemented addresses the SQL injection vulnerability in the `lookup` function by:
+
+1. Replacing the string interpolation approach (`f"SELECT ... WHERE name = '{name}'"`) with a parameterized query using `?` placeholder
+2. Passing the parameter as a tuple `(name,)` to the `execute()` method
+3. Maintaining the exact same function signature `lookup(con, name)`
+4. Ensuring normal lookups still work (e.g., `lookup(con, "alice")` returns the alice row)
+5. Preventing injection payloads from returning unintended rows (e.g., `lookup(con, "' OR '1'='1")` returns 0 rows)
+
+This is a proper fix that follows SQL best practices by using parameterized queries rather than just escaping characters or blocking substrings. The vulnerability is now eliminated while preserving all intended functionality.

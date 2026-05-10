@@ -22,17 +22,11 @@ case "$ACTION" in
     echo "ts,gpu_util_pct,gpu_mem_used_mb,gpu_temp_c,gpu_power_w,gpu_fan_pct,host_load1" > "$csv"
     touch "$flag"
     (
-      ctl=""
-      if [[ -n "$SSH_TARGET" ]]; then
-        # SSH multiplexing for low-overhead per-sample nvidia-smi queries.
-        ctl="$RUN_DIR/.sshctl"
-        ssh -o ControlMaster=yes -o ControlPersist=60 -o ControlPath="$ctl" -fN "$SSH_TARGET" 2>/dev/null
-      fi
       while [[ -f "$flag" ]]; do
         ts=$(date +%s)
         gpu=",,,,"  # default: empty fields
-        if [[ -n "$ctl" ]]; then
-          gpu="$(ssh -o ControlPath="$ctl" "$SSH_TARGET" \
+        if [[ -n "$SSH_TARGET" ]]; then
+          gpu="$(ssh -o ConnectTimeout=2 -o BatchMode=yes "$SSH_TARGET" \
             'nvidia-smi --query-gpu=utilization.gpu,memory.used,temperature.gpu,power.draw,fan.speed --format=csv,noheader,nounits' 2>/dev/null \
             | tr -d ' \r' | head -1)"
           [[ -z "$gpu" ]] && gpu=",,,,"
@@ -41,8 +35,6 @@ case "$ACTION" in
         echo "${ts},${gpu},${load}" >> "$csv"
         sleep "$SAMPLE_INTERVAL"
       done
-      [[ -n "$ctl" ]] && ssh -o ControlPath="$ctl" -O exit "$SSH_TARGET" 2>/dev/null
-      [[ -n "$ctl" ]] && rm -f "$ctl"
     ) </dev/null >/dev/null 2>&1 &
     SAMPLER_PID=$!
     disown $SAMPLER_PID 2>/dev/null

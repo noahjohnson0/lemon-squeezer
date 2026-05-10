@@ -1,0 +1,166 @@
+```python
+# balance.py
+import re
+import numpy as np
+from fractions import Fraction
+from math import gcd
+from functools import reduce
+
+def parse_formula(formula):
+    """Parse a chemical formula and return a dictionary of element counts."""
+    elements = {}
+    
+    # Find all element symbols (capital letter followed by optional lowercase letters)
+    # and their optional numeric subscripts
+    pattern = r'([A-Z][a-z]*)(\d*)'
+    
+    # Handle parentheses
+    while '(' in formula:
+        # Find the innermost parentheses group
+        match = re.search(r'\(([^()]+)\)(\d*)', formula)
+        if not match:
+            break
+            
+        group, multiplier = match.groups()
+        multiplier = int(multiplier) if multiplier else 1
+        expanded_group = expand_group(group)
+        # Replace the parentheses with the expanded content, multiplied
+        formula = formula[:match.start()] + expanded_group * multiplier + formula[match.end():]
+    
+    # Now parse the simplified formula
+    matches = re.findall(pattern, formula)
+    for element, count in matches:
+        count = int(count) if count else 1
+        elements[element] = elements.get(element, 0) + count
+    
+    return elements
+
+def expand_group(group):
+    """Expand a group inside parentheses."""
+    # This is a helper function for handling parentheses
+    # It simply returns the group as-is since we're handling that elsewhere
+    return group
+
+def get_all_elements(equation):
+    """Get a list of all unique elements in the equation."""
+    elements = set()
+    sides = equation.split('->')
+    
+    for side in sides:
+        for formula in re.findall(r'[A-Z][a-z]*(\d*)', side):
+            # Extract the element name and add it to set
+            element_name = re.match(r'[A-Z][a-z]*', formula).group(0)
+            elements.add(element_name)
+    
+    # Return sorted list for consistent ordering
+    return sorted(list(elements))
+
+def balance(equation: str) -> tuple[list[int], list[int]]:
+    """
+    Take an unbalanced equation string like "H2 + O2 -> H2O".
+    Return (lhs_coefficients, rhs_coefficients) as lists of POSITIVE integers
+    in the smallest-integer form.
+
+    Example:
+        balance("H2 + O2 -> H2O") returns ([2, 1], [2])
+        balance("CH4 + O2 -> CO2 + H2O") returns ([1, 2], [1, 2])
+    """
+    # Split equation into reactants and products
+    if '->' not in equation:
+        raise ValueError("Invalid equation format: missing '->'")
+    
+    reactants, products = equation.split('->')
+    
+    # Parse reactants and products
+    reactant_formulas = [f.strip() for f in reactants.split('+') if f.strip()]
+    product_formulas = [f.strip() for f in products.split('+') if f.strip()]
+    
+    # Get all unique elements
+    all_elements = get_all_elements(equation)
+    
+    # Create coefficient matrix
+    # We'll create a system where each row represents an element
+    # and each column represents a compound (reactant then product)
+    num_elements = len(all_elements)
+    num_compounds = len(reactant_formulas) + len(product_formulas)
+    
+    # Initialize the matrix
+    matrix = np.zeros((num_elements, num_compounds), dtype=int)
+    
+    # Fill in the matrix
+    for i, element in enumerate(all_elements):
+        # Process reactants (positive coefficients)
+        for j, formula in enumerate(reactant_formulas):
+            elements_in_formula = parse_formula(formula)
+            if element in elements_in_formula:
+                matrix[i, j] = elements_in_formula[element]
+        
+        # Process products (negative coefficients)
+        for j, formula in enumerate(product_formulas):
+            elements_in_formula = parse_formula(formula)
+            if element in elements_in_formula:
+                matrix[i, len(reactant_formulas) + j] = -elements_in_formula[element]
+    
+    # We now have a matrix A such that A * x = 0
+    # To solve this, we need to find the nullspace
+    # Using SVD to find the nullspace
+    u, s, vh = np.linalg.svd(matrix)
+    
+    # Find the right null space
+    # The last column of vh corresponds to the null space of A
+    null_vector = vh.T[:, -1]
+    
+    # Convert to positive integer coefficients
+    # Scale to get integer coefficients
+    coefficients = []
+    
+    # Find scaling factor that makes all elements integers with no common factors
+    # Use fractions to find the common denominator
+    fractions = [Fraction(abs(x)).limit_denominator(1000000) for x in null_vector]
+    
+    # Find the LCM of denominators to scale to integers
+    denominators = [f.denominator for f in fractions]
+    lcm_denominator = reduce(lambda a, b: a * b // gcd(a, b), denominators)
+    
+    # Scale
+    scaled_coeffs = [int(f * lcm_denominator) for f in fractions]
+    
+    # Make sure we have positive coefficients (we can multiply everything by -1 if needed)
+    if scaled_coeffs[0] < 0:
+        scaled_coeffs = [-x for x in scaled_coeffs]
+    
+    # Normalize so that the smallest coefficient is 1 (if possible)
+    if any(x > 0 for x in scaled_coeffs):
+        # Find the smallest positive coefficient
+        min_coefficient = min(x for x in scaled_coeffs if x > 0)
+        
+        # Check if we can reduce by this factor
+        gcd_all = reduce(gcd, [x for x in scaled_coeffs if x > 0])
+        if gcd_all > 1:
+            scaled_coeffs = [x // gcd_all for x in scaled_coeffs]
+    
+    # Split into left and right sides
+    left_coeffs = scaled_coeffs[:len(reactant_formulas)]
+    right_coeffs = scaled_coeffs[len(reactant_formulas):]
+    
+    # Ensure all coefficients are positive
+    if any(c <= 0 for c in left_coeffs + right_coeffs):
+        raise ValueError("Could not balance equation")
+    
+    # Double-check that the balanced equation is correct
+    for i, element in enumerate(all_elements):
+        left_sum = 0
+        right_sum = 0
+        for j, formula in enumerate(reactant_formulas):
+            elements_in_formula = parse_formula(formula)
+            if element in elements_in_formula:
+                left_sum += left_coeffs[j] * elements_in_formula[element]
+        for j, formula in enumerate(product_formulas):
+            elements_in_formula = parse_formula(formula)
+            if element in elements_in_formula:
+                right_sum += right_coeffs[j] * elements_in_formula[element]
+        if left_sum != right_sum:
+            raise ValueError("Could not balance equation") 
+    
+    return (left_coeffs, right_coeffs)
+```

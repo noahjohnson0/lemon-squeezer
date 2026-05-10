@@ -1,0 +1,19 @@
+{
+  "run_id": "2026-05-10T08-21-55Z_chem-balance_pi_qwen3_coder_30b_a3b_q4_K_M_baseline",
+  "ts": "2026-05-10T08-21-55Z",
+  "eval": "chem-balance",
+  "harness": "pi",
+  "model": "qwen3-coder:30b-a3b-q4_K_M",
+  "tag": "baseline",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 89,
+  "tokens_in": 2258,
+  "tokens_out": 1484,
+  "tool_calls": 0,
+  "score_pct": "0",
+  "telemetry": {
+    "samples": 87,
+    "host_load_peak": 3.06
+  }
+}
