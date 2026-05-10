@@ -61,7 +61,9 @@ m = dict(c.execute("SELECT key,value FROM meta").fetchall())
 print(f"  {sys.argv[1].split('/')[-2]:20} docs={m.get('n_docs','?'):>5}  sections={m.get('n_sections','?'):>6}  built={m.get('built_at','?')}")
 PY
   done
-  (( found == 0 )) && echo "  (none — build with: bin/refs/build_index.py ~/refs/<name>)"
+  if (( found == 0 )); then
+    echo "  (none — build with: bin/refs/build_index.py ~/refs/<name>)"
+  fi
 }
 
 cmd_search() {
@@ -76,15 +78,24 @@ cmd_search() {
 # Cheap, transparent, easily-overrideable.
 route_for() {
   local q="$1"; local q_lc; q_lc="$(echo "$q" | tr '[:upper:]' '[:lower:]')"
-  # Coding signals
-  if echo "$q_lc" | grep -qE 'write (a |the )?(function|script|program|cli|class|module)|implement|refactor|fix this code|debug|unit test|pytest|stack trace|compile error|build a (web|next|react|fastapi)'; then
-    echo "code:$CODE_MODEL"
-    return
+  # Coding signals: bare verbs that strongly imply code work
+  if echo "$q_lc" | grep -qE '\b(refactor|debug|implement|unit test|stack trace|compile error|type error|runtime error)\b'; then
+    echo "code:$CODE_MODEL"; return
   fi
-  # Math/scientific
-  if echo "$q_lc" | grep -qE 'derivative|integral|matrix|eigen|fourier|theorem|prove that|equation|tflops|simulate'; then
-    echo "librarian:$LIB_MODEL:default"
-    return
+  # Imperative: "write/build/fix X" where X is code-y
+  if echo "$q_lc" | grep -qE '\b(write|build|fix) (a |the |an )?(function|script|program|cli|class|module|test|web ?app|next|react|fastapi|flask|api|server|client|component)\b'; then
+    echo "code:$CODE_MODEL"; return
+  fi
+  if echo "$q_lc" | grep -qE '\b(how (do|can) i|how to)\b.*\b(parse|serialize|deserialize|read|write|sort|filter|connect|fetch|render|bundle|compile|install)\b'; then
+    echo "code:$CODE_MODEL"; return
+  fi
+  if echo "$q_lc" | grep -qE '\b(python|javascript|typescript|rust|node|npm|pip|cargo|sql|bash|regex|json|csv|http|api)\b' \
+     && echo "$q_lc" | grep -qE '\b(how|why|what|use|using|with|in|to)\b'; then
+    echo "code:$CODE_MODEL"; return
+  fi
+  # Math/scientific reasoning — answer with a strong model, not necessarily RAG
+  if echo "$q_lc" | grep -qE '\b(derivative|integral|matrix|eigen|fourier|theorem|prove|equation|tflops|simulate|differential|partial|gradient)\b'; then
+    echo "librarian:$LIB_MODEL:default"; return
   fi
   # Default: factual librarian
   echo "librarian:$LIB_MODEL:default"
