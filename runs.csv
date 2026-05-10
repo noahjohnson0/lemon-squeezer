@@ -300,3 +300,5 @@ run_id,ts,eval,harness,model,tag,wall_s,tok_in,tok_out,tools,exit,score_pct
 2026-05-10T17-41-42Z_levenshtein_squeezer-critique_gpt_oss_20b_fill,2026-05-10T17-41-42Z,levenshtein,squeezer-critique,gpt-oss:20b,fill,468,35164,10661,16,0,100
 2026-05-10T17-49-36Z_lru-cache_squeezer-critique_gpt_oss_20b_fill,2026-05-10T17-49-36Z,lru-cache,squeezer-critique,gpt-oss:20b,fill,188,13364,3065,8,0,100
 2026-05-10T17-52-50Z_matrix-ops_squeezer-critique_gpt_oss_20b_fill,2026-05-10T17-52-50Z,matrix-ops,squeezer-critique,gpt-oss:20b,fill,472,18276,10771,7,0,89
+2026-05-10T18-00-49Z_password-strength_squeezer-critique_gpt_oss_20b_fill,2026-05-10T18-00-49Z,password-strength,squeezer-critique,gpt-oss:20b,fill,488,15295,11155,6,0,100
+2026-05-10T18-09-04Z_port-scanner_squeezer-critique_gpt_oss_20b_fill,2026-05-10T18-09-04Z,port-scanner,squeezer-critique,gpt-oss:20b,fill,270,13115,6273,7,0,100
