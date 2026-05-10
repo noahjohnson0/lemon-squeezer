@@ -15,6 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 RUNS = ROOT / "runs"
+PENDING = ROOT / "pending"
 OUT  = ROOT / "inflight.json"
 INTERVAL = float(os.environ.get("INFLIGHT_INTERVAL", "2"))
 
@@ -109,6 +110,37 @@ def scan() -> list[dict]:
         out.append(info)
     return out
 
+def scan_pending() -> list[dict]:
+    """Read pending/<pid>/info entries — runs queued waiting for the GPU lock."""
+    out = []
+    if not PENDING.exists(): return out
+    now = time.time()
+    for d in sorted(PENDING.iterdir()):
+        if not d.is_dir(): continue
+        info_path = d / "info"
+        if not info_path.exists(): continue
+        try:
+            info = {}
+            for line in info_path.read_text().splitlines():
+                if "=" in line:
+                    k, _, v = line.partition("=")
+                    info[k.strip()] = v.strip()
+            # Drop stale entries — owner PID dead
+            try:
+                pid = int(info.get("pid", "0"))
+                if pid > 0:
+                    os.kill(pid, 0)  # raises if dead
+            except (ProcessLookupError, ValueError):
+                continue
+            queued_epoch = int(info.get("queued_epoch", "0"))
+            info["queued_for_s"] = max(0, int(now - queued_epoch)) if queued_epoch else 0
+            out.append(info)
+        except Exception:
+            continue
+    # Order by oldest first (FIFO)
+    out.sort(key=lambda x: x.get("queued_for_s", 0), reverse=True)
+    return out
+
 def main() -> None:
     while True:
         try:
@@ -116,6 +148,7 @@ def main() -> None:
                 "generated_ts": datetime.now(timezone.utc).isoformat(timespec="seconds"),
                 "interval_s": INTERVAL,
                 "runs": scan(),
+                "queued": scan_pending(),
             }
             tmp = OUT.with_suffix(".json.tmp")
             tmp.write_text(json.dumps(data, indent=2))

@@ -81,5 +81,4 @@ run_id,ts,eval,harness,model,tag,wall_s,tok_in,tok_out,tools,exit,score_pct
 2026-05-10T08-34-48Z_sql-injection-fix_pi_devstral_24b_baseline,2026-05-10T08-34-48Z,sql-injection-fix,pi,devstral:24b,baseline,5,1877,31,0,0,65
 2026-05-10T08-34-55Z_password-strength_pi_devstral_24b_baseline,2026-05-10T08-34-55Z,password-strength,pi,devstral:24b,baseline,13,2044,90,0,0,0
 2026-05-10T08-35-10Z_port-scanner_pi_devstral_24b_baseline,2026-05-10T08-35-10Z,port-scanner,pi,devstral:24b,baseline,55,1935,444,0,0,0
-2026-05-10T08-41-33Z_bug-fix_aider_qwen3_coder_30b_a3b_q4_K_M_lock-test-A,2026-05-10T08-41-33Z,bug-fix,aider,qwen3-coder:30b-a3b-q4_K_M,lock-test-A,16,728,148,0,0,100
-2026-05-10T08-41-52Z_bug-fix_aider_qwen3_coder_30b_a3b_q4_K_M_lock-test-B,2026-05-10T08-41-52Z,bug-fix,aider,qwen3-coder:30b-a3b-q4_K_M,lock-test-B,7,728,148,0,0,100
+2026-05-10T08-46-14Z_bug-fix_squeezer-critique_qwen3_14b_critique-test,2026-05-10T08-46-14Z,bug-fix,squeezer-critique,qwen3:14b,critique-test,189,6987,7004,7,0,100

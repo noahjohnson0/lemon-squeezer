@@ -18,3 +18,4 @@ __pycache__/
 /tmp/agent-evals-server.log
 runs/**/workspace/.git/
 /inflight.json
+/pending/

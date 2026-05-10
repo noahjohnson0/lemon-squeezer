@@ -143,6 +143,13 @@
   </h3>
   <p class="desc" style="margin-top:4px;">Live view of in-flight evals on the local GPU host. Sampled every <code id="live-interval">2</code>s by <code>bin/inflight-watcher</code>. This panel only appears when the watcher is running.</p>
   <div id="live-rows"></div>
+  <div id="live-queue-wrap" style="margin-top:14px; display:none;">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+      <strong style="font-size:12px; color:var(--muted); letter-spacing:0.04em; text-transform:uppercase;">Queued for GPU lock</strong>
+      <span class="num" id="live-queue-count" style="font-size:11px; color:var(--muted); border:1px solid var(--border); padding:1px 6px; border-radius:999px; font-weight:400;">–</span>
+    </div>
+    <div id="live-queue-rows"></div>
+  </div>
 </section>
 <style>
   @keyframes pulse-anim { 0%,100% { opacity: 1 } 50% { opacity: 0.35 } }
@@ -159,6 +166,11 @@
   .live-row .gpu .v.hot  { color: var(--bad); }
   .live-row .barwrap { width: 64px; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; display: inline-block; vertical-align: middle; }
   .live-row .barwrap > span { display: block; height: 100%; background: var(--accent); }
+  .queued-row { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; padding: 6px 0; border-top: 1px solid var(--border); align-items: center; opacity: 0.78; }
+  .queued-row:first-of-type { border-top: 0; }
+  .queued-row .head { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 12px; }
+  .queued-row .head strong { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .queued-row .wait { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: var(--muted); }
 </style>
 
 <section class="stats">
@@ -355,6 +367,26 @@ function renderInflight(data) {
   document.getElementById("live-interval").textContent = data.interval_s ?? 2;
   const tempClass = t => (t == null ? "" : t > 80 ? "hot" : t > 70 ? "warm" : "");
   const utilWidth = u => `width:${Math.max(0,Math.min(100, u||0))}%`;
+  // Queued
+  const qWrap = document.getElementById("live-queue-wrap");
+  const queued = Array.isArray(data.queued) ? data.queued : [];
+  if (queued.length === 0) {
+    qWrap.style.display = "none";
+  } else {
+    qWrap.style.display = "block";
+    document.getElementById("live-queue-count").textContent = `${queued.length} waiting`;
+    document.getElementById("live-queue-rows").innerHTML = queued.map(q => `
+      <div class="queued-row">
+        <div class="head">
+          <span style="color:var(--muted);">⏳</span>
+          <strong>${q.eval||"?"}</strong>
+          <span class="chip ${q.harness||""}">${q.harness||"?"}</span>
+          <span>${q.model||"?"}</span>
+          <span class="chip">${q.tag||""}</span>
+        </div>
+        <div class="wait">queued ${fmtElapsed(q.queued_for_s)}</div>
+      </div>`).join("");
+  }
   document.getElementById("live-rows").innerHTML = data.runs.map(r => `
     <div class="live-row">
       <div>

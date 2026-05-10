@@ -4,6 +4,25 @@
 set -euo pipefail
 [ -f "$HOME/.config/lemon-squeezer.env" ] && . "$HOME/.config/lemon-squeezer.env"
 
+LSQ_ROOT="${HOME}/repos/lemon-squeezer"
+
+# Parse the args eagerly so we can register a pending entry before grabbing the lock.
+# (Reparsed below for the actual run.)
+PRE_HARNESS="${1:-?}"; PRE_EVAL="${2:-?}"; PRE_MODEL="${3:-?}"; PRE_TAG="${4:-?}"
+
+# Register this invocation in pending/ so the dashboard shows queued runs.
+PENDING_DIR="$LSQ_ROOT/pending/$$"
+mkdir -p "$PENDING_DIR"
+cat > "$PENDING_DIR/info" <<PEND
+harness=$PRE_HARNESS
+eval=$PRE_EVAL
+model=$PRE_MODEL
+tag=$PRE_TAG
+queued_ts=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+queued_epoch=$(date +%s)
+pid=$$
+PEND
+
 # ────────────────────────── GPU serialization lock ──────────────────────────
 # The whole point of this benchmark is reproducible wall-clock + telemetry.
 # Concurrent runs against the same Ollama host destroy that — Ollama queues
@@ -11,17 +30,16 @@ set -euo pipefail
 # whichever run happens to be active at sample time, not necessarily ours.
 #
 # We use an atomic mkdir-based lock: only one eval-run holds the GPU at a time.
-# Multiple invocations queue automatically. Set LEMON_NO_LOCK=1 to bypass
-# (e.g. when running on a separate host).
-LOCK="${HOME}/repos/lemon-squeezer/.gpu.lock"
+# Multiple invocations queue automatically. Set LEMON_NO_LOCK=1 to bypass.
+LOCK="$LSQ_ROOT/.gpu.lock"
 if [[ "${LEMON_NO_LOCK:-0}" != "1" ]]; then
+  trap 'rm -rf "$PENDING_DIR" "$LOCK"' EXIT INT TERM
   WAITED=0
   while ! mkdir "$LOCK" 2>/dev/null; do
     if (( WAITED == 0 )); then
       echo "⏳ another eval-run holds the GPU lock; queueing…"
       WAITED=1
     fi
-    # Detect stale lock — if owner pid dead, reclaim
     if [[ -f "$LOCK/owner.pid" ]]; then
       OWNER=$(cat "$LOCK/owner.pid" 2>/dev/null || echo 0)
       if (( OWNER > 0 )) && ! kill -0 "$OWNER" 2>/dev/null; then
@@ -33,8 +51,10 @@ if [[ "${LEMON_NO_LOCK:-0}" != "1" ]]; then
     sleep 2
   done
   echo "$$" > "$LOCK/owner.pid"
-  trap 'rm -rf "$LOCK"' EXIT INT TERM
 fi
+# We have the lock — promote pending → running. The pending entry is removed
+# now, but the run_dir + .sampling flag will surface us under "Running" instead.
+rm -rf "$PENDING_DIR"
 
 HARNESS="${1:?usage: eval-run <harness> <eval> <model> <tag> [-- flags...]}"
 EVAL="${2:?eval required}"
