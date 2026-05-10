@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-05-10T09-02-52Z_refactor_squeezer-critique_qwen3_14b_crit",
+  "ts": "2026-05-10T09-02-52Z",
+  "eval": "refactor",
+  "harness": "squeezer-critique",
+  "model": "qwen3:14b",
+  "tag": "crit",
+  "extra_flags": [],
+  "exit_code": 0,
+  "wall_seconds": 221,
+  "tokens_in": 7529,
+  "tokens_out": 8645,
+  "tool_calls": 6,
+  "score_pct": "?",
+  "telemetry": {
+    "samples": 156,
+    "gpu_util_avg": 84.5,
+    "gpu_util_peak": 98.0,
+    "gpu_mem_peak_mb": 11398.0,
+    "gpu_mem_avg_mb": 10751.26,
+    "gpu_temp_peak_c": 68.0,
+    "gpu_temp_avg_c": 63.15,
+    "gpu_power_avg_w": 183.26,
+    "gpu_power_peak_w": 219.79,
+    "gpu_fan_peak_pct": 47.0,
+    "host_load_peak": 2.94
+  }
+}

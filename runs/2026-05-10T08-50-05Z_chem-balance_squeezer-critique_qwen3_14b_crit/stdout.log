@@ -13,3 +13,7 @@
 [critique-1] done — 1 tools, 1485/115 tok, 11.3s
 
 ══════ STEP: refine-1  (qwen3:14b) ══════
+[refine-1 it=0] To balance a chemical equation, we follow a systematic approach that involves identifying all compounds on both sides of the equation, determining the chemical elements in each compound, and setting up a system of equations based on the con
+[refine-1] done — 0 tools, 736/9457 tok, 234.1s
+
+══════ PIPELINE DONE — 3 steps, 2964/18309 tok total ══════

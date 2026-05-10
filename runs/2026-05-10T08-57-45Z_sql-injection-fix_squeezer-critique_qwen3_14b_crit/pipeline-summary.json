@@ -1,0 +1,27 @@
+{
+  "pipeline": "critique",
+  "steps": [
+    {
+      "name": "draft",
+      "model": "qwen3:14b",
+      "tokens_in": 3843,
+      "tokens_out": 2445,
+      "tool_calls": 2,
+      "wall_s": 72.5,
+      "final": "The SQL-injection vulnerability in `lookup(con, name)` has been fixed by replacing the vulnerable string interpolation with a **parameterised query** using `?` placeholders and tuple binding. Here's what was done:\n\n1. **Original vulnerable code:**\n   ```python\n   q = f\"SELECT id, name, email FROM users WHERE name = '{name}'\"\n   cur.execute(q)\n   ```\n\n2. **Fixed code:**\n   ```python\n   q = \"SELECT id, name, email FROM users WHERE name = ?\"\n   cur.execute(q, (name,))\n   ```\n\nThis change:\n- Prevents SQL injection by treating `name` as a parameter (not part of the SQL syntax)\n- Maintains the original function signature `lookup(con, name)`\n- Ensures injection payloads like `\" OR '1'='1` return 0 rows (not all users)\n- Works identically for normal lookups like `lookup(con, \"alice\")`\n\nNo other parts of `app.py` were modified. The fix is 100% compliant with all constraints."
+    },
+    {
+      "name": "critique-1",
+      "model": "gpt-oss:20b",
+      "tokens_in": 3958,
+      "tokens_out": 964,
+      "tool_calls": 3,
+      "wall_s": 44.9,
+      "final": "OK: nothing to fix"
+    }
+  ],
+  "primary_model": "qwen3:14b",
+  "critic_model": "gpt-oss:20b",
+  "judge_model": null,
+  "rounds": 1
+}

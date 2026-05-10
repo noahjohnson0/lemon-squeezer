@@ -82,3 +82,9 @@ run_id,ts,eval,harness,model,tag,wall_s,tok_in,tok_out,tools,exit,score_pct
 2026-05-10T08-34-55Z_password-strength_pi_devstral_24b_baseline,2026-05-10T08-34-55Z,password-strength,pi,devstral:24b,baseline,13,2044,90,0,0,0
 2026-05-10T08-35-10Z_port-scanner_pi_devstral_24b_baseline,2026-05-10T08-35-10Z,port-scanner,pi,devstral:24b,baseline,55,1935,444,0,0,0
 2026-05-10T08-46-14Z_bug-fix_squeezer-critique_qwen3_14b_critique-test,2026-05-10T08-46-14Z,bug-fix,squeezer-critique,qwen3:14b,critique-test,189,6987,7004,7,0,100
+2026-05-10T08-50-05Z_chem-balance_squeezer-critique_qwen3_14b_crit,2026-05-10T08-50-05Z,chem-balance,squeezer-critique,qwen3:14b,crit,457,2964,18309,1,0,0
+2026-05-10T08-57-45Z_sql-injection-fix_squeezer-critique_qwen3_14b_crit,2026-05-10T08-57-45Z,sql-injection-fix,squeezer-critique,qwen3:14b,crit,117,7801,3409,5,0,85
+2026-05-10T08-59-45Z_cli-tool_squeezer-critique_qwen3_14b_crit,2026-05-10T08-59-45Z,cli-tool,squeezer-critique,qwen3:14b,crit,184,6172,6539,5,0,100
+2026-05-10T09-02-52Z_refactor_squeezer-critique_qwen3_14b_crit,2026-05-10T09-02-52Z,refactor,squeezer-critique,qwen3:14b,crit,221,7529,8645,6,0,?
+2026-05-10T09-06-35Z_wifi-stats_squeezer-critique_qwen3_14b_crit,2026-05-10T09-06-35Z,wifi-stats,squeezer-critique,qwen3:14b,crit,284,18040,10219,15,0,78
+2026-05-10T09-11-22Z_sql-injection-fix_squeezer-critique_gpt_oss_20b_crit,2026-05-10T09-11-22Z,sql-injection-fix,squeezer-critique,gpt-oss:20b,crit,103,9331,1464,8,0,100

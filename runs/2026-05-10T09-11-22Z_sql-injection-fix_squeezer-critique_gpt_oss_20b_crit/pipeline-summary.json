@@ -1,0 +1,36 @@
+{
+  "pipeline": "critique",
+  "steps": [
+    {
+      "name": "draft",
+      "model": "gpt-oss:20b",
+      "tokens_in": 6186,
+      "tokens_out": 1144,
+      "tool_calls": 4,
+      "wall_s": 55.7,
+      "final": "The `app.py` file has been updated to remove the SQL\u2011injection vulnerability by using a parameterized query.  \nKey changes:\n\n- Replaced unsafe string interpolation with `cur.execute(\"SELECT id, name, email FROM users WHERE name = ?\", (name,))`.\n- Added comments indicating the fix.\n- The rest of the server code remains unchanged.\n\nAll syntax checks passed\u2014`python -m py_compile app.py` succeeded. No further changes are needed."
+    },
+    {
+      "name": "critique-1",
+      "model": "gpt-oss:20b",
+      "tokens_in": 1406,
+      "tokens_out": 61,
+      "tool_calls": 2,
+      "wall_s": 26.0,
+      "final": ""
+    },
+    {
+      "name": "refine-1",
+      "model": "gpt-oss:20b",
+      "tokens_in": 1739,
+      "tokens_out": 259,
+      "tool_calls": 2,
+      "wall_s": 21.2,
+      "final": ""
+    }
+  ],
+  "primary_model": "gpt-oss:20b",
+  "critic_model": "gpt-oss:20b",
+  "judge_model": null,
+  "rounds": 1
+}
