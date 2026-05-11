@@ -30,9 +30,13 @@ add "file:answer.txt" "$([[ -f "$A" ]] && echo 1 || echo 0)" 5
 if [[ -f "$A" ]]; then
   ans="$(cat "$A")"
   ans_lower="$(echo "$ans" | tr '[:upper:]' '[:lower:]')"
+  # Wikipedia renders some numerics with SI thin-spaces inside the digits
+  # (e.g. "9.806 65", "5 888 cores"); models faithfully copy that. Strip
+  # whitespace and U+202F/U+00A0 so the numeric regexes can match.
+  ans_packed="$(echo "$ans" | python3 -c 'import sys; s=sys.stdin.read(); print("".join(c for c in s if not c.isspace() and c not in "   "))')"
 
   # ---- Q1: standard gravity = 9.80665 m/s²  (article: Standard_gravity) ----
-  echo "$ans" | grep -qE '9\.80665' \
+  echo "$ans_packed" | grep -qE '9\.80665' \
     && add "q1_value" 1 8 \
     || add "q1_value" 0 8
   echo "$ans" | grep -qiE 'standard[_ ]gravity' \
@@ -56,7 +60,7 @@ if [[ -f "$A" ]]; then
     || add "q3_cite" 0 4
 
   # ---- Q4: Treaty of Tordesillas = 1494  (article: Treaty_of_Tordesillas) ----
-  echo "$ans" | grep -qE '\b1494\b' \
+  echo "$ans_packed" | grep -qE '1494' \
     && add "q4_year" 1 8 \
     || add "q4_year" 0 8
   echo "$ans" | grep -qiE 'tordesillas' \
@@ -72,7 +76,7 @@ if [[ -f "$A" ]]; then
     || add "q5_cite" 0 4
 
   # ---- Q6: Krakatoa eruption = 1883  (article: 1883_eruption_of_Krakatoa) ----
-  echo "$ans" | grep -qE '\b1883\b' \
+  echo "$ans_packed" | grep -qE '1883' \
     && add "q6_year" 1 8 \
     || add "q6_year" 0 8
   echo "$ans" | grep -qiE 'krakatoa' \
@@ -81,7 +85,7 @@ if [[ -f "$A" ]]; then
 
   # ---- Q7: cobalt-60 half-life ~5.27 years  (article: Cobalt-60) ----
   # Accept 5.27, 5.2714, or 5.272 — common roundings in physics textbooks.
-  echo "$ans" | grep -qE '\b5\.(27|2714|272)\b' \
+  echo "$ans_packed" | grep -qE '5\.(27|2714|272)' \
     && add "q7_halflife" 1 8 \
     || add "q7_halflife" 0 8
   echo "$ans" | grep -qiE 'cobalt[-_ ]?60' \

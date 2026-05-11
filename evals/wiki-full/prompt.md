@@ -7,12 +7,27 @@ guess. When you state a fact, name the source article in parentheses using its
 slug form (the URL-safe title with underscores, exactly as it appears in
 read_local paths), e.g. `(Haversine_formula)` or `(Standard_gravity)`.
 
-Format every answer as:
+CRITICAL WORKFLOW — your write_answer tool ends the session. You get to call
+it EXACTLY ONCE. Do NOT call write_answer after the first question — research
+all eight questions first (search_local + read_local per question as needed),
+THEN call write_answer ONCE with all eight Q1..Q8 lines together in its `text`
+field. If you call write_answer too early, every question after the first
+scores zero.
+
+The `text` you pass to write_answer must contain ALL EIGHT answers in this
+exact shape (one line per question, no blank lines between them):
+
   Q1: <answer> (Article_Slug)
   Q2: <answer> (Article_Slug)
-  ...
+  Q3: <answer> (Article_Slug)
+  Q4: <answer> (Article_Slug)
+  Q5: <answer> (Article_Slug)
+  Q6: <answer> (Article_Slug)
+  Q7: <answer> (Article_Slug)
+  Q8: <answer> (Article_Slug or "—" if abstaining)
 
-Be concise. Each answer should be a single short sentence or a number.
+Be concise. Each answer should be a single short sentence or a number, no
+trailing thin-spaces inside numbers (write `9.80665`, not `9.806 65`).
 You MUST call search_local at least once per question before you answer it,
 and read_local at least once on the most-relevant article. Cite each article
 exactly as its read_local path appears (underscores, original capitalization).
