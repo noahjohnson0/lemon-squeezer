@@ -26,7 +26,7 @@ See `RUNS.md` / `findings.md` for live data. Broadly:
 - **Scientific computing**: kepler-orbit, kalman-filter, chem-balance, projectile-sim, double-pendulum, fft-spectrum
 - **Cyber/security**: port-scanner, password-strength, hash-collision
 - **CLI/tools**: cli-tool, bug-fix
-- **RAG/librarian**: truthfulqa-mc, needle-haystack, wiki-rag, wiki-rag-tool
+- **RAG/librarian**: truthfulqa-mc, needle-haystack, wiki-rag, wiki-rag-tool, wiki-full
 
 ## New categories to add (grid-down framework)
 
