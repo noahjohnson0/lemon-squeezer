@@ -1,0 +1,1 @@
+The ISO 80000 standard defines the standard (nominal) acceleration of gravity as 9.80665 m s⁻². (Standard_gravity)

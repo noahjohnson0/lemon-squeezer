@@ -388,3 +388,9 @@ run_id,ts,eval,harness,model,tag,wall_s,tok_in,tok_out,tools,exit,score_pct
 2026-05-11T05-29-15Z_med-snakebite_librarian_gpt_oss_20b_medical,2026-05-11T05-29-15Z,med-snakebite,librarian,gpt-oss:20b,medical,57,7650,1232,6,0,68
 2026-05-11T05-30-25Z_med-dose-pediatric_librarian_gemma4_e4b_medical,2026-05-11T05-30-25Z,med-dose-pediatric,librarian,gemma4:e4b,medical,25,5323,1611,6,0,13
 2026-05-11T05-31-03Z_med-dose-pediatric_librarian_gpt_oss_20b_medical,2026-05-11T05-31-03Z,med-dose-pediatric,librarian,gpt-oss:20b,medical,70,34809,1153,16,0,0
+2026-05-11T16-34-02Z_wiki-full_librarian_gemma4_e4b_default,2026-05-11T16-34-02Z,wiki-full,librarian,gemma4:e4b,default,19,6242,967,3,0,7
+2026-05-11T16-34-33Z_wiki-full_librarian_gpt_oss_20b_default,2026-05-11T16-34-33Z,wiki-full,librarian,gpt-oss:20b,default,58,26547,911,11,0,20
+2026-05-11T16-35-43Z_wiki-full_librarian_qwen3_14b_default,2026-05-11T16-35-43Z,wiki-full,librarian,qwen3:14b,default,31,4846,975,8,0,10
+2026-05-11T16-37-56Z_wiki-full_librarian_gemma4_e4b_v2,2026-05-11T16-37-56Z,wiki-full,librarian,gemma4:e4b,v2,32,6968,2005,3,0,14
+2026-05-11T16-38-40Z_wiki-full_librarian_gpt_oss_20b_v2,2026-05-11T16-38-40Z,wiki-full,librarian,gpt-oss:20b,v2,26,9395,372,4,0,10
+2026-05-11T16-39-18Z_wiki-full_librarian_qwen3_14b_v2,2026-05-11T16-39-18Z,wiki-full,librarian,qwen3:14b,v2,40,5007,1374,8,0,10

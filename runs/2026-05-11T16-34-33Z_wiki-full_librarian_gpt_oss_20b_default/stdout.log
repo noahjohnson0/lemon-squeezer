@@ -1,0 +1,13 @@
+[TOOL_CALL it=0] search_local {"corpus":"wikipedia-en","query":"standard gravity gₙ","top_k":5}
+[TOOL_CALL it=1] search_local {"corpus":"wikipedia-en","query":"standard gravity (gₙ) in SI units","top_k":5}
+[TOOL_CALL it=2] search_local {"corpus":"wikipedia-en","query":"standard gravity","top_k":5}
+[TOOL_CALL it=3] read_local {"corpus":"wikipedia-en","path":"wikipedia_en_all_nopic_2026-03/Standard_gravity"}
+[TOOL_CALL it=4] search_local {"corpus":"wikipedia-en","query":"Standard_gravity","top_k":5}
+[TOOL_CALL it=5] search_local {"corpus":"wikipedia-en","query":"Standard gravity Wikipedia","top_k":5}
+[TOOL_CALL it=6] search_local {"corpus":"wikipedia-en","query":"Standard gravity – Wikipedia","top_k":5}
+[TOOL_CALL it=7] search_local {"corpus":"wikipedia-en","query":"9.80665 m s-2 standard gravity","top_k":5}
+[TOOL_CALL it=8] read_local {"corpus":"wikipedia-en","path":"wikipedia_en_all_nopic_2026-03/Standard_gravity"}
+[TOOL_CALL it=9] search_local {"corpus":"wikipedia-en","query":"ISO standard 80000 standard gravity 9.80665","top_k":5}
+[TOOL_CALL it=10] write_answer {"text":"The ISO 80000 standard defines the standard (nominal) acceleration of gravity as 9.80665 m s⁻². (Standard_gravity)"}
+
+[librarian] done: 11 tools, 26547 in / 911 out tokens, 57.5s, answer=yes
