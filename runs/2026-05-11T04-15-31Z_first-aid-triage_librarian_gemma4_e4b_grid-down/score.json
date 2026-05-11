@@ -1,0 +1,17 @@
+{
+  "checks": [
+    {"name":"file:answer.txt","pass":1,"weight":5,"note":""},
+    {"name":"p1_correct_(GREEN)","pass":1,"weight":15,"note":"got=GREEN"},
+    {"name":"p2_correct_(BLACK)","pass":1,"weight":15,"note":"got=BLACK"},
+    {"name":"p3_correct_(RED)","pass":1,"weight":15,"note":"got=RED"},
+    {"name":"p4_correct_(GREEN)","pass":1,"weight":15,"note":"got=GREEN"},
+    {"name":"p5_correct_(RED)","pass":1,"weight":15,"note":"got=RED"},
+    {"name":"uses_walk_rule","pass":1,"weight":5,"note":""},
+    {"name":"uses_breathing_rate_rule","pass":1,"weight":5,"note":""},
+    {"name":"uses_perfusion_rule","pass":0,"weight":5,"note":""},
+    {"name":"uses_mental_status_rule","pass":1,"weight":5,"note":""}
+  ],
+  "gained": 95,
+  "total": 100,
+  "score_pct": 95
+}

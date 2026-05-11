@@ -1,0 +1,13 @@
+{
+  "checks": [
+    {"name":"file:pf.py","pass":1,"weight":5,"note":""},
+    {"name":"imports_and_runs","pass":1,"weight":15,"note":""},
+    {"name":"ran_to_convergence","pass":1,"weight":10,"note":"ran 30 steps"},
+    {"name":"converges_within_0.7m","pass":1,"weight":30,"note":"late_avg=0.075"},
+    {"name":"final_within_1m","pass":1,"weight":15,"note":"final=0.083"},
+    {"name":"estimate_returns_scalar","pass":1,"weight":10,"note":""}
+  ],
+  "gained": 85,
+  "total": 85,
+  "score_pct": 100
+}

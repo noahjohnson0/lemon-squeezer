@@ -370,3 +370,7 @@ run_id,ts,eval,harness,model,tag,wall_s,tok_in,tok_out,tools,exit,score_pct
 2026-05-11T04-09-40Z_epidemiology-sir_aider_gpt_oss_20b_grid-down,2026-05-11T04-09-40Z,epidemiology-sir,aider,gpt-oss:20b,grid-down,68,1100,1500,0,0,100
 2026-05-11T04-10-56Z_water-purify-bleach_aider_gpt_oss_20b_grid-down,2026-05-11T04-10-56Z,water-purify-bleach,aider,gpt-oss:20b,grid-down,47,1000,1000,0,0,100
 2026-05-11T04-11-50Z_ham-radio-antenna_aider_gpt_oss_20b_grid-down,2026-05-11T04-11-50Z,ham-radio-antenna,aider,gpt-oss:20b,grid-down,38,1100,780,0,0,100
+2026-05-11T04-12-36Z_slam-particle-filter_squeezer_gpt_oss_20b_grid-down,2026-05-11T04-12-36Z,slam-particle-filter,squeezer,gpt-oss:20b,grid-down,84,6668,1547,4,0,100
+2026-05-11T04-14-07Z_robot-arm-ik_squeezer_gpt_oss_20b_grid-down,2026-05-11T04-14-07Z,robot-arm-ik,squeezer,gpt-oss:20b,grid-down,77,786,1565,1,0,?
+2026-05-11T04-15-31Z_first-aid-triage_librarian_gemma4_e4b_grid-down,2026-05-11T04-15-31Z,first-aid-triage,librarian,gemma4:e4b,grid-down,18,873,943,1,0,95
+2026-05-11T04-15-57Z_first-aid-triage_librarian_gpt_oss_20b_grid-down,2026-05-11T04-15-57Z,first-aid-triage,librarian,gpt-oss:20b,grid-down,13,1735,173,1,0,5

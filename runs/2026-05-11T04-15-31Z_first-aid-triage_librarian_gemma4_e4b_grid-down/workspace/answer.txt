@@ -1,0 +1,5 @@
+Patient 1: GREEN — The patient was able to walk, satisfying the first triage rule.
+Patient 2: BLACK — No breathing was found even after attempting to reposition the airway.
+Patient 3: RED — The respiratory rate (36/min) exceeded 30 breaths per minute.
+Patient 4: GREEN — The patient was able to walk, satisfying the first triage rule.
+Patient 5: RED — The patient could not follow simple commands, triggering the mental status rule.

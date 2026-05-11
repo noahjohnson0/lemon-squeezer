@@ -1,0 +1,5 @@
+{"iter": 0, "tool": "write_file", "args_keys": ["path", "content"], "result_chars": 29}
+{"iter": 1, "tool": "run_bash", "args_keys": ["command", "timeout"], "result_chars": 58}
+{"iter": 2, "tool": "run_bash", "args_keys": ["command", "timeout"], "result_chars": 24}
+{"iter": 3, "tool": "list_files", "args_keys": ["dir"], "result_chars": 54}
+{"iter": 4, "http_error": 500, "body": "{\"error\":{\"message\":\"error parsing tool call: raw='{\\\"command\\\":\\\"python3 - \\u003c\\u003c'PY'\\\\nfrom pf import ParticleFilter\\\\nimport numpy as np\\\\npf = ParticleFilter(n_particles=200, corridor_length=10.0)\\\\n# Simulate robot starting at x=2.0\\\\nx = 2.0\\\\nfor i in range(30):\\\\n    control = 0.5\\\\n    noise = np.random.normal(scale=0.1)\\\\n    x += control + noise\\\\n    # sensor: distance to wall\\\\n"}

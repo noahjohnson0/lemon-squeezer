@@ -1,0 +1,4 @@
+[TOOL_CALL it=0] search_local {"corpus":"default","query":"START protocol Simple Triage And Rapid Treatment","top_k":5}
+[ASSISTANT it=1] {"text":"I don't know — the available references don't contain this."}
+
+[librarian] done: 1 tools, 1735 in / 173 out tokens, 13.4s, answer=yes
