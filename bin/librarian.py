@@ -247,7 +247,18 @@ def main():
 
     user_prompt = Path(args.prompt_file).read_text()
     if corpora:
-        manifest = "\n".join(f"  - {name} ({sum(1 for _ in p.rglob('*.md'))} markdown docs)" for name, p in corpora.items())
+        # Describe each corpus honestly. ZIM-backed corpora (kiwix-serve) have
+        # millions of articles but no on-disk .md files, so the old md-count
+        # path lied with "0 markdown docs" and models like qwen3 abstained
+        # without ever calling search_local. Use the corpus type instead.
+        def _describe(name, p):
+            if (p / ".lemon-zim.conf").exists():
+                return f"  - {name} (ZIM corpus via kiwix-serve; use search_local to query)"
+            n_md = sum(1 for _ in p.rglob("*.md"))
+            if n_md:
+                return f"  - {name} ({n_md} markdown docs; use search_local)"
+            return f"  - {name} (corpus; use search_local)"
+        manifest = "\n".join(_describe(name, p) for name, p in corpora.items())
         user_prompt = f"{user_prompt}\n\n[available corpora:\n{manifest}\n]"
 
     sys_prompt = SYSTEM_PROMPT
