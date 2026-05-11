@@ -21,4 +21,5 @@ dashboard-next/node_modules/
 dashboard-next/out/
 dashboard-next/public/inflight.json
 dashboard-next/public/runs.jsonl
+dashboard-next/public/bench-data.json
 runs/**/workspace/.git/

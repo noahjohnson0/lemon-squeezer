@@ -1,5 +1,6 @@
 "use client";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 type Props = { runCount: number };
 
@@ -43,11 +44,16 @@ export default function Hero({ runCount }: Props) {
               local-llm coding agent benchmarks
             </span>
           </div>
-          <div className="flex items-baseline gap-2 text-[var(--muted)] text-xs uppercase tracking-wider">
-            <span className="text-[var(--accent)] font-bold tabular-nums text-base normal-case tracking-normal">
-              {runCount.toLocaleString()}
-            </span>
-            <span>runs · live</span>
+          <div className="flex items-baseline gap-4 text-[var(--muted)] text-xs uppercase tracking-wider">
+            <Link href="/bench" className="hover:text-[var(--accent)] tracking-wider normal-case">
+              📚 benchmarks →
+            </Link>
+            <div className="flex items-baseline gap-2">
+              <span className="text-[var(--accent)] font-bold tabular-nums text-base normal-case tracking-normal">
+                {runCount.toLocaleString()}
+              </span>
+              <span>runs · live</span>
+            </div>
           </div>
         </motion.div>
 

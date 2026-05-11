@@ -6,6 +6,8 @@ on:
     paths:
       - "dashboard-next/**"
       - "runs.jsonl"
+      - "bench-data.json"
+      - "bench/**"
       - ".github/workflows/deploy.yml"
   workflow_dispatch: {}
 
@@ -43,6 +45,13 @@ jobs:
           else
             # Emit an empty stub so the dashboard cleanly hides the live panel.
             echo '{"generated_ts":"1970-01-01T00:00:00+00:00","interval_s":2,"runs":[],"queued":[]}' > dashboard-next/public/inflight.json
+          fi
+          # bench-data.json is the rag-bench sweep aggregate (committed at repo root,
+          # produced locally by `npm run bench-data`). If missing, write an empty stub.
+          if [ -f bench-data.json ]; then
+            cp bench-data.json dashboard-next/public/bench-data.json
+          else
+            echo '{"generated_at":"1970-01-01T00:00:00+00:00","sweeps":[],"qsets":{}}' > dashboard-next/public/bench-data.json
           fi
 
       - name: Install dashboard deps

@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "node scripts/build-bench-data.js && next build",
+    "bench-data": "node scripts/build-bench-data.js",
     "start": "next start"
   },
   "dependencies": {
