@@ -1,0 +1,218 @@
+#!/usr/bin/env python3
+"""rag-bench — run a question set through the librarian harness against a corpus
+and score answers against gold aliases.
+
+Designed for benchmark sweeps (TriviaQA, NaturalQuestions style) where each
+question is independent and we want an aggregate accuracy across N runs, not
+a hand-tuned per-eval rubric. Bypasses bin/eval-run because we don't need
+per-question sampler telemetry; instead we wrap the WHOLE sweep with a single
+GPU-lock acquire so a concurrent eval-run waits politely.
+
+Usage:
+    bin/rag-bench triviaqa-200 gpt-oss:20b --n 50 --corpus wikipedia-en
+                  ^ qset (bench/<name>.jsonl)
+                              ^ ollama model tag
+                                          ^ optional sample size; default = all
+                                                        ^ corpus to retrieve from
+
+Output: bench/results/<ts>_<qset>_<safe-model>/
+  summary.json           # aggregate accuracy, n, mean wall, token totals
+  per_question.jsonl     # one record per Q: answer, hit, gold_aliases
+  trace/<idx>.jsonl      # the librarian-trace.jsonl for each invocation
+
+Q-set format: one JSON object per line with at least {question, normalized_aliases}.
+"""
+from __future__ import annotations
+import argparse, json, os, re, shutil, subprocess, sys, time
+from pathlib import Path
+from datetime import datetime, timezone
+
+ROOT = Path(__file__).resolve().parent.parent
+
+
+def normalize(s: str) -> str:
+    """Match the TriviaQA normalization: lowercase, drop articles + punctuation."""
+    s = s.lower()
+    s = re.sub(r"\b(a|an|the)\b", " ", s)
+    s = re.sub(r"[^a-z0-9 ]", " ", s)
+    s = re.sub(r"\s+", " ", s).strip()
+    return s
+
+
+def answer_hit(model_answer: str, aliases: list[str]) -> tuple[bool, str | None]:
+    """Substring-match the model answer against any normalized alias.
+    Returns (hit, matched_alias_or_None)."""
+    norm_ans = normalize(model_answer)
+    for a in aliases:
+        if not a:
+            continue
+        if a in norm_ans:
+            return True, a
+    return False, None
+
+
+def run_one(model: str, question: str, corpus: str, base_url: str,
+            run_dir: Path, timeout_s: int) -> dict:
+    """Invoke librarian.py for a single Q. Returns {answer, wall, tokens, tools, exit}."""
+    run_dir.mkdir(parents=True, exist_ok=True)
+    ws = run_dir / "workspace"
+    ws.mkdir(exist_ok=True)
+    (ws / "prompt.md").write_text(question + "\n")
+
+    env = os.environ.copy()
+    env["LEMON_CORPORA"] = f"{corpus}={Path.home() / 'refs' / corpus}"
+    env["OLLAMA_API_BASE"] = base_url
+
+    cmd = ["python3", str(ROOT / "bin" / "librarian.py"),
+           "--model", model,
+           "--prompt-file", str(ws / "prompt.md"),
+           "--workspace", str(ws),
+           "--run-dir", str(run_dir),
+           "--base-url", f"{base_url}/v1",
+           "--max-iter", "10"]
+
+    t0 = time.monotonic()
+    try:
+        proc = subprocess.run(cmd, env=env, capture_output=True, text=True, timeout=timeout_s)
+        wall = time.monotonic() - t0
+        exit_code = proc.returncode
+    except subprocess.TimeoutExpired:
+        wall = time.monotonic() - t0
+        exit_code = -1
+
+    ans_path = ws / "answer.txt"
+    answer = ans_path.read_text() if ans_path.exists() else ""
+
+    def num_from(name: str) -> int:
+        f = run_dir / name
+        return int(f.read_text().strip()) if f.exists() else 0
+
+    return {
+        "answer": answer.strip(),
+        "wall_seconds": round(wall, 2),
+        "tokens_in": num_from("tokens_in"),
+        "tokens_out": num_from("tokens_out"),
+        "tool_calls": num_from("tool_calls"),
+        "exit_code": exit_code,
+    }
+
+
+def acquire_lock(lock_dir: Path) -> bool:
+    try:
+        lock_dir.mkdir()
+        (lock_dir / "owner").write_text(f"rag-bench pid={os.getpid()}\n")
+        return True
+    except FileExistsError:
+        return False
+
+
+def release_lock(lock_dir: Path):
+    try:
+        shutil.rmtree(lock_dir)
+    except Exception:
+        pass
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("qset", help="bench/<name>.jsonl basename (no .jsonl)")
+    ap.add_argument("model", help="ollama model tag, e.g. gpt-oss:20b")
+    ap.add_argument("--n", type=int, default=None, help="sample first N questions (default: all)")
+    ap.add_argument("--corpus", default="wikipedia-en", help="corpus name (default wikipedia-en)")
+    ap.add_argument("--base-url", default=None, help="ollama base url; default from $OLLAMA_API_BASE or localhost")
+    ap.add_argument("--timeout", type=int, default=180, help="per-question timeout seconds")
+    ap.add_argument("--no-lock", action="store_true", help="skip GPU lock (use only if you know nothing else is queued)")
+    args = ap.parse_args()
+
+    base_url = args.base_url or os.environ.get("OLLAMA_API_BASE") or "http://localhost:11434"
+
+    qset_path = ROOT / "bench" / f"{args.qset}.jsonl"
+    if not qset_path.exists():
+        print(f"qset not found: {qset_path}", file=sys.stderr); sys.exit(2)
+    questions = [json.loads(line) for line in qset_path.read_text().splitlines() if line.strip()]
+    if args.n:
+        questions = questions[:args.n]
+    n = len(questions)
+
+    ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H-%M-%SZ")
+    safe_model = args.model.replace(":", "_").replace("/", "_").replace(".", "_")
+    out_dir = ROOT / "bench" / "results" / f"{ts}_{args.qset}_{safe_model}"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    print(f"[rag-bench] output: {out_dir}  n={n}  model={args.model}  corpus={args.corpus}", file=sys.stderr)
+
+    # Lock so a concurrent eval-run queues behind us.
+    lock = ROOT / ".gpu.lock"
+    locked = False
+    if not args.no_lock:
+        # Wait up to 5 min for the lock
+        for _ in range(300):
+            if acquire_lock(lock):
+                locked = True; break
+            time.sleep(1)
+        if not locked:
+            print(f"[rag-bench] could not acquire {lock} after 5 min; continuing without lock", file=sys.stderr)
+
+    try:
+        per_q_path = out_dir / "per_question.jsonl"
+        hits = 0
+        total_wall = 0.0
+        total_in = total_out = total_tools = 0
+        with open(per_q_path, "w") as per_fh:
+            for i, q in enumerate(questions):
+                question = q["question"]
+                aliases = q.get("normalized_aliases", [])
+                q_run_dir = out_dir / "runs" / f"{i:04d}"
+                print(f"[rag-bench] {i+1}/{n}  {question[:80]}", file=sys.stderr)
+                res = run_one(args.model, question, args.corpus, base_url, q_run_dir, args.timeout)
+                hit, matched = answer_hit(res["answer"], aliases)
+                hits += int(hit)
+                total_wall += res["wall_seconds"]
+                total_in += res["tokens_in"]
+                total_out += res["tokens_out"]
+                total_tools += res["tool_calls"]
+                rec = {
+                    "i": i,
+                    "id": q.get("id"),
+                    "question": question,
+                    "answer_value": q.get("answer_value"),
+                    "model_answer": res["answer"],
+                    "hit": hit,
+                    "matched_alias": matched,
+                    "wall_seconds": res["wall_seconds"],
+                    "tokens_in": res["tokens_in"],
+                    "tokens_out": res["tokens_out"],
+                    "tool_calls": res["tool_calls"],
+                    "exit_code": res["exit_code"],
+                }
+                per_fh.write(json.dumps(rec) + "\n")
+                per_fh.flush()
+                print(f"   {'HIT' if hit else 'miss':>4}  ({res['wall_seconds']}s, {res['tool_calls']} tools)  → {res['answer'][:80]}", file=sys.stderr)
+
+        accuracy = hits / n if n else 0.0
+        summary = {
+            "ts": ts,
+            "qset": args.qset,
+            "model": args.model,
+            "harness": "librarian",
+            "corpus": args.corpus,
+            "n": n,
+            "hits": hits,
+            "accuracy": round(accuracy, 4),
+            "score_pct": round(accuracy * 100, 1),
+            "wall_seconds_total": round(total_wall, 1),
+            "wall_seconds_mean": round(total_wall / n, 2) if n else 0,
+            "tokens_in_total": total_in,
+            "tokens_out_total": total_out,
+            "tool_calls_total": total_tools,
+            "host": os.environ.get("LEMON_HOST", "?"),
+            "base_url": base_url,
+        }
+        (out_dir / "summary.json").write_text(json.dumps(summary, indent=2))
+        print(json.dumps(summary, indent=2))
+    finally:
+        if locked:
+            release_lock(lock)
+
+
+if __name__ == "__main__":
+    main()

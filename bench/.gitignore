@@ -1,0 +1,2 @@
+# Per-sweep outputs are large + reproducible; don't commit.
+results/
