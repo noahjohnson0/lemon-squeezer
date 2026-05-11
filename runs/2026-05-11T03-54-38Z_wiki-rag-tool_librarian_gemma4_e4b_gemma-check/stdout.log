@@ -1,0 +1,11 @@
+[TOOL_CALL it=0] search_local {"query":"Python release year"}
+[TOOL_CALL it=1] search_local {"query":"Python release date"}
+[TOOL_CALL it=2] search_local {"query":"Python creator and previous language"}
+[TOOL_CALL it=3] search_local {"query":"RTX 4070 CUDA cores"}
+[TOOL_CALL it=4] search_local {"query":"M4 Max cores unified memory"}
+[TOOL_CALL it=5] search_local {"query":"Python 2 latest version"}
+[TOOL_CALL it=6] search_local {"query":"RTX 4070 TFLOPS"}
+[TOOL_CALL it=7] search_local {"query":"history of Python programming language"}
+[TOOL_CALL it=8] write_answer {"text":"Q1: I don't know — the available references don't contain this.\nQ2: I don't know — the available references don't contain this.\nQ3: The GeForce RTX 4070 features 5888 CUDA cores (context::r
+
+[librarian] done: 9 tools, 11417 in / 2250 out tokens, 33.6s, answer=yes

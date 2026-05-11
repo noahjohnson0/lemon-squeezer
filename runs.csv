@@ -365,3 +365,4 @@ run_id,ts,eval,harness,model,tag,wall_s,tok_in,tok_out,tools,exit,score_pct
 2026-05-11T01-02-20Z_wiki-rag-tool_librarian_deepseek_coder_v2_16b_rag2,2026-05-11T01-02-20Z,wiki-rag-tool,librarian,deepseek-coder-v2:16b,rag2,1,0,0,0,0,0
 2026-05-11T01-02-28Z_wiki-rag-tool_librarian_devstral_24b_rag2,2026-05-11T01-02-28Z,wiki-rag-tool,librarian,devstral:24b,rag2,20,1468,55,1,0,17
 2026-05-11T01-02-55Z_wiki-rag-tool_librarian_gemma3_12b_rag2,2026-05-11T01-02-55Z,wiki-rag-tool,librarian,gemma3:12b,rag2,0,0,0,0,0,0
+2026-05-11T03-54-38Z_wiki-rag-tool_librarian_gemma4_e4b_gemma-check,2026-05-11T03-54-38Z,wiki-rag-tool,librarian,gemma4:e4b,gemma-check,34,11417,2250,9,0,63
