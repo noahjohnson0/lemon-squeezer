@@ -1,0 +1,8 @@
+[TOOL_CALL it=0] search_local {"corpus":"medical","query":"pediatric dosing acetaminophen ibuprofen mg/kg","top_k":5}
+[TOOL_CALL it=1] search_local {"corpus":"medical","query":"acetaminophen ibuprofen pediatric dosing regimen mg/kg","top_k":5}
+[TOOL_CALL it=2] search_local {"corpus":"medical","query":"acetaminophen pediatric dose mg/kg","top_k":3}
+[TOOL_CALL it=3] search_local {"corpus":"medical","query":"pediatric dose acetaminophen","top_k":3}
+[TOOL_CALL it=4] search_local {"corpus":"medical","query":"pediatric antipyretic dosing guidelines acetaminophen ibuprofen","top_k":3}
+[TOOL_CALL it=5] write_answer {"text":"I don't know — the available references don't contain this."}
+
+[librarian] done: 6 tools, 5323 in / 1611 out tokens, 24.9s, answer=yes

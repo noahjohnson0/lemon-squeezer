@@ -1,0 +1,23 @@
+Based on the available medical corpus, specific protocols for this scenario can only be summarized generally. A full, actionable field-medic plan with specific advice for all six points is not available in the references.
+
+**Field-Medic Plan for Laceration (8-year-old, Dirty, Moderate Bleeding)**
+
+1. **Immediate bleeding control:**
+    * The process begins with **hemostasis (blood clotting)**, where platelets stick to the injured site within the first few minutes of injury (medical::Wound_healing.md). (No specific intervention like applying direct pressure is detailed.)
+
+2. **Cleaning the wound:**
+    * Wound care involves **cleaning** the wound (medical::Wound_healing.md). (The sources do not specify what cleaning agents to use or what to avoid.)
+
+3. **Foreign body management (The gravel):**
+    * The corpus does not contain specific recommendations for the removal or management of embedded gravel in a laceration.
+
+4. **Dressing:**
+    * Wound care is focused on **protection from reinjury or infection** (medical::Wound_healing.md). (The source does not provide explicit dressing advice.)
+
+5. **Tetanus consideration:**
+    * The corpus does not provide guidelines regarding the timing or necessity of a tetanus booster based on wound contamination or booster history (medical::Wound_healing.md).
+
+6. **When to escalate to professional care (3 specific warning signs):**
+    * The corpus does not provide specific warning signs that mandate escalation to professional care.
+
+I don't know — the available references don't contain this. The retrieved material is very general, describing the overall process of wound healing (including hemostasis and cleaning) but lacks the necessary clinical specificity (e.g., direct pressure instructions, specific cleaning agents, foreign body removal protocol, or tetanus guideline) required to structure the complete plan requested.

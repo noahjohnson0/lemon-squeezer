@@ -1,0 +1,17 @@
+{
+  "checks": [
+    {"name":"file:answer.txt","pass":1,"weight":5,"note":""},
+    {"name":"safety_under_6mo_no_ibuprofen","pass":0,"weight":20,"note":"MISSED critical safety check"},
+    {"name":"patient_a_calc_paracetamol","pass":0,"weight":12,"note":""},
+    {"name":"patient_a_calc_ibuprofen","pass":0,"weight":10,"note":""},
+    {"name":"patient_c_calc_paracetamol","pass":0,"weight":12,"note":""},
+    {"name":"dosing_interval","pass":0,"weight":8,"note":""},
+    {"name":"states_max_daily","pass":0,"weight":8,"note":""},
+    {"name":"cites_source","pass":0,"weight":7,"note":"0"},
+    {"name":"used_search_tool","pass":1,"weight":8,"note":"5 calls"},
+    {"name":"shows_per_kg_math","pass":0,"weight":5,"note":"no per-kg work shown"}
+  ],
+  "gained": 13,
+  "total": 95,
+  "score_pct": 13
+}

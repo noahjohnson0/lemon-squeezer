@@ -1,0 +1,16 @@
+{"iter": 0, "tool": "search_local", "args_keys": ["corpus", "query", "top_k"], "result_chars": 63}
+{"iter": 1, "tool": "search_local", "args_keys": ["corpus", "query", "top_k"], "result_chars": 37}
+{"iter": 2, "tool": "search_local", "args_keys": ["corpus", "query", "top_k"], "result_chars": 60}
+{"iter": 3, "tool": "search_local", "args_keys": ["corpus", "query", "top_k"], "result_chars": 50}
+{"iter": 4, "tool": "search_local", "args_keys": ["corpus", "query", "top_k"], "result_chars": 45}
+{"iter": 5, "tool": "search_local", "args_keys": ["corpus", "query", "top_k"], "result_chars": 3091}
+{"iter": 6, "tool": "search_local", "args_keys": ["corpus", "query", "top_k"], "result_chars": 3091}
+{"iter": 7, "tool": "read_local", "args_keys": ["corpus", "path"], "result_chars": 8013}
+{"iter": 8, "tool": "read_local", "args_keys": ["corpus", "path"], "result_chars": 8013}
+{"iter": 9, "tool": "search_local", "args_keys": ["corpus", "query", "top_k"], "result_chars": 6167}
+{"iter": 10, "tool": "search_local", "args_keys": ["corpus", "query", "top_k"], "result_chars": 3091}
+{"iter": 11, "tool": "read_local", "args_keys": ["corpus", "path"], "result_chars": 42}
+{"iter": 12, "tool": "read_local", "args_keys": ["corpus", "path"], "result_chars": 8013}
+{"iter": 13, "tool": "search_local", "args_keys": ["corpus", "query", "top_k"], "result_chars": 1544}
+{"iter": 14, "tool": "search_local", "args_keys": ["corpus", "query", "top_k"], "result_chars": 1544}
+{"iter": 15, "tool": "search_local", "args_keys": ["corpus", "query", "top_k"], "result_chars": 1544}

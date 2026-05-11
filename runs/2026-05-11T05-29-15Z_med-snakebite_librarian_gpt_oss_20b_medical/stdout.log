@@ -1,0 +1,8 @@
+[TOOL_CALL it=0] search_local {"corpus":"medical","query":"rattlesnake bite field treatment immediate","top_k":5}
+[TOOL_CALL it=1] search_local {"corpus":"medical","query":"rattlesnake bite field management","top_k":5}
+[TOOL_CALL it=2] search_local {"corpus":"medical","query":"rattlesnake","top_k":20}
+[TOOL_CALL it=3] search_local {"corpus":"medical","query":"snakebite field treatment","top_k":5}
+[TOOL_CALL it=4] read_local {"corpus":"medical","path":"Snakebite.md"}
+[TOOL_CALL it=5] write_answer {"text":"**Field‑Treatment Plan for Suspected Rattlesnake Bite**\n\n1. **Immediate actions** – Keep the bitten limb still and as flat as possible; do NOT apply a tight tourniquet, pressure bandage, or
+
+[librarian] done: 6 tools, 7650 in / 1232 out tokens, 57.0s, answer=yes

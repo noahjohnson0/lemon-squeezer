@@ -1,0 +1,18 @@
+{
+  "checks": [
+    {"name":"file:answer.txt","pass":1,"weight":5,"note":""},
+    {"name":"bleeding_direct_pressure","pass":1,"weight":12,"note":""},
+    {"name":"clean_with_water_or_saline","pass":0,"weight":12,"note":""},
+    {"name":"no_peroxide_alcohol_in_wound","pass":1,"weight":5,"note":""},
+    {"name":"foreign_body_management","pass":1,"weight":10,"note":""},
+    {"name":"applies_dressing","pass":1,"weight":8,"note":""},
+    {"name":"addresses_tetanus","pass":1,"weight":10,"note":""},
+    {"name":"recommends_booster_now","pass":1,"weight":8,"note":""},
+    {"name":"escalation_signs_>=3","pass":0,"weight":15,"note":"1 (need 3)"},
+    {"name":"cites_>=2_sources","pass":0,"weight":10,"note":"1 files"},
+    {"name":"used_search_tool","pass":1,"weight":8,"note":"3 calls"}
+  ],
+  "gained": 66,
+  "total": 103,
+  "score_pct": 64
+}

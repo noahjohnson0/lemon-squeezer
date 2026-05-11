@@ -380,3 +380,11 @@ run_id,ts,eval,harness,model,tag,wall_s,tok_in,tok_out,tools,exit,score_pct
 2026-05-11T04-28-45Z_nav-great-circle_aider_gpt_oss_20b_grid-down,2026-05-11T04-28-45Z,nav-great-circle,aider,gpt-oss:20b,grid-down,50,1100,1100,0,0,100
 2026-05-11T04-29-43Z_nav-dead-reckoning_aider_gpt_oss_20b_grid-down,2026-05-11T04-29-43Z,nav-dead-reckoning,aider,gpt-oss:20b,grid-down,50,1200,1100,0,0,100
 2026-05-11T04-30-40Z_robot-arm-ik_aider_gpt_oss_20b_grid-down,2026-05-11T04-30-40Z,robot-arm-ik,aider,gpt-oss:20b,grid-down,60,1000,1300,0,0,100
+2026-05-11T05-24-46Z_med-wound-care_librarian_gemma4_e4b_medical,2026-05-11T05-24-46Z,med-wound-care,librarian,gemma4:e4b,medical,25,4122,1526,3,0,64
+2026-05-11T05-25-23Z_med-wound-care_librarian_gpt_oss_20b_medical,2026-05-11T05-25-23Z,med-wound-care,librarian,gpt-oss:20b,medical,71,37624,1136,16,0,0
+2026-05-11T05-26-46Z_med-fever-pediatric_librarian_gemma4_e4b_medical,2026-05-11T05-26-46Z,med-fever-pediatric,librarian,gemma4:e4b,medical,42,10102,2989,9,0,38
+2026-05-11T05-27-40Z_med-fever-pediatric_librarian_gpt_oss_20b_medical,2026-05-11T05-27-40Z,med-fever-pediatric,librarian,gpt-oss:20b,medical,47,32138,816,13,0,13
+2026-05-11T05-28-38Z_med-snakebite_librarian_gemma4_e4b_medical,2026-05-11T05-28-38Z,med-snakebite,librarian,gemma4:e4b,medical,25,4239,1554,4,0,68
+2026-05-11T05-29-15Z_med-snakebite_librarian_gpt_oss_20b_medical,2026-05-11T05-29-15Z,med-snakebite,librarian,gpt-oss:20b,medical,57,7650,1232,6,0,68
+2026-05-11T05-30-25Z_med-dose-pediatric_librarian_gemma4_e4b_medical,2026-05-11T05-30-25Z,med-dose-pediatric,librarian,gemma4:e4b,medical,25,5323,1611,6,0,13
+2026-05-11T05-31-03Z_med-dose-pediatric_librarian_gpt_oss_20b_medical,2026-05-11T05-31-03Z,med-dose-pediatric,librarian,gpt-oss:20b,medical,70,34809,1153,16,0,0

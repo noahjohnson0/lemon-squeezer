@@ -1,0 +1,20 @@
+[TOOL_CALL it=0] search_local {"corpus":"medical","query":"ibuprofen pediatric dose per kg","top_k":5}
+[TOOL_CALL it=1] search_local {"corpus":"medical","query":"acetaminophen pediatric dose\"","top_k":5}
+[TOOL_CALL it=2] search_local {"corpus":"medical","query":"acetaminophen pediatric dose","top_k":5}
+[ASSISTANT it=3] The medical corpus maybe contains specific docs. Let's list corpus files.
+[TOOL_CALL it=3] search_local {"corpus":"medical","query":"\"pediatric\" \"dose\"","top_k":10}
+[TOOL_CALL it=4] search_local {"corpus":"medical","query":"acetaminophen 10 mg/kg","top_k":5}
+[TOOL_CALL it=5] search_local {"corpus":"context","query":"acetaminophen dose mg","top_k":5}
+[TOOL_CALL it=6] search_local {"corpus":"medical","query":"Paracetamol dosing","top_k":5}
+[TOOL_CALL it=7] read_local {"corpus":"medical","path":"Paracetamol.md"}
+[TOOL_CALL it=8] read_local {"corpus":"medical","path":"Ibuprofen.md"}
+[TOOL_CALL it=9] search_local {"corpus":"medical","query":"1 g ibuprofen effect body","top_k":5}
+[TOOL_CALL it=10] search_local {"corpus":"medical","query":"1 g ibuprofen dose effect body","top_k":10}
+[TOOL_CALL it=11] read_local {"corpus":"medical","path":"medical::Ibuprofen.md"}
+[TOOL_CALL it=12] read_local {"corpus":"medical","path":"Ibuprofen.md"}
+[TOOL_CALL it=13] search_local {"corpus":"medical","query":"1 g ibuprofen 1000 mg daily safe maximum dose","top_k":10}
+[TOOL_CALL it=14] search_local {"corpus":"medical","query":"maximum daily dose of ibuprofen 2023 guideline","top_k":10}
+[ASSISTANT it=15] The search returned Paracetamol docs; maybe the medical corpus doesn't have ibuprofen guidelines. Let's search the general web? Only have medical corpus. Perhaps the ibuprofen doc contains dosage info. Let's search within the file for "dose" or "mg" quickly.
+[TOOL_CALL it=15] search_local {"corpus":"medical","query":"ibuprofen 1000 mg dosage","top_k":10}
+
+[librarian] done: 16 tools, 34809 in / 1153 out tokens, 69.9s, answer=NO
