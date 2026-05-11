@@ -239,6 +239,17 @@ def main():
     tot_in = tot_out = tot_calls = 0
     started = time.time()
 
+    # Write counters incrementally so a SIGTERM/SIGKILL (e.g. eval-run gtimeout)
+    # doesn't erase what we've already accumulated. The harness will pick up
+    # whatever's most-recent in these files.
+    def _flush_counters():
+        try:
+            (run_dir / "tokens_in").write_text(str(tot_in))
+            (run_dir / "tokens_out").write_text(str(tot_out))
+            (run_dir / "tool_calls").write_text(str(tot_calls))
+        except Exception:
+            pass
+
     for it in range(args.max_iter):
         try:
             resp = call_chat(args.base_url, args.model, messages, schema)
@@ -252,6 +263,7 @@ def main():
         u = resp.get("usage") or {}
         tot_in  += int(u.get("prompt_tokens", 0))
         tot_out += int(u.get("completion_tokens", 0))
+        _flush_counters()
 
         choice = (resp.get("choices") or [{}])[0]
         msg = choice.get("message") or {}
@@ -306,9 +318,7 @@ def main():
             transcript.append({"iter": it, "early_exit": "write_answer"})
             break
 
-    (run_dir / "tokens_in").write_text(str(tot_in))
-    (run_dir / "tokens_out").write_text(str(tot_out))
-    (run_dir / "tool_calls").write_text(str(tot_calls))
+    _flush_counters()  # final flush
 
     with (run_dir / "librarian-session.jsonl").open("w") as f:
         for m in messages:

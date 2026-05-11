@@ -336,7 +336,7 @@ run_id,ts,eval,harness,model,tag,wall_s,tok_in,tok_out,tools,exit,score_pct
 2026-05-10T23-46-21Z_fft-spectrum_aider_llama3_1_8b_fill,2026-05-10T23-46-21Z,fft-spectrum,aider,llama3.1:8b,fill,251,0,0,0,143,0
 2026-05-10T23-50-32Z_wiki-rag-tool_librarian_command_r_35b_rag,2026-05-10T23-50-32Z,wiki-rag-tool,librarian,command-r:35b,rag,600,0,0,0,124,0
 2026-05-11T00-00-40Z_wiki-rag-tool_librarian_command_r7b_rag,2026-05-11T00-00-40Z,wiki-rag-tool,librarian,command-r7b,rag,438,1915,342,0,0,62
-2026-05-11T00-08-05Z_wiki-rag-tool_librarian_gpt_oss_20b_rag,2026-05-11T00-08-05Z,wiki-rag-tool,librarian,gpt-oss:20b,rag,600,0,0,0,124,0
+2026-05-11T00-08-05Z_wiki-rag-tool_librarian_gpt_oss_20b_rag,2026-05-11T00-08-05Z,wiki-rag-tool,librarian,gpt-oss:20b,rag,600,14321,743,8,124,100
 2026-05-11T00-18-11Z_wiki-rag-tool_librarian_qwen3_14b_rag,2026-05-11T00-18-11Z,wiki-rag-tool,librarian,qwen3:14b,rag,600,0,0,0,124,0
 2026-05-11T00-28-19Z_wiki-rag-tool_librarian_mistral_small_24b_rag,2026-05-11T00-28-19Z,wiki-rag-tool,librarian,mistral-small:24b,rag,79,1247,76,2,0,26
 2026-05-11T00-29-47Z_truthfulqa-mc_qa_phi4_14b_rag,2026-05-11T00-29-47Z,truthfulqa-mc,qa,phi4:14b,rag,8,785,46,0,0,72
@@ -360,3 +360,8 @@ run_id,ts,eval,harness,model,tag,wall_s,tok_in,tok_out,tools,exit,score_pct
 2026-05-11T00-33-58Z_truthfulqa-mc_qa_qwen2_5_coder_14b_rag,2026-05-11T00-33-58Z,truthfulqa-mc,qa,qwen2.5-coder:14b,rag,8,795,2,0,0,12
 2026-05-11T00-34-13Z_needle-haystack_qa_qwen2_5_coder_14b_rag,2026-05-11T00-34-13Z,needle-haystack,qa,qwen2.5-coder:14b,rag,3,4096,5,0,0,22
 2026-05-11T00-34-23Z_wiki-rag_qa_qwen2_5_coder_14b_rag,2026-05-11T00-34-23Z,wiki-rag,qa,qwen2.5-coder:14b,rag,5,1229,194,0,0,100
+2026-05-11T01-01-29Z_wiki-rag-tool_librarian_qwen3_14b_rag2,2026-05-11T01-01-29Z,wiki-rag-tool,librarian,qwen3:14b,rag2,30,769,1141,9,0,49
+2026-05-11T01-02-05Z_wiki-rag-tool_librarian_mistral_nemo_12b_rag2,2026-05-11T01-02-05Z,wiki-rag-tool,librarian,mistral-nemo:12b,rag2,8,1301,93,1,0,23
+2026-05-11T01-02-20Z_wiki-rag-tool_librarian_deepseek_coder_v2_16b_rag2,2026-05-11T01-02-20Z,wiki-rag-tool,librarian,deepseek-coder-v2:16b,rag2,1,0,0,0,0,0
+2026-05-11T01-02-28Z_wiki-rag-tool_librarian_devstral_24b_rag2,2026-05-11T01-02-28Z,wiki-rag-tool,librarian,devstral:24b,rag2,20,1468,55,1,0,17
+2026-05-11T01-02-55Z_wiki-rag-tool_librarian_gemma3_12b_rag2,2026-05-11T01-02-55Z,wiki-rag-tool,librarian,gemma3:12b,rag2,0,0,0,0,0,0

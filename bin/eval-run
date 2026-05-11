@@ -125,7 +125,12 @@ fi
 # Pipelines like squeezer-critique/squeezer-ensemble can take longer; bump for those.
 RUN_TIMEOUT="${LEMON_RUN_TIMEOUT:-600}"
 case "$HARNESS" in
-  squeezer-critique|squeezer-ensemble) RUN_TIMEOUT="${LEMON_PIPELINE_TIMEOUT:-1800}" ;;
+  squeezer-critique|squeezer-ensemble|squeezer-architect|squeezer-verify)
+    RUN_TIMEOUT="${LEMON_PIPELINE_TIMEOUT:-1800}" ;;
+  # Librarian/cascade harnesses do many search round-trips per turn — they
+  # need longer than coding evals. (gpt-oss:20b on wiki-rag-tool ran 22 min.)
+  librarian|librarian-cascade)
+    RUN_TIMEOUT="${LEMON_LIBRARIAN_TIMEOUT:-1800}" ;;
 esac
 TIMEOUT_BIN="$(command -v gtimeout || command -v timeout || echo '')"
 

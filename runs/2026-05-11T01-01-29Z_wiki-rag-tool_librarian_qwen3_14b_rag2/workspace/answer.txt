@@ -1,0 +1,8 @@
+Q1: 1991 (python.md)
+Q2: Guido van Rossum began working on Python, succeeding the ABC language (python.md)
+Q3: 4608 (rtx_4070.md)
+Q4: $499 (rtx_4070.md)
+Q5: 24 (m4_max.md)
+Q6: 18GB (m4_max.md)
+Q7: 2.7.18 (python.md)
+Q8: 28.6 (rtx_4070.md)

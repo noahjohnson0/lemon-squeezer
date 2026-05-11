@@ -1,0 +1,4 @@
+[TOOL_CALL it=0] search_local {"corpus":"context","query":"Python first released year"}
+[ASSISTANT it=1] [{"name": "write_answer", "arguments": {"text": "I don't know — the available references don't contain this."}}]
+
+[librarian] done: 1 tools, 1468 in / 55 out tokens, 19.7s, answer=yes
