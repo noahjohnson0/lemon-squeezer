@@ -354,3 +354,9 @@ run_id,ts,eval,harness,model,tag,wall_s,tok_in,tok_out,tools,exit,score_pct
 2026-05-11T00-32-20Z_truthfulqa-mc_qa_qwen3_8b_rag,2026-05-11T00-32-20Z,truthfulqa-mc,qa,qwen3:8b,rag,11,797,551,0,0,85
 2026-05-11T00-32-38Z_needle-haystack_qa_qwen3_8b_rag,2026-05-11T00-32-38Z,needle-haystack,qa,qwen3:8b,rag,15,4096,932,0,0,22
 2026-05-11T00-32-59Z_wiki-rag_qa_qwen3_8b_rag,2026-05-11T00-32-59Z,wiki-rag,qa,qwen3:8b,rag,7,1231,453,0,0,91
+2026-05-11T00-33-14Z_truthfulqa-mc_qa_devstral_24b_rag,2026-05-11T00-33-14Z,truthfulqa-mc,qa,devstral:24b,rag,13,791,7,0,0,5
+2026-05-11T00-33-34Z_needle-haystack_qa_devstral_24b_rag,2026-05-11T00-33-34Z,needle-haystack,qa,devstral:24b,rag,7,4096,16,0,0,22
+2026-05-11T00-33-47Z_wiki-rag_qa_devstral_24b_rag,2026-05-11T00-33-47Z,wiki-rag,qa,devstral:24b,rag,4,1233,16,0,0,21
+2026-05-11T00-33-58Z_truthfulqa-mc_qa_qwen2_5_coder_14b_rag,2026-05-11T00-33-58Z,truthfulqa-mc,qa,qwen2.5-coder:14b,rag,8,795,2,0,0,12
+2026-05-11T00-34-13Z_needle-haystack_qa_qwen2_5_coder_14b_rag,2026-05-11T00-34-13Z,needle-haystack,qa,qwen2.5-coder:14b,rag,3,4096,5,0,0,22
+2026-05-11T00-34-23Z_wiki-rag_qa_qwen2_5_coder_14b_rag,2026-05-11T00-34-23Z,wiki-rag,qa,qwen2.5-coder:14b,rag,5,1229,194,0,0,100

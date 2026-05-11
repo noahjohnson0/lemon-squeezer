@@ -1,0 +1,4 @@
+ts,gpu_util_pct,gpu_mem_used_mb,gpu_temp_c,gpu_power_w,gpu_fan_pct,host_load1,host_cpu_pct,host_mem_used_pct,ollama_rss_mb
+1778459663,100,10569,51,32.09,0,2.64,9.4,75.2,120
+1778459665,96,10571,58,208.10,0,2.64,7.7,75.1,120
+1778459667,97,10571,60,210.25,0,2.64,21.1,75.2,120
