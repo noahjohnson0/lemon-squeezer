@@ -1,0 +1,9 @@
+{"iter": 0, "tool": "search_local", "args_keys": ["corpus", "query", "top_k"], "result_chars": 51}
+{"iter": 0, "tool": "search_local", "args_keys": ["corpus", "query", "top_k"], "result_chars": 65}
+{"iter": 0, "tool": "search_local", "args_keys": ["corpus", "query", "top_k"], "result_chars": 1159}
+{"iter": 0, "tool": "search_local", "args_keys": ["top_k", "corpus", "query"], "result_chars": 1159}
+{"iter": 0, "tool": "search_local", "args_keys": ["corpus", "query", "top_k"], "result_chars": 1221}
+{"iter": 0, "tool": "search_local", "args_keys": ["corpus", "query", "top_k"], "result_chars": 1221}
+{"iter": 0, "tool": "search_local", "args_keys": ["corpus", "query", "top_k"], "result_chars": 1274}
+{"iter": 0, "tool": "search_local", "args_keys": ["corpus", "query", "top_k"], "result_chars": 47}
+{"iter": 1, "error": "TimeoutError('timed out')"}

@@ -1,0 +1,3 @@
+{"iter": 0, "tool": "search_local", "args_keys": ["corpus", "query"], "result_chars": 51}
+{"iter": 0, "tool": "search_local", "args_keys": ["corpus", "query"], "result_chars": 55}
+{"iter": 1, "final_content_chars": 119}

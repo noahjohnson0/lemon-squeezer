@@ -1,0 +1,11 @@
+{
+  "checks": [
+    {"name":"file:answer.txt","pass":1,"weight":5,"note":""},
+    {"name":"found_access_code","pass":0,"weight":60,"note":"expected RAINBOW-7942-OMEGA"},
+    {"name":"found_coordinates","pass":0,"weight":10,"note":""},
+    {"name":"concise_answer","pass":0,"weight":15,"note":"283 chars (verbose)"}
+  ],
+  "gained": 5,
+  "total": 90,
+  "score_pct": 5
+}

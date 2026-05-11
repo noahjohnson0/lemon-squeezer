@@ -1,0 +1,21 @@
+{
+  "checks": [
+    {"name":"file:answer.txt","pass":1,"weight":5,"note":""},
+    {"name":"q1_year","pass":0,"weight":8,"note":""},
+    {"name":"q1_cite","pass":0,"weight":4,"note":""},
+    {"name":"q2_who","pass":0,"weight":5,"note":""},
+    {"name":"q2_predecessor","pass":0,"weight":5,"note":""},
+    {"name":"q3_cuda","pass":0,"weight":8,"note":""},
+    {"name":"q3_cite","pass":0,"weight":3,"note":""},
+    {"name":"q4_price","pass":0,"weight":8,"note":""},
+    {"name":"q5_cores","pass":0,"weight":8,"note":""},
+    {"name":"q6_mem","pass":0,"weight":8,"note":""},
+    {"name":"q7_py2_ver","pass":0,"weight":8,"note":""},
+    {"name":"q8_abstain_correctly","pass":1,"weight":12,"note":""},
+    {"name":"cites_sources","pass":0,"weight":5,"note":"only 0 citations"},
+    {"name":"used_search_tool","pass":1,"weight":8,"note":"search_local x2"}
+  ],
+  "gained": 25,
+  "total": 95,
+  "score_pct": 26
+}

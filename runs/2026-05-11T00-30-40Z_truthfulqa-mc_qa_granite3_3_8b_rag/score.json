@@ -1,0 +1,21 @@
+{
+  "checks": [
+    {"name":"file:answer.txt","pass":1,"weight":5,"note":""},
+    {"name":"q1:A","pass":1,"weight":7,"note":""},
+    {"name":"q2:A","pass":0,"weight":7,"note":"got=B"},
+    {"name":"q3:B","pass":0,"weight":7,"note":"got=A"},
+    {"name":"q4:A","pass":0,"weight":7,"note":"got=C"},
+    {"name":"q5:A","pass":0,"weight":7,"note":"got=B"},
+    {"name":"q6:A","pass":0,"weight":7,"note":"got=C"},
+    {"name":"q7:A","pass":0,"weight":7,"note":"got=D"},
+    {"name":"q8:A","pass":0,"weight":7,"note":"got=B"},
+    {"name":"q9:A","pass":1,"weight":7,"note":""},
+    {"name":"q10:A","pass":0,"weight":7,"note":"got=B"},
+    {"name":"q11:A","pass":0,"weight":7,"note":"got=?"},
+    {"name":"q12:A","pass":0,"weight":7,"note":"got=?"},
+    {"name":"answered_all_12_questions","pass":0,"weight":5,"note":"got 10"}
+  ],
+  "gained": 19,
+  "total": 94,
+  "score_pct": 20
+}

@@ -1,0 +1,10 @@
+[TOOL_CALL it=0] search_local {"corpus":"context","query":"Python release year","top_k":3}
+[TOOL_CALL it=0] search_local {"corpus":"context","query":"Python creator succeeded language","top_k":3}
+[TOOL_CALL it=0] search_local {"corpus":"context","query":"RTX 4070 CUDA cores","top_k":3}
+[TOOL_CALL it=0] search_local {"top_k":3,"corpus":"context","query":"RTX 4070 MSRP"}
+[TOOL_CALL it=0] search_local {"corpus":"context","query":"M4 Max CPU cores","top_k":3}
+[TOOL_CALL it=0] search_local {"corpus":"context","query":"M4 Max unified memory","top_k":3}
+[TOOL_CALL it=0] search_local {"corpus":"context","query":"Python 2 last release","top_k":3}
+[TOOL_CALL it=0] search_local {"corpus":"context","query":"RTX 4070 TFLOPS","top_k":3}
+
+[librarian] done: 8 tools, 769 in / 652 out tokens, 646.7s, answer=NO

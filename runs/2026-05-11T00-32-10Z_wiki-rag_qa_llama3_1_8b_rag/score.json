@@ -1,0 +1,20 @@
+{
+  "checks": [
+    {"name":"file:answer.txt","pass":1,"weight":5,"note":""},
+    {"name":"q1_year","pass":0,"weight":8,"note":""},
+    {"name":"q1_cite","pass":1,"weight":4,"note":""},
+    {"name":"q2_who","pass":1,"weight":5,"note":""},
+    {"name":"q2_predecessor","pass":1,"weight":5,"note":""},
+    {"name":"q3_cuda","pass":1,"weight":8,"note":""},
+    {"name":"q3_cite","pass":1,"weight":3,"note":""},
+    {"name":"q4_price","pass":1,"weight":8,"note":""},
+    {"name":"q5_cores","pass":1,"weight":8,"note":""},
+    {"name":"q6_mem","pass":1,"weight":8,"note":""},
+    {"name":"q7_py2_ver","pass":1,"weight":8,"note":""},
+    {"name":"q8_abstain_correctly","pass":1,"weight":15,"note":""},
+    {"name":"cites_sources","pass":1,"weight":7,"note":"found 2 distinct citations"}
+  ],
+  "gained": 84,
+  "total": 92,
+  "score_pct": 91
+}

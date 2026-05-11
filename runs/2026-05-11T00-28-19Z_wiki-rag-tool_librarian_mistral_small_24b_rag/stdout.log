@@ -1,0 +1,6 @@
+[TOOL_CALL it=0] search_local {"corpus":"context","query":"release date Python"}
+[TOOL_CALL it=0] search_local {"corpus":"context","query":"Python creator language"}
+[ASSISTANT it=1] I don't know — the available references don't contain this.
+I don't know — the available references don't contain this.
+
+[librarian] done: 2 tools, 1247 in / 76 out tokens, 79.4s, answer=yes

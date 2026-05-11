@@ -1,0 +1,8 @@
+Q1: 1991 (python_lang.md)  
+Q2: Guido van Rossum, ABC (python_lang.md)  
+Q3: 5888 (rtx_4070.md)  
+Q4: $599 USD (rtx_4070.md)  
+Q5: 16 (m4_max.md)  
+Q6: 128 GB (m4_max.md)  
+Q7: 2.7.18 (python_lang.md)  
+Q8: I don't know (no relevant data in context)

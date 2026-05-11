@@ -1,0 +1,15 @@
+Q1: Python was first released in 1991. (python_lang.md)
+
+Q2: Guido van Rossum began working on Python, which succeeded the ABC programming language. (python_lang.md)
+
+Q3: The RTX 4070 has 5888 CUDA cores. (rtx_4070.md)
+
+Q4: The launch MSRP of the RTX 4070 was $599 USD. (rtx_4070.md)
+
+Q5: The M4 Max contains a maximum of 16 CPU cores (12 performance + 4 efficiency). (m4_max.md)
+
+Q6: The M4 Max supports up to 128 GB of unified memory. During its announcement, the exact maximum amount wasn't specified beyond the stated support. However, based on this information, the max in context is 128 GB. (m4_max.md)
+
+Q7: Python 2.7.18 was the last release of Python 2. (python_lang.md)
+
+Q8: The context does not provide information about TFLOPS for RTX 4070. I don't know.
