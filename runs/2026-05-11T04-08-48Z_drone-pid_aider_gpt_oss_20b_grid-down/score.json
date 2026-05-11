@@ -1,0 +1,15 @@
+{
+  "checks": [
+    {"name":"file:pid.py","pass":1,"weight":5,"note":""},
+    {"name":"imports_and_runs","pass":1,"weight":10,"note":""},
+    {"name":"settles_to_setpoint","pass":1,"weight":15,"note":""},
+    {"name":"reaches_setpoint","pass":1,"weight":10,"note":""},
+    {"name":"stable_late_phase","pass":1,"weight":15,"note":""},
+    {"name":"reset_zeroes_state","pass":1,"weight":10,"note":""},
+    {"name":"set_setpoint_works","pass":1,"weight":10,"note":""},
+    {"name":"set_gains_works","pass":1,"weight":10,"note":""}
+  ],
+  "gained": 85,
+  "total": 85,
+  "score_pct": 100
+}

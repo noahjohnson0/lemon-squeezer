@@ -366,3 +366,7 @@ run_id,ts,eval,harness,model,tag,wall_s,tok_in,tok_out,tools,exit,score_pct
 2026-05-11T01-02-28Z_wiki-rag-tool_librarian_devstral_24b_rag2,2026-05-11T01-02-28Z,wiki-rag-tool,librarian,devstral:24b,rag2,20,1468,55,1,0,17
 2026-05-11T01-02-55Z_wiki-rag-tool_librarian_gemma3_12b_rag2,2026-05-11T01-02-55Z,wiki-rag-tool,librarian,gemma3:12b,rag2,0,0,0,0,0,0
 2026-05-11T03-54-38Z_wiki-rag-tool_librarian_gemma4_e4b_gemma-check,2026-05-11T03-54-38Z,wiki-rag-tool,librarian,gemma4:e4b,gemma-check,34,11417,2250,9,0,63
+2026-05-11T04-08-48Z_drone-pid_aider_gpt_oss_20b_grid-down,2026-05-11T04-08-48Z,drone-pid,aider,gpt-oss:20b,grid-down,46,984,930,0,0,100
+2026-05-11T04-09-40Z_epidemiology-sir_aider_gpt_oss_20b_grid-down,2026-05-11T04-09-40Z,epidemiology-sir,aider,gpt-oss:20b,grid-down,68,1100,1500,0,0,100
+2026-05-11T04-10-56Z_water-purify-bleach_aider_gpt_oss_20b_grid-down,2026-05-11T04-10-56Z,water-purify-bleach,aider,gpt-oss:20b,grid-down,47,1000,1000,0,0,100
+2026-05-11T04-11-50Z_ham-radio-antenna_aider_gpt_oss_20b_grid-down,2026-05-11T04-11-50Z,ham-radio-antenna,aider,gpt-oss:20b,grid-down,38,1100,780,0,0,100

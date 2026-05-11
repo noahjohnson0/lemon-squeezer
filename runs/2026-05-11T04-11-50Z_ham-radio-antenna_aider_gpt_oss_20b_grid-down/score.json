@@ -1,0 +1,15 @@
+{
+  "checks": [
+    {"name":"file:antenna.py","pass":1,"weight":5,"note":""},
+    {"name":"imports","pass":1,"weight":5,"note":""},
+    {"name":"wavelength_14MHz","pass":1,"weight":10,"note":""},
+    {"name":"dipole_leg_40m","pass":1,"weight":15,"note":""},
+    {"name":"dipole_total_40m","pass":1,"weight":15,"note":""},
+    {"name":"qtr_wave_2m_simplex","pass":1,"weight":15,"note":""},
+    {"name":"all_8_bands_correct","pass":1,"weight":25,"note":"8/8"},
+    {"name":"raises_on_oob_freq","pass":1,"weight":10,"note":""}
+  ],
+  "gained": 100,
+  "total": 100,
+  "score_pct": 100
+}

@@ -1,0 +1,14 @@
+{
+  "checks": [
+    {"name":"file:sir.py","pass":1,"weight":5,"note":""},
+    {"name":"imports_and_runs","pass":1,"weight":15,"note":""},
+    {"name":"conservation_S+I+R","pass":1,"weight":15,"note":"drift=0.000"},
+    {"name":"peak_day~38","pass":1,"weight":20,"note":"t_peak=38.4"},
+    {"name":"peak_infected~300","pass":1,"weight":20,"note":"i_peak=300.8"},
+    {"name":"R_final~940","pass":1,"weight":20,"note":"R_final=940.5"},
+    {"name":"integrated_to_t_end","pass":1,"weight":5,"note":""}
+  ],
+  "gained": 100,
+  "total": 100,
+  "score_pct": 100
+}
