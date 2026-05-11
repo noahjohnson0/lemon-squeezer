@@ -51,7 +51,7 @@ def answer_hit(model_answer: str, aliases: list[str]) -> tuple[bool, str | None]
     return False, None
 
 
-def run_one(model: str, question: str, corpus: str, base_url: str,
+def run_one(model: str, question: str, corpora: list[str], base_url: str,
             run_dir: Path, timeout_s: int) -> dict:
     """Invoke librarian.py for a single Q. Returns {answer, wall, tokens, tools, exit}."""
     run_dir.mkdir(parents=True, exist_ok=True)
@@ -60,7 +60,8 @@ def run_one(model: str, question: str, corpus: str, base_url: str,
     (ws / "prompt.md").write_text(question + "\n")
 
     env = os.environ.copy()
-    env["LEMON_CORPORA"] = f"{corpus}={Path.home() / 'refs' / corpus}"
+    # LEMON_CORPORA is the colon-separated name=path list the librarian honors.
+    env["LEMON_CORPORA"] = ":".join(f"{c}={Path.home() / 'refs' / c}" for c in corpora)
     env["OLLAMA_API_BASE"] = base_url
 
     cmd = ["python3", str(ROOT / "bin" / "librarian.py"),
@@ -118,7 +119,9 @@ def main():
     ap.add_argument("qset", help="bench/<name>.jsonl basename (no .jsonl)")
     ap.add_argument("model", help="ollama model tag, e.g. gpt-oss:20b")
     ap.add_argument("--n", type=int, default=None, help="sample first N questions (default: all)")
-    ap.add_argument("--corpus", default="wikipedia-en", help="corpus name (default wikipedia-en)")
+    ap.add_argument("--corpus", default="wikipedia-en",
+                    help="corpus name(s), comma-separated to expose multiple corpora to the librarian (default wikipedia-en)")
+    ap.add_argument("--tag", default=None, help="optional output-dir suffix to distinguish configurations (e.g. 'allcorpora', 'wikionly')")
     ap.add_argument("--base-url", default=None, help="ollama base url; default from $OLLAMA_API_BASE or localhost")
     ap.add_argument("--timeout", type=int, default=180, help="per-question timeout seconds")
     ap.add_argument("--no-lock", action="store_true", help="skip GPU lock (use only if you know nothing else is queued)")
@@ -134,11 +137,13 @@ def main():
         questions = questions[:args.n]
     n = len(questions)
 
+    corpora = [c.strip() for c in args.corpus.split(",") if c.strip()]
     ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H-%M-%SZ")
     safe_model = args.model.replace(":", "_").replace("/", "_").replace(".", "_")
-    out_dir = ROOT / "bench" / "results" / f"{ts}_{args.qset}_{safe_model}"
+    suffix = f"_{args.tag}" if args.tag else ""
+    out_dir = ROOT / "bench" / "results" / f"{ts}_{args.qset}_{safe_model}{suffix}"
     out_dir.mkdir(parents=True, exist_ok=True)
-    print(f"[rag-bench] output: {out_dir}  n={n}  model={args.model}  corpus={args.corpus}", file=sys.stderr)
+    print(f"[rag-bench] output: {out_dir}  n={n}  model={args.model}  corpora={corpora}", file=sys.stderr)
 
     # Lock so a concurrent eval-run queues behind us.
     lock = ROOT / ".gpu.lock"
@@ -163,7 +168,7 @@ def main():
                 aliases = q.get("normalized_aliases", [])
                 q_run_dir = out_dir / "runs" / f"{i:04d}"
                 print(f"[rag-bench] {i+1}/{n}  {question[:80]}", file=sys.stderr)
-                res = run_one(args.model, question, args.corpus, base_url, q_run_dir, args.timeout)
+                res = run_one(args.model, question, corpora, base_url, q_run_dir, args.timeout)
                 hit, matched = answer_hit(res["answer"], aliases)
                 hits += int(hit)
                 total_wall += res["wall_seconds"]
@@ -195,6 +200,8 @@ def main():
             "model": args.model,
             "harness": "librarian",
             "corpus": args.corpus,
+            "corpora": corpora,
+            "tag": args.tag,
             "n": n,
             "hits": hits,
             "accuracy": round(accuracy, 4),
