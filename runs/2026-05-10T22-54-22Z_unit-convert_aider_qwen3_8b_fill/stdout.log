@@ -1878,3 +1878,6 @@ Tokens: 2.7k sent, 1.7k received.
 
 convert.py
 Applied edit to convert.py
+Summarization failed for model ollama_chat/qwen3:8b: cannot schedule new futures after shutdown
+Summarization failed for model ollama_chat/qwen3:8b: cannot schedule new futures after shutdown
+summarizer unexpectedly failed for all models

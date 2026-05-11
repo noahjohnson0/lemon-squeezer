@@ -336,3 +336,4 @@ run_id,ts,eval,harness,model,tag,wall_s,tok_in,tok_out,tools,exit,score_pct
 2026-05-10T23-46-21Z_fft-spectrum_aider_llama3_1_8b_fill,2026-05-10T23-46-21Z,fft-spectrum,aider,llama3.1:8b,fill,251,0,0,0,143,0
 2026-05-10T23-50-32Z_wiki-rag-tool_librarian_command_r_35b_rag,2026-05-10T23-50-32Z,wiki-rag-tool,librarian,command-r:35b,rag,600,0,0,0,124,0
 2026-05-11T00-00-40Z_wiki-rag-tool_librarian_command_r7b_rag,2026-05-11T00-00-40Z,wiki-rag-tool,librarian,command-r7b,rag,438,1915,342,0,0,62
+2026-05-11T00-08-05Z_wiki-rag-tool_librarian_gpt_oss_20b_rag,2026-05-11T00-08-05Z,wiki-rag-tool,librarian,gpt-oss:20b,rag,600,0,0,0,124,0

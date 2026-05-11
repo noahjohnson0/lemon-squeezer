@@ -1,6 +1,29 @@
 import re
 from collections import defaultdict
 import numpy as np
+import math  # Add this line to import the math module
+
+def parse_formula(formula: str) -> int:
+    """
+    Parse a formula string and return the total count of elements.
+    
+    Example:
+        parse_formula("H2O") returns 3
+        parse_formula("Al2(SO4)3") returns 13
+    """
+    count = 1
+    for element in re.findall(r'[A-Z][a-z]*\d*', formula):
+        if '(' in element and ')' in element:
+            group = element[element.index('('):element.index(')')+1]
+            sub_count, sub_formula = re.match(r'(\d*)\(([^)]+)\)', group).groups()
+            if sub_count == '':
+                sub_count = 1
+            else:
+                sub_count = int(sub_count)
+            count *= parse_formula(sub_formula)
+        else:
+            count *= int(element[:-1]) if element[-1].isdigit() else 1
+    return count
 
 def balance(equation: str) -> tuple[list[int], list[int]]:
     """
@@ -62,8 +85,9 @@ def balance(equation: str) -> tuple[list[int], list[int]]:
         raise ValueError("Unbalanceable input")
 
     # Reduce coefficients to smallest positive integers
+    lhs_coefficients = []
     for i in range(len(lhs_counts)):
-        lhs_coefficients[i] = math.gcd(lhs_coefficients[i], coefficients[i])
-        lhs_coefficients[i] //= math.gcd(lhs_coefficients[i], coefficients[i])
+        coefficient = math.gcd(lhs_counts[list(lhs_counts.keys())[i]], coefficients[i])
+        lhs_coefficients.append(coefficient // math.gcd(coefficient, coefficients[i]))
 
     return (lhs_coefficients, np.round(coefficients).astype(int))
