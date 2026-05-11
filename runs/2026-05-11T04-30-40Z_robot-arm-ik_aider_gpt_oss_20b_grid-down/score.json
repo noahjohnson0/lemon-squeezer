@@ -1,0 +1,12 @@
+{
+  "checks": [
+    {"name":"file:ik.py","pass":1,"weight":5,"note":""},
+    {"name":"imports","pass":1,"weight":10,"note":""},
+    {"name":"fk_ik_roundtrip_5/5","pass":1,"weight":40,"note":""},
+    {"name":"raises_on_unreachable","pass":1,"weight":25,"note":""},
+    {"name":"elbow_up_vs_down","pass":1,"weight":20,"note":""}
+  ],
+  "gained": 100,
+  "total": 100,
+  "score_pct": 100
+}

@@ -111,9 +111,15 @@ harness_run() {
    redirected to stderr (`>&2`) or the JSON is corrupted. We literally lost
    12 chem-balance scores to this; the eval-export auto-runs `eval-rescore`
    which has an `\x`/`\0`-stripping fallback parser, but don't rely on that.
-2. **Backslashes in notes.** Notes like `got=b'\x00'` from `repr()` produce
-   invalid JSON escapes. The `add()` helper takes a raw string into a printf
-   `%s`; sanitize note before storing or just don't include raw bytes.
+2. **Backslashes AND double-quotes in notes.** Notes like `got=b'\x00'` from
+   `repr()` produce invalid JSON escapes; notes containing `"` (e.g. from
+   `NameError("name 'EOF' is not defined")`) break the JSON entirely.
+   The `add()` helper takes a raw string into a printf `%s`; sanitize the
+   note before storing — at minimum strip backslashes and replace `"` with
+   `'`, or just don't pipe `repr()` exception messages straight into notes.
+   robot-arm-ik hit this with a gpt-oss:20b run that emitted a literal
+   `EOF` line; the import error message contained a quote and the score.json
+   wouldn't parse. `eval-rescore` has a stripper fallback but trust nothing.
 3. **`gtimeout`.** macOS doesn't ship `timeout(1)` — we use `gtimeout` from
    `coreutils`. `brew install coreutils` is a hard dep. Linux CI gets the
    `timeout` fallback in `bin/eval-run`.

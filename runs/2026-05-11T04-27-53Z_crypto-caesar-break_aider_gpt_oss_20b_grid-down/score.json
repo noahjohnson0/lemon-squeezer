@@ -1,0 +1,12 @@
+{
+  "checks": [
+    {"name":"file:break_caesar.py","pass":1,"weight":5,"note":""},
+    {"name":"imports","pass":1,"weight":10,"note":""},
+    {"name":"recovers_shift_all","pass":0,"weight":40,"note":"1/4"},
+    {"name":"recovers_text_all","pass":1,"weight":35,"note":"4/4"},
+    {"name":"returns_tuple","pass":1,"weight":10,"note":""}
+  ],
+  "gained": 60,
+  "total": 100,
+  "score_pct": 60
+}

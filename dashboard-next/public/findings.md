@@ -1,13 +1,13 @@
 # 🍋 Findings
 
-_375 runs · 37 evals · 9 harnesses · 17 models. Auto-generated._
+_381 runs · 42 evals · 9 harnesses · 17 models. Auto-generated._
 
 ## Harness scoreboard
 
 | harness | avg | cells |
 |---|---:|---:|
 | `squeezer-critique` | **85.5** | 31 |
-| `aider` | **65.5** | 191 |
+| `aider` | **66.3** | 197 |
 | `squeezer-architect` | **60.2** | 12 |
 | `squeezer-tdd` | **57.7** | 12 |
 | `qa` | **52.6** | 33 |
@@ -20,7 +20,7 @@ _375 runs · 37 evals · 9 harnesses · 17 models. Auto-generated._
 
 | model | avg | cells |
 |---|---:|---:|
-| `gpt-oss:20b` | **84.7** | 70 |
+| `gpt-oss:20b` | **85.4** | 76 |
 | `gemma4:e4b` | **79.0** | 2 |
 | `qwen3-coder:30b-a3b-q4_K_M` | **77.9** | 55 |
 | `qwen2.5:14b` | **70.4** | 28 |
@@ -45,18 +45,18 @@ _375 runs · 37 evals · 9 harnesses · 17 models. Auto-generated._
 | `sql-injection-fix` | `qwen3:14b` | 65% | 85% | **+20** |
 | `sql-injection-fix` | `gpt-oss:20b` | 85% | 100% | **+15** |
 | `password-strength` | `gpt-oss:20b` | 93% | 100% | **+7** |
-| `crc-checksum` | `gpt-oss:20b` | 100% | 100% | **+0** |
-| `bug-fix` | `gpt-oss:20b` | 100% | 100% | **+0** |
-| `chem-balance` | `gpt-oss:20b` | 100% | 100% | **+0** |
-| `refactor` | `gpt-oss:20b` | 100% | 100% | **+0** |
-| `port-scanner` | `gpt-oss:20b` | 100% | 100% | **+0** |
+| `hamming-code` | `gpt-oss:20b` | 100% | 100% | **+0** |
+| `lru-cache` | `gpt-oss:20b` | 100% | 100% | **+0** |
+| `kepler-orbit` | `qwen3-coder:30b-a3b-q4_K_M` | 100% | 100% | **+0** |
 | `dijkstra` | `gpt-oss:20b` | 100% | 100% | **+0** |
 | `dijkstra` | `qwen3:14b` | 100% | 100% | **+0** |
-| `lru-cache` | `gpt-oss:20b` | 100% | 100% | **+0** |
-| `bug-fix` | `qwen3:14b` | 100% | 100% | **+0** |
-| `sql-injection-fix` | `qwen3-coder:30b-a3b-q4_K_M` | 85% | 85% | **+0** |
-| `matrix-ops` | `gpt-oss:20b` | 89% | 89% | **+0** |
-| `kepler-orbit` | `qwen3-coder:30b-a3b-q4_K_M` | 100% | 100% | **+0** |
+| `cli-tool` | `gpt-oss:20b` | 100% | 100% | **+0** |
+| `cli-tool` | `qwen3:14b` | 100% | 100% | **+0** |
+| `refactor` | `gpt-oss:20b` | 100% | 100% | **+0** |
+| `kalman-filter` | `gpt-oss:20b` | 100% | 100% | **+0** |
+| `great-circle` | `gpt-oss:20b` | 100% | 100% | **+0** |
+| `engineering` | `gpt-oss:20b` | 100% | 100% | **+0** |
+| `projectile-sim` | `gpt-oss:20b` | 100% | 100% | **+0** |
 
 _Across 39 (eval × model) pairs with both single-pass and multi-step: 3 improved with a pipeline. Mean delta = **-9.7 pts**._
 

@@ -1,0 +1,17 @@
+{
+  "checks": [
+    {"name":"file:otp.py","pass":1,"weight":5,"note":""},
+    {"name":"imports","pass":1,"weight":5,"note":""},
+    {"name":"xor_encrypt","pass":1,"weight":15,"note":""},
+    {"name":"xor_decrypt","pass":1,"weight":10,"note":""},
+    {"name":"rejects_len_mismatch","pass":1,"weight":15,"note":""},
+    {"name":"handles_empty","pass":1,"weight":5,"note":""},
+    {"name":"hex_roundtrip","pass":1,"weight":10,"note":""},
+    {"name":"generate_key_length","pass":1,"weight":10,"note":""},
+    {"name":"generate_key_random","pass":1,"weight":10,"note":""},
+    {"name":"uses_secrets_module","pass":1,"weight":15,"note":""}
+  ],
+  "gained": 100,
+  "total": 100,
+  "score_pct": 100
+}

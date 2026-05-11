@@ -28,10 +28,23 @@ import argparse, json, os, sqlite3, sys, time
 import urllib.request, urllib.error, urllib.parse
 from pathlib import Path
 
-# Reuse the FTS5 search helper
+# Reuse the FTS5 search helper, plus the ZIM-via-kiwix-serve backend
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE / "refs"))
 from search import search as fts_search  # type: ignore
+from zim_search import search as zim_search, read_article as zim_read  # type: ignore
+
+
+def _is_zim_corpus(corpus_dir: Path) -> bool:
+    """A corpus is treated as ZIM-backed if it has a .lemon-zim.conf file."""
+    return (corpus_dir / ".lemon-zim.conf").exists()
+
+
+def _dispatch_search(corpus_dir: Path, query: str, top: int = 5):
+    """Pick FTS5 or ZIM backend based on which marker files are present."""
+    if _is_zim_corpus(corpus_dir):
+        return zim_search(corpus_dir, query, top=top)
+    return fts_search(corpus_dir, query, top=top)
 
 
 # ───────────────────────── corpus registry ─────────────────────────
@@ -75,9 +88,11 @@ def make_tools(workspace: Path, corpora: dict[str, Path], allow_web: bool):
         if corpus not in corpora:
             return f"ERROR: unknown corpus '{corpus}'. Available: {list(corpora)}"
         try:
-            hits = fts_search(corpora[corpus], query, top=int(top_k))
+            hits = _dispatch_search(corpora[corpus], query, top=int(top_k))
         except sqlite3.OperationalError as e:
             return f"ERROR: bad query: {e}"
+        except Exception as e:
+            return f"ERROR: search failed: {e!r}"
         if not hits:
             return f"(no matches for '{query}' in '{corpus}')"
         out = [f"[{i+1}] {corpus}::{h['path']} :: {h['section']}\n{h['snippet']}" for i, h in enumerate(hits)]
@@ -90,8 +105,16 @@ def make_tools(workspace: Path, corpora: dict[str, Path], allow_web: bool):
             corpus = next(iter(corpora))
         if corpus not in corpora:
             return f"ERROR: unknown corpus '{corpus}'. Available: {list(corpora)}"
-        target = (corpora[corpus] / path).resolve()
-        if not str(target).startswith(str(corpora[corpus].resolve())):
+        corpus_dir = corpora[corpus]
+        # ZIM-backed: fetch the article from kiwix-serve
+        if _is_zim_corpus(corpus_dir):
+            try:
+                return zim_read(corpus_dir, path)
+            except Exception as e:
+                return f"ERROR: zim fetch failed: {e!r}"
+        # FTS5-backed: read the file relative to corpus dir
+        target = (corpus_dir / path).resolve()
+        if not str(target).startswith(str(corpus_dir.resolve())):
             return f"ERROR: path escapes corpus: {path}"
         if not target.exists():
             return f"ERROR: no such file: {path}"

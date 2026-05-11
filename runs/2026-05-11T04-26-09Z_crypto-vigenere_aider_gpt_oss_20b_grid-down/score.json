@@ -1,0 +1,13 @@
+{
+  "checks": [
+    {"name":"file:vigenere.py","pass":1,"weight":5,"note":""},
+    {"name":"imports","pass":1,"weight":5,"note":""},
+    {"name":"encrypt_4/4","pass":1,"weight":25,"note":""},
+    {"name":"decrypt_4/4","pass":1,"weight":25,"note":""},
+    {"name":"rejects_empty_key","pass":1,"weight":10,"note":""},
+    {"name":"rejects_bad_key","pass":1,"weight":10,"note":""}
+  ],
+  "gained": 80,
+  "total": 80,
+  "score_pct": 100
+}
