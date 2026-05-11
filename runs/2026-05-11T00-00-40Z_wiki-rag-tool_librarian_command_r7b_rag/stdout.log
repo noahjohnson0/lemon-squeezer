@@ -1,0 +1,5 @@
+[ASSISTANT it=0] Q1:  Python was first released in 1991. (python_interpreter.md)
+Q2:  Guido van Rossum began working on Python and it succeeded ABC programming language. (python_interpreter.md)
+Q3: The RTX 4070 has an unknown number of CUDA cores that is described as "New architecture with new RT and Tensor cores". 
+
+[librarian] done: 0 tools, 1915 in / 342 out tokens, 438.0s, answer=yes
