@@ -15,6 +15,13 @@ DEFAULT_TOP = 5
 
 
 def search(corpus_dir: Path, query: str, top: int = DEFAULT_TOP) -> list[dict]:
+    # ZIM-backed corpora (e.g. wikipedia-en) carry a .lemon-zim.conf sentinel and
+    # are served by kiwix-serve; dispatch to the ZIM shim so `lemon search` works
+    # uniformly across both backends. Same as the dispatch in bin/librarian.py.
+    if (corpus_dir / ".lemon-zim.conf").exists():
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        from zim_search import search as zim_search  # type: ignore
+        return zim_search(corpus_dir, query, top=top)
     db = corpus_dir / ".lemon-index.db"
     if not db.exists():
         raise FileNotFoundError(f"no index at {db}; build with bin/refs/build_index.py")

@@ -32,12 +32,12 @@ CODE_MODEL="${LEMON_CODE_MODEL:-qwen3-coder:30b-a3b-q4_K_M}"
 LIB_MODEL="${LEMON_LIBRARIAN_MODEL:-gpt-oss:20b}"
 FAST_MODEL="${LEMON_FAST_MODEL:-qwen3:8b}"
 
-# Default corpora — registered if their indices exist
+# Default corpora — registered if their FTS5 index OR a ZIM conf is present
 default_corpora() {
   local out=""
-  for c in lemon-test python-docs node-docs rust-docs dlmf-math wikipedia-en; do
+  for c in lemon-test python-docs node-docs rust-docs dlmf-math wikipedia-en medical; do
     local p="$HOME/refs/$c"
-    if [[ -f "$p/.lemon-index.db" ]]; then
+    if [[ -f "$p/.lemon-index.db" || -f "$p/.lemon-zim.conf" ]]; then
       [[ -n "$out" ]] && out="$out:$c=$p" || out="$c=$p"
     fi
   done
@@ -52,14 +52,22 @@ cmd_corpora() {
   local found=0
   for db in "$HOME"/refs/*/.lemon-index.db; do
     found=1
-    local dir; dir="$(dirname "$db")"
-    local name; name="$(basename "$dir")"
     python3 - "$db" <<'PY'
 import sqlite3, sys
 c = sqlite3.connect(sys.argv[1])
 m = dict(c.execute("SELECT key,value FROM meta").fetchall())
 print(f"  {sys.argv[1].split('/')[-2]:20} docs={m.get('n_docs','?'):>5}  sections={m.get('n_sections','?'):>6}  built={m.get('built_at','?')}")
 PY
+  done
+  # ZIM-backed corpora (served by kiwix-serve) — no FTS5 index, listed separately
+  for conf in "$HOME"/refs/*/.lemon-zim.conf; do
+    found=1
+    local dir; dir="$(dirname "$conf")"
+    local name; name="$(basename "$dir")"
+    local base book
+    base="$(grep -E '^base_url=' "$conf" | head -1 | cut -d= -f2-)"
+    book="$(grep -E '^book='     "$conf" | head -1 | cut -d= -f2-)"
+    printf "  %-20s zim    book=%s  via=%s\n" "$name" "$book" "$base"
   done
   if (( found == 0 )); then
     echo "  (none — build with: bin/refs/build_index.py ~/refs/<name>)"
@@ -141,7 +149,7 @@ cmd_librarian() {
     --workspace "$ws" \
     --run-dir "$ws/run" \
     --base-url "$OLLAMA_API_BASE/v1" \
-    --max-iter 12 "${extra[@]}" >&2
+    --max-iter 12 ${extra[@]+"${extra[@]}"} >&2
 
   echo "---"
   cat "$ws/answer.txt" 2>/dev/null || echo "(no answer produced)"
