@@ -1,0 +1,177 @@
+#!/usr/bin/env python3
+"""bench-analyze — produce a human-readable report from bench/results/.
+
+Usage:
+    bin/bench-analyze                       # full report on all sweeps
+    bin/bench-analyze --since 2026-05-11    # sweeps newer than ts prefix
+    bin/bench-analyze --qset gridown-50     # only one qset
+    bin/bench-analyze --domain medical      # per-Q breakdown for one grid-down domain
+
+Reads bench/results/<ts>_<qset>_<safe-model>(_<tag>)/summary.json and the
+matching per_question.jsonl files. Prints:
+  - the model × qset × tag matrix of accuracy + wall + tokens
+  - per-domain accuracy for gridown-50 sweeps
+  - per-Q hit-pattern table for a domain (with --domain)
+"""
+from __future__ import annotations
+import argparse, json, pathlib, collections, sys, statistics
+
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+RES = ROOT / "bench" / "results"
+
+
+def load_summaries(since_prefix: str | None, qset_filter: str | None) -> list[dict]:
+    out = []
+    for sj in sorted(RES.glob("*/summary.json")):
+        if since_prefix and sj.parent.name < since_prefix:
+            continue
+        try:
+            d = json.load(open(sj))
+        except Exception as e:
+            print(f"WARN skipping {sj}: {e}", file=sys.stderr); continue
+        if qset_filter and d.get("qset") != qset_filter:
+            continue
+        d["_dir"] = sj.parent
+        out.append(d)
+    return out
+
+
+def matrix(summaries: list[dict]) -> None:
+    """Print the model × (qset, tag) accuracy matrix."""
+    rows = collections.defaultdict(dict)  # rows[model][(qset,tag)] = (acc, n, wall_mean, t_in, t_out)
+    for s in summaries:
+        key = (s["qset"], s.get("tag") or "default")
+        rows[s["model"]][key] = (
+            s.get("accuracy", 0),
+            s.get("n", 0),
+            s.get("wall_seconds_mean", 0),
+            s.get("tokens_in_total", 0),
+            s.get("tokens_out_total", 0),
+        )
+    cols = sorted({k for v in rows.values() for k in v.keys()})
+    print("\n=== Model × (qset, tag) accuracy ===")
+    print(f"  {'model':<22}", end="")
+    for c in cols:
+        label = f"{c[0]}/{c[1]}"
+        print(f" | {label:>26}", end="")
+    print()
+    print("  " + "-" * (22 + 28 * len(cols)))
+    for model in sorted(rows):
+        print(f"  {model:<22}", end="")
+        for c in cols:
+            v = rows[model].get(c)
+            if v is None:
+                print(f" | {'-':>26}", end="")
+            else:
+                acc, n, wm, ti, to = v
+                cell = f"{100*acc:.1f}% n={n} {wm:.1f}s"
+                print(f" | {cell:>26}", end="")
+        print()
+
+
+def per_domain(summaries: list[dict], qset: str = "gridown-50") -> None:
+    """For each gridown sweep, break accuracy down by Q domain."""
+    sweeps = [s for s in summaries if s["qset"] == qset]
+    if not sweeps:
+        print(f"\n(no {qset} sweeps yet)"); return
+    print(f"\n=== Per-domain accuracy on {qset} ===")
+    # Discover domains from the qset file
+    qset_path = ROOT / "bench" / f"{qset}.jsonl"
+    dom_by_id = {}
+    if qset_path.exists():
+        for line in qset_path.read_text().splitlines():
+            line = line.strip()
+            if not line: continue
+            try:
+                q = json.loads(line)
+                dom_by_id[q["id"]] = q.get("domain", "unknown")
+            except Exception:
+                pass
+    domains = sorted(set(dom_by_id.values()))
+    # Header
+    print(f"  {'model/tag':<32}", end="")
+    for d in domains:
+        print(f" | {d:>10}", end="")
+    print(f" | {'overall':>10}")
+    print("  " + "-" * (32 + 13 * (len(domains) + 1)))
+    for s in sweeps:
+        per_dom_hits = collections.defaultdict(lambda: [0, 0])  # [hits, n]
+        all_hits = [0, 0]
+        try:
+            for line in open(s["_dir"] / "per_question.jsonl"):
+                r = json.loads(line)
+                qid = r.get("id") or ""
+                d = dom_by_id.get(qid, "unknown")
+                per_dom_hits[d][1] += 1
+                all_hits[1] += 1
+                if r.get("hit"):
+                    per_dom_hits[d][0] += 1
+                    all_hits[0] += 1
+        except FileNotFoundError:
+            continue
+        label = f"{s['model']}/{s.get('tag','-')}"[:32]
+        print(f"  {label:<32}", end="")
+        for d in domains:
+            h, n = per_dom_hits.get(d, [0, 0])
+            cell = f"{h}/{n}" if n else "-"
+            print(f" | {cell:>10}", end="")
+        h, n = all_hits
+        print(f" | {h}/{n}" + (f" ({100*h/n:.0f}%)" if n else ""))
+
+
+def domain_drill(summaries: list[dict], qset: str, domain: str) -> None:
+    """For a chosen domain, show per-Q hit pattern across all sweeps."""
+    sweeps = [s for s in summaries if s["qset"] == qset]
+    if not sweeps:
+        return
+    qset_path = ROOT / "bench" / f"{qset}.jsonl"
+    qs = []
+    for line in qset_path.read_text().splitlines():
+        line = line.strip()
+        if not line: continue
+        q = json.loads(line)
+        if q.get("domain") == domain:
+            qs.append(q)
+    print(f"\n=== {qset} / domain={domain} ({len(qs)} questions) ===")
+    print(f"  {'qid':<22} {'gold':<40}", end="")
+    for s in sweeps:
+        label = f"{s['model']}/{s.get('tag','-')}"[:18]
+        print(f" | {label:>18}", end="")
+    print()
+    print("  " + "-" * (22 + 41 + (21 * len(sweeps))))
+    per_sweep_hits = {}
+    for s in sweeps:
+        try:
+            recs = [json.loads(l) for l in open(s["_dir"] / "per_question.jsonl")]
+            per_sweep_hits[s["_dir"].name] = {r.get("id"): r for r in recs}
+        except FileNotFoundError:
+            per_sweep_hits[s["_dir"].name] = {}
+    for q in qs:
+        gold = (q.get("answer_value") or "")[:38]
+        print(f"  {q['id']:<22} {gold:<40}", end="")
+        for s in sweeps:
+            r = per_sweep_hits[s["_dir"].name].get(q["id"])
+            mark = " "
+            if r:
+                mark = "✓" if r["hit"] else "✗"
+            print(f" | {mark:>18}", end="")
+        print()
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--since", help="ts prefix filter, e.g. 2026-05-11")
+    ap.add_argument("--qset", help="restrict to one qset (e.g. gridown-50)")
+    ap.add_argument("--domain", help="drill into one gridown domain (e.g. medical)")
+    args = ap.parse_args()
+    summaries = load_summaries(args.since, args.qset)
+    if not summaries:
+        print("no summaries match"); return
+    matrix(summaries)
+    per_domain(summaries, qset="gridown-50")
+    if args.domain:
+        domain_drill(summaries, args.qset or "gridown-50", args.domain)
+
+
+if __name__ == "__main__":
+    main()
