@@ -1,0 +1,149 @@
+#!/usr/bin/env python3
+"""bench-judge — re-score a rag-bench per_question.jsonl using an LLM judge.
+
+Substring scoring is unfair to correct-but-paraphrased answers (e.g.
+'60 Ω' missing the regex for '60 ohms', '11.2 km/s' missing '11.186').
+LLM judging asks a model "did the answer correctly address the gold?"
+and tends to lift apparent accuracy by 10-25pp on factoid evals.
+
+Usage:
+    bin/bench-judge bench/results/<sweep_dir>/
+        --judge-model qwen3:14b
+        [--base-url http://...:11434/v1]
+        [--out per_question_judged.jsonl]
+        [--limit N]
+        [--only-misses]   # only re-judge substring=False records (faster)
+
+Outputs:
+    <sweep_dir>/per_question_judged.jsonl    — original + judge_hit field
+    <sweep_dir>/summary_judged.json          — substring + judge accuracy
+"""
+from __future__ import annotations
+import argparse, json, os, sys, time
+import urllib.request, urllib.error
+from pathlib import Path
+
+
+JUDGE_PROMPT = """You are grading a factoid quiz. The student was asked a question and may have used search results to answer. You see:
+
+QUESTION: {question}
+GOLD ANSWER: {gold}
+ACCEPTABLE ALIASES: {aliases}
+STUDENT'S ANSWER: {answer}
+
+Did the student's answer correctly convey the gold answer (or an equivalent — paraphrase, unit conversion, or different valid value within the same range)?
+
+Be GENEROUS on phrasing and formatting (the student is allowed to be verbose or use different unit notation).
+Be STRICT on factual correctness (a wrong number, wrong substance, or wrong subject is NOT correct).
+If the student abstained ('I don't know'), that's NOT correct.
+
+Respond with exactly one token: CORRECT or INCORRECT.
+"""
+
+
+def call_chat(base_url: str, model: str, prompt: str, timeout_s: int = 60) -> str:
+    body = json.dumps({
+        "model": model,
+        "messages": [{"role": "user", "content": prompt}],
+        "stream": False,
+        "max_tokens": 8,
+    }).encode()
+    req = urllib.request.Request(
+        base_url.rstrip("/") + "/chat/completions",
+        data=body,
+        headers={"Content-Type": "application/json", "Authorization": "Bearer ollama"},
+    )
+    with urllib.request.urlopen(req, timeout=timeout_s) as r:
+        d = json.loads(r.read())
+    return (d.get("choices", [{}])[0].get("message", {}).get("content") or "").strip().upper()
+
+
+def judge_one(rec: dict, judge_model: str, base_url: str) -> tuple[bool, str]:
+    aliases = rec.get("normalized_aliases") or rec.get("aliases") or []
+    if isinstance(aliases, list):
+        aliases_str = ", ".join(str(a) for a in aliases[:10])
+    else:
+        aliases_str = str(aliases)
+    prompt = JUDGE_PROMPT.format(
+        question=rec["question"],
+        gold=rec.get("answer_value") or "",
+        aliases=aliases_str,
+        answer=(rec.get("model_answer") or "")[:2000],
+    )
+    try:
+        verdict = call_chat(base_url, judge_model, prompt)
+        is_correct = verdict.startswith("CORRECT")
+        return is_correct, verdict
+    except Exception as e:
+        return False, f"JUDGE_ERROR: {e!r}"
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("sweep_dir", help="bench/results/<sweep_dir>/")
+    ap.add_argument("--judge-model", default="qwen3:14b")
+    ap.add_argument("--base-url", default=None)
+    ap.add_argument("--out", default="per_question_judged.jsonl")
+    ap.add_argument("--limit", type=int, default=None)
+    ap.add_argument("--only-misses", action="store_true",
+                    help="only re-judge records where substring hit=False (faster)")
+    args = ap.parse_args()
+
+    base_url = args.base_url or os.environ.get("OLLAMA_API_BASE") or "http://localhost:11434"
+    if not base_url.endswith("/v1"):
+        base_url = base_url.rstrip("/") + "/v1"
+
+    sweep = Path(args.sweep_dir)
+    pq = sweep / "per_question.jsonl"
+    if not pq.exists():
+        print(f"ERROR: no per_question.jsonl at {sweep}", file=sys.stderr); sys.exit(2)
+
+    records = [json.loads(l) for l in pq.read_text().splitlines() if l.strip()]
+    if args.limit:
+        records = records[: args.limit]
+
+    out_path = sweep / args.out
+    n_substring_hit = 0
+    n_judge_hit = 0
+    n_total = len(records)
+    n_judged = 0
+    t0 = time.monotonic()
+    with open(out_path, "w") as fh:
+        for i, r in enumerate(records):
+            substring_hit = r.get("hit", False)
+            n_substring_hit += int(substring_hit)
+            if args.only_misses and substring_hit:
+                r["judge_hit"] = True  # trust substring positives
+                r["judge_verdict"] = "(skipped: substring hit)"
+                n_judge_hit += 1
+            else:
+                jh, verdict = judge_one(r, args.judge_model, base_url)
+                r["judge_hit"] = jh
+                r["judge_verdict"] = verdict
+                n_judge_hit += int(jh)
+                n_judged += 1
+                mark = "✓" if jh else "✗"
+                print(f"  [{i+1}/{n_total}] {mark} Q{r.get('i','?')}: substring={substring_hit} judge={jh} ({verdict})",
+                      file=sys.stderr)
+            fh.write(json.dumps(r) + "\n"); fh.flush()
+    wall = time.monotonic() - t0
+
+    summary = {
+        "sweep_dir": str(sweep),
+        "judge_model": args.judge_model,
+        "n_total": n_total,
+        "n_judged": n_judged,
+        "substring_hits": n_substring_hit,
+        "substring_pct": round(100 * n_substring_hit / n_total, 1) if n_total else 0,
+        "judge_hits": n_judge_hit,
+        "judge_pct": round(100 * n_judge_hit / n_total, 1) if n_total else 0,
+        "lift_pp": round(100 * (n_judge_hit - n_substring_hit) / n_total, 1) if n_total else 0,
+        "wall_seconds": round(wall, 1),
+    }
+    sj = sweep / "summary_judged.json"
+    sj.write_text(json.dumps(summary, indent=2))
+    print(json.dumps(summary, indent=2))
+
+
+if __name__ == "__main__":
+    main()
