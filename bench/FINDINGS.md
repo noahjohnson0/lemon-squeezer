@@ -71,10 +71,69 @@ NATO Delta cited correctly but regex wanted exact substring, etc.
 
 2 substring-hits were actually wrong (gave homemade ORS values, not WHO).
 
-### Stage A-rerank — LLM listwise rerank (predicted)
-Smoke test on 3 known-failing Qs: 2 of 3 newly correct. Full sweep
-running; expecting **~55-60% substring / ~70-75% Claude-judged** if the
-2/3 fix rate holds.
+### Stage A-rerank — LLM listwise rerank (ACTUAL RESULT: regression)
+Smoke test on 3 known-failing Qs: 2 of 3 newly correct, predicted
++15-20pp lift. Full sweep delivered **25.5% — a -17.6pp REGRESSION from
+sem and -9.8pp from baseline**. The "use a 4B chat model as a listwise
+reranker via JSON prompt" approximation is fundamentally weaker than
+the literature's "use a dedicated cross-encoder model via reranker
+inference." gemma4-as-reranker makes bad ranking decisions at scale
+even when it gets simple cases right.
+
+**Lesson**: smoke tests on cherry-picked failing Qs don't predict
+full-sweep results. A 2/3 fix rate on 3 specific Qs doesn't generalize
+when the other 48 weren't failures to begin with — the rerank can
+DOWNGRADE previously-correct retrievals by replacing them with worse
+LLM-selected ones.
+
+### Stage A-sem — extended model field (post-backfill)
+| Model | substring | vs baseline | wall/Q |
+|---|---|---|---|
+| qwen3:14b | 43.1% | +7.8pp | 33.3s |
+| gemma4:e4b | 35.3% | +7.8pp | 31.4s |
+| mistral-small:24b | 13.7% | +3.9pp | 43.7s |
+| gpt-oss:20b | 15.7% | +0.0pp | 103.8s |
+| qwen2.5:14b | 19.6% | (no baseline) | 26.4s |
+
+**Pattern**: sem benefits scale with the model's ability to engage with
+retrieved snippets. qwen3/gemma4 (the strong extractors) get the full
++7.8pp. mistral-small gets half. gpt-oss gets nothing — it abstains or
+confabulates regardless of how good retrieval gets. Model selection
+matters as much as retrieval architecture.
+
+### Stage B-sem — qwen3:14b on TriviaQA (ACTUAL: regression / flat)
+- baseline librarian (N=100): 49.0%
+- librarian-sem (N=200): **47.5% (-1.5pp)**
+
+**Finding**: the +7.8pp sem lift is **gridown-specific**. TriviaQA
+questions are usually keyword-findable on the first FTS query
+("Who was the man behind The Chipmunks?" → Wikipedia article directly).
+Semantic rerank adds noise without recall lift when the question and
+answer use the same vocabulary. Generalizable rule:
+
+  Semantic retrieval helps where vocabulary diverges between question
+  and answer. Grid-down diverges (model says "EPA bleach water" but
+  Wikipedia says "household chlorine treatment"). Trivia doesn't.
+
+### Stage C — corpus ablation (CLEAN FINDING)
+qwen3:14b × gridown × librarian-sem, varying which corpora are exposed:
+
+| Configuration | Score |
+|---|---|
+| All 23 corpora | **43.1%** |
+| Wikipedia ONLY | 31.4% |
+| No-Wikipedia (22 specialists) | 31.4% |
+
+Symmetric finding: **both corpus categories pull equal weight**. Each
+alone gets to 31.4%. Together: 43.1%. Decomposing 51 Qs:
+- ~20% answerable by EITHER alone (overlap zone)
+- ~12% unique to Wikipedia
+- ~12% unique to specialists
+- ~57% solvable by neither (long tail)
+
+**Validates the corpus investment**: iFixit + Appropedia + SE dumps +
+LibreTexts + Gutenberg LCC subsets (~30 GB) added +11.7pp over what
+Wikipedia alone gives. The specialist corpora are not redundant.
 
 ## What didn't work (interventions tested and reverted)
 
@@ -108,15 +167,14 @@ could address both failure modes, but adds verbosity.
 
 ## What's documented but we haven't tried
 
-| Intervention | Expected lift | Cost | Risk |
-|---|---|---|---|
-| **LLM listwise rerank** (cross-encoder-style) | +15-30pp | 1 extra LLM call per Q (~10s) | ~2x wall time |
-| BGE-reranker or MS-MARCO via llama.cpp | +15-30pp | install llama.cpp; run reranker server | engineering bigger |
-| Dense embedding INDEX (skip FTS entirely) | +20-40pp | hours to embed Wikipedia + indexing layer | biggest engineering |
-| Cite-or-abstain prompt | unknown, probably +3-5pp | prompt-only | low risk |
-| Bigger model (command-r:35b w/ VRAM offload) | unknown | 60+ s/Q | very slow on 12GB VRAM |
-
-LLM listwise rerank is the one we're testing tonight in `librarian-rerank.py`.
+| Intervention | Expected lift | Cost | Risk | Status |
+|---|---|---|---|---|
+| ~~LLM listwise rerank (gemma4 as judge)~~ | +15-30pp predicted | 1 extra LLM call per Q | ~2x wall | **TESTED: -17.6pp** (gemma4 is not a real cross-encoder) |
+| BGE-reranker or MS-MARCO via llama.cpp | +15-30pp | install llama.cpp; reranker server | bigger eng | untried |
+| Dense embedding INDEX (skip FTS entirely) | +20-40pp | hours to embed Wikipedia | biggest eng | untried |
+| Cite-or-abstain prompt | unknown, +3-5pp? | prompt-only | low | next |
+| mxbai-embed-large swap | +2-5pp? | env var | low (bug fixed) | next |
+| Bigger model (command-r:35b w/ offload) | unknown | 60+ s/Q | slow on 12GB VRAM | untried |
 
 ## Realistic ceilings on this hardware
 

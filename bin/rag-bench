@@ -52,7 +52,8 @@ def answer_hit(model_answer: str, aliases: list[str]) -> tuple[bool, str | None]
 
 
 def run_one(model: str, question: str, corpora: list[str], base_url: str,
-            run_dir: Path, timeout_s: int, harness_script: str = "librarian.py") -> dict:
+            run_dir: Path, timeout_s: int, harness_script: str = "librarian.py",
+            system: str | None = None) -> dict:
     """Invoke <harness_script> for a single Q. Returns {answer, wall, tokens, tools, exit}."""
     run_dir.mkdir(parents=True, exist_ok=True)
     ws = run_dir / "workspace"
@@ -64,7 +65,10 @@ def run_one(model: str, question: str, corpora: list[str], base_url: str,
     env["LEMON_CORPORA"] = ":".join(f"{c}={Path.home() / 'refs' / c}" for c in corpora)
     env["OLLAMA_API_BASE"] = base_url
 
-    cmd = ["python3", str(ROOT / "bin" / harness_script),
+    cmd = ["python3", str(ROOT / "bin" / harness_script)]
+    if system:
+        cmd += ["--system", system]
+    cmd += [
            "--model", model,
            "--prompt-file", str(ws / "prompt.md"),
            "--workspace", str(ws),
@@ -126,6 +130,8 @@ def main():
     ap.add_argument("--timeout", type=int, default=180, help="per-question timeout seconds")
     ap.add_argument("--harness-script", default="librarian.py",
                     help="which harness file under bin/ to invoke per question (default: librarian.py; use 'librarian-mq.py' for multi-query)")
+    ap.add_argument("--system", default=None,
+                    help="system prompt — raw text or @path/to/file.md — passed through to the harness")
     ap.add_argument("--no-lock", action="store_true", help="skip GPU lock (use only if you know nothing else is queued)")
     args = ap.parse_args()
 
@@ -170,7 +176,8 @@ def main():
                 aliases = q.get("normalized_aliases", [])
                 q_run_dir = out_dir / "runs" / f"{i:04d}"
                 print(f"[rag-bench] {i+1}/{n}  {question[:80]}", file=sys.stderr)
-                res = run_one(args.model, question, corpora, base_url, q_run_dir, args.timeout, args.harness_script)
+                res = run_one(args.model, question, corpora, base_url, q_run_dir,
+                              args.timeout, args.harness_script, args.system)
                 hit, matched = answer_hit(res["answer"], aliases)
                 hits += int(hit)
                 total_wall += res["wall_seconds"]
