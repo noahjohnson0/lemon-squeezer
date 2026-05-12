@@ -56,17 +56,48 @@ def _dispatch_search(corpus_dir: Path, query: str, top: int = 5):
 EMBED_MODEL = os.environ.get("LEMON_EMBED_MODEL", "nomic-embed-text")
 
 
+def _sanitize_for_embed(text: str) -> str:
+    """Strip control characters that some embedding models reject (mxbai
+    in particular returns HTTP 400 on certain payloads with control chars
+    even though nomic accepts the same text)."""
+    if not text:
+        return ""
+    # Drop ASCII control chars except newline/tab/CR
+    return "".join(c for c in text if c in "\n\r\t" or 0x20 <= ord(c) < 0x7F or ord(c) >= 0xA0)[:2000]
+
+
 def _embed_batch(texts: list, base_url: str, model: str = EMBED_MODEL) -> list:
-    """POST /api/embed with input=[...]; return list of vectors."""
+    """POST /api/embed with input=[...]; return list of vectors.
+    On HTTP error, fall back to one-text-at-a-time so a single bad snippet
+    doesn't kill the whole retrieval batch."""
     if not texts:
         return []
-    body = json.dumps({"model": model, "input": [t[:2000] for t in texts]}).encode()
-    base = base_url.rstrip("/v").rstrip("/")  # strip /v1 if present; we need /api/embed
+    clean = [_sanitize_for_embed(t) for t in texts]
+    base = base_url.rstrip("/v").rstrip("/")
     url = base + "/api/embed"
+    body = json.dumps({"model": model, "input": clean}).encode()
     req = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json"})
-    with urllib.request.urlopen(req, timeout=60) as r:
-        d = json.loads(r.read())
-    return d.get("embeddings", [])
+    try:
+        with urllib.request.urlopen(req, timeout=60) as r:
+            d = json.loads(r.read())
+        embs = d.get("embeddings", [])
+        if len(embs) == len(clean):
+            return embs
+    except Exception:
+        pass
+    # Fallback: per-text. Slower but resilient to one bad input.
+    out = []
+    for t in clean:
+        try:
+            body = json.dumps({"model": model, "input": [t]}).encode()
+            req = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json"})
+            with urllib.request.urlopen(req, timeout=30) as r:
+                d = json.loads(r.read())
+            embs = d.get("embeddings") or [d.get("embedding")] if d.get("embedding") else d.get("embeddings", [])
+            out.append(embs[0] if embs else [0.0])
+        except Exception:
+            out.append([0.0])  # zero vector → cosine 0 → ranks last
+    return out
 
 
 def _cosine(a: list, b: list) -> float:
@@ -338,6 +369,12 @@ def make_tools(workspace: Path, corpora: dict[str, Path], allow_web: bool, embed
                 f"[{i+1}] (sim={sim:.3f}) corpus={h['_corpus']} path={display_path}\n"
                 f"{h['snippet']}"
             )
+        # Note: tried auto-inlining the top-1 article body here; reverted
+        # because the top-1 by cosine is sometimes a BROAD overview article
+        # (sim ~0.65) rather than the SPECIFIC one with the factoid, and
+        # injecting 6KB of overview text distracts the model into writing
+        # general essays instead of extracting the requested fact. The
+        # snippet-only output below is empirically better.
         suffix = f"\n\n(reranked top {len(top)} of {len(candidates)} FTS candidates across {len(target)} corpora)"
         return "\n\n---\n\n".join(out) + suffix
 
@@ -630,7 +667,10 @@ def main():
             messages.append({
                 "role": "tool",
                 "tool_call_id": tc.get("id", ""),
-                "content": str(result)[:8000],
+                # 16K chars (~4K tokens) so search_semantic's snippets PLUS
+                # the auto-inlined top article fit. Modern Ollama context
+                # windows (qwen3:14b: 32K+, gemma4:e4b: 8K+) handle this.
+                "content": str(result)[:16000],
             })
             transcript.append({"iter": it, "tool": name, "args_keys": list(args_raw.keys()) if isinstance(args_raw, dict) else None, "result_chars": len(str(result))})
 

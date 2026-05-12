@@ -56,17 +56,42 @@ def _dispatch_search(corpus_dir: Path, query: str, top: int = 5):
 EMBED_MODEL = os.environ.get("LEMON_EMBED_MODEL", "nomic-embed-text")
 
 
+def _sanitize_for_embed(text: str) -> str:
+    """Strip control characters that some embedding models (mxbai) reject."""
+    if not text:
+        return ""
+    return "".join(c for c in text if c in "\n\r\t" or 0x20 <= ord(c) < 0x7F or ord(c) >= 0xA0)[:2000]
+
+
 def _embed_batch(texts: list, base_url: str, model: str = EMBED_MODEL) -> list:
-    """POST /api/embed with input=[...]; return list of vectors."""
+    """POST /api/embed with input=[...]; per-text fallback on batch failure."""
     if not texts:
         return []
-    body = json.dumps({"model": model, "input": [t[:2000] for t in texts]}).encode()
-    base = base_url.rstrip("/v").rstrip("/")  # strip /v1 if present; we need /api/embed
+    clean = [_sanitize_for_embed(t) for t in texts]
+    base = base_url.rstrip("/v").rstrip("/")
     url = base + "/api/embed"
+    body = json.dumps({"model": model, "input": clean}).encode()
     req = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json"})
-    with urllib.request.urlopen(req, timeout=60) as r:
-        d = json.loads(r.read())
-    return d.get("embeddings", [])
+    try:
+        with urllib.request.urlopen(req, timeout=60) as r:
+            d = json.loads(r.read())
+        embs = d.get("embeddings", [])
+        if len(embs) == len(clean):
+            return embs
+    except Exception:
+        pass
+    out = []
+    for t in clean:
+        try:
+            body = json.dumps({"model": model, "input": [t]}).encode()
+            req = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json"})
+            with urllib.request.urlopen(req, timeout=30) as r:
+                d = json.loads(r.read())
+            embs = d.get("embeddings") or ([d.get("embedding")] if d.get("embedding") else [])
+            out.append(embs[0] if embs else [0.0])
+        except Exception:
+            out.append([0.0])
+    return out
 
 
 def _cosine(a: list, b: list) -> float:
