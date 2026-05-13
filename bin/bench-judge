@@ -24,29 +24,30 @@ import urllib.request, urllib.error
 from pathlib import Path
 
 
-JUDGE_PROMPT = """You are grading a factoid quiz. The student was asked a question and may have used search results to answer. You see:
+JUDGE_PROMPT = """You are a strict factoid-quiz grader. Output ONLY the single word CORRECT or INCORRECT — no reasoning, no <think> tags, no preamble, no punctuation.
 
 QUESTION: {question}
-GOLD ANSWER: {gold}
-ACCEPTABLE ALIASES: {aliases}
+GOLD: {gold}
+ALIASES: {aliases}
 STUDENT'S ANSWER: {answer}
 
-Did the student's answer correctly convey the gold answer (or an equivalent — paraphrase, unit conversion, or different valid value within the same range)?
+Rules:
+- Equivalents count (paraphrase, unit conversion, different valid value in same range).
+- Wrong number / wrong substance / wrong subject = INCORRECT.
+- Abstention ("I don't know") = INCORRECT.
 
-Be GENEROUS on phrasing and formatting (the student is allowed to be verbose or use different unit notation).
-Be STRICT on factual correctness (a wrong number, wrong substance, or wrong subject is NOT correct).
-If the student abstained ('I don't know'), that's NOT correct.
-
-Respond with exactly one token: CORRECT or INCORRECT.
-"""
+Output CORRECT or INCORRECT now:"""
 
 
 def call_chat(base_url: str, model: str, prompt: str, timeout_s: int = 60) -> str:
+    # max_tokens=200 because reasoning models (qwen3) emit <think> blocks
+    # before reaching the actual answer. We parse for the word, not rely on
+    # the position. /no_think prefix disables thinking mode in qwen3.
     body = json.dumps({
         "model": model,
-        "messages": [{"role": "user", "content": prompt}],
+        "messages": [{"role": "user", "content": "/no_think " + prompt}],
         "stream": False,
-        "max_tokens": 8,
+        "max_tokens": 400,
     }).encode()
     req = urllib.request.Request(
         base_url.rstrip("/") + "/chat/completions",
@@ -55,7 +56,11 @@ def call_chat(base_url: str, model: str, prompt: str, timeout_s: int = 60) -> st
     )
     with urllib.request.urlopen(req, timeout=timeout_s) as r:
         d = json.loads(r.read())
-    return (d.get("choices", [{}])[0].get("message", {}).get("content") or "").strip().upper()
+    raw = (d.get("choices", [{}])[0].get("message", {}).get("content") or "").strip()
+    # Strip any <think>...</think> block (qwen3 reasoning models emit these)
+    import re
+    raw = re.sub(r"<think>.*?</think>", "", raw, flags=re.DOTALL).strip()
+    return raw.upper()
 
 
 def judge_one(rec: dict, judge_model: str, base_url: str) -> tuple[bool, str]:

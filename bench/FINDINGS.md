@@ -71,6 +71,36 @@ NATO Delta cited correctly but regex wanted exact substring, etc.
 
 2 substring-hits were actually wrong (gave homemade ORS values, not WHO).
 
+### 2026-05-13 update — qwen3:8b is the new SOTA, judge re-grading at scale
+
+After the 24h extended sweep, the cleanest picture:
+
+```
+model                   substring  judge    lift
+─────────────────────────────────────────────────
+qwen3:8b                  49.0%   68.6%   +19.6pp  ⭐ SOTA
+qwen3:14b                 43.1%   54.9%   +11.8pp
+granite3.3:8b             31.4%   49.0%   +17.6pp  (no tool calls — training-baseline)
+gemma4:e4b                35.3%   41.2%    +5.9pp
+qwen2.5:14b               19.6%   25.5%    +5.9pp
+mistral-nemo:12b          41.2%      —     (not yet judged)
+gpt-oss:20b               15.7%   23.5%    +7.8pp
+mistral-small:24b         13.7%   19.6%    +5.9pp
+```
+
+Key insights from the extended runs:
+- **Smaller can be better**: qwen3:8b beats qwen3:14b by +5.9pp substring / +13.7pp judge.
+  At HALF the parameters and ~30% faster wall time. Defies "bigger model = better RAG."
+- **Sem-lift varies enormously by model**:
+  qwen3:8b gets +15.7pp from sem (baseline 33.3% → 49.0%). gpt-oss:20b gets 0pp.
+  Small instruction-tuned models extract from reranked snippets BETTER than larger ones.
+- **TriviaQA × sem is essentially flat** (qwen3:8b: 48.0%→49.5%, +1.5pp).
+  Confirms the rule: sem helps where vocabulary diverges between Q and A.
+- **Granite3.3:8b at 49% judge with zero tool calls** = the "frontier-trained-data" baseline.
+  These factoid Qs have answers in pre-training; you don't strictly need retrieval to do OK.
+- **The +21pp Claude-judge methodology reproduces locally** with qwen3:14b as the judge
+  (qwen3:8b: 49.0%→68.6%, +19.6pp; closely matches our manual Claude grade at 64.7%).
+
 ### Stage A-rerank — LLM listwise rerank (ACTUAL RESULT: regression)
 Smoke test on 3 known-failing Qs: 2 of 3 newly correct, predicted
 +15-20pp lift. Full sweep delivered **25.5% — a -17.6pp REGRESSION from
