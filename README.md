@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/assets/logo.png" alt="lemon-squeezer" width="200">
+</p>
+
 # lemon-squeezer
 
 Reproducible benchmarks for **local-LLM coding agents** running on a single consumer GPU.
