@@ -1,11 +1,14 @@
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/logo-dark.png">
-    <img src="docs/assets/logo-light.png" alt="lemon-squeezer" width="200">
-  </picture>
-</p>
-
-# lemon-squeezer
+<table border="0" cellspacing="0" cellpadding="0">
+<tr>
+<td width="220" valign="middle">
+<picture>
+<source media="(prefers-color-scheme: dark)" srcset="docs/assets/logo-dark.png">
+<img src="docs/assets/logo-light.png" alt="lemon-squeezer" width="200">
+</picture>
+</td>
+<td valign="middle"><h1>L&nbsp;E&nbsp;M&nbsp;O&nbsp;N &nbsp; S&nbsp;Q&nbsp;U&nbsp;E&nbsp;E&nbsp;Z&nbsp;E&nbsp;R</h1></td>
+</tr>
+</table>
 
 Reproducible benchmarks for **local-LLM coding agents** running on a single consumer GPU.
 
