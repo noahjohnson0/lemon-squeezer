@@ -1,0 +1,145 @@
+#!/usr/bin/env python3
+"""conciseness - measure how MUCH code each scaffold writes to pass, not just whether.
+
+The ponytail insight: same model, same tests, same pass rate, but one scaffold
+solves it in 490 lines and another in 3,629. Pass rate alone misses that. This
+measures the SOLUTION size (source lines of code, comments/blanks excluded) of
+each run's produced code and reports a few "good = concise" views per harness.
+
+    bin/conciseness [--pass-threshold 80] [--by model|harness] [--tag fable-hunt]
+
+Views (we report several - "test a few"):
+  A. passers-only median SLOC  : among runs that PASS, how big is the solution?
+  B. score-per-100-lines       : a blended correctness x concision number
+  C. side-by-side              : pass% and median SLOC together, rank neither
+
+Solution files: the file(s) the eval's rubric imports/checks (parsed from
+`$WS/<file>`), falling back to every workspace file not shipped as a starter.
+For in-place bug-fix evals this counts the whole edited file (diff-based sizing
+is a future refinement).
+"""
+from __future__ import annotations
+import argparse, json, re, statistics
+from collections import defaultdict
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+SRC_EXT = {".py", ".js", ".ts", ".go", ".rs", ".java", ".c", ".cpp", ".rb", ".sh"}
+
+
+def starter_files(eval_name):
+    """Relative paths shipped as starter code (so we don't count them as solution)."""
+    fd = ROOT / "evals" / eval_name / "files"
+    out = set()
+    if fd.is_dir():
+        for p in fd.rglob("*"):
+            if p.is_file():
+                out.add(p.relative_to(fd).as_posix())
+    return out
+
+
+def rubric_targets(eval_name):
+    """Solution filenames the rubric references as $WS/<path> (best signal)."""
+    rp = ROOT / "evals" / eval_name / "rubric.sh"
+    if not rp.is_file():
+        return set()
+    txt = rp.read_text(encoding="utf-8", errors="replace")
+    return set(re.findall(r'\$WS/([A-Za-z0-9_./-]+\.[A-Za-z0-9]+)', txt))
+
+
+def sloc(path: Path):
+    """Source lines: non-blank, non-pure-comment. Cheap, language-agnostic-ish."""
+    try:
+        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+    except Exception:
+        return 0
+    n = 0
+    for ln in lines:
+        s = ln.strip()
+        if not s:
+            continue
+        if s[0] in "#" or s.startswith("//") or s.startswith("*") or s.startswith("/*"):
+            continue
+        n += 1
+    return n
+
+
+def solution_sloc(eval_name, run_id):
+    ws = ROOT / "runs" / run_id / "workspace"
+    if not ws.is_dir():
+        return None
+    targets = rubric_targets(eval_name)
+    starters = starter_files(eval_name)
+    total, counted = 0, 0
+    # prefer the rubric's named target files
+    for t in targets:
+        p = ws / t
+        if p.is_file():
+            total += sloc(p); counted += 1
+    if counted:
+        return total
+    # fallback: every source file in the workspace that isn't a starter
+    for p in ws.rglob("*"):
+        if p.is_file() and p.suffix in SRC_EXT and p.relative_to(ws).as_posix() not in starters:
+            total += sloc(p); counted += 1
+    return total if counted else None
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--pass-threshold", type=int, default=80)
+    ap.add_argument("--by", choices=["harness", "model"], default="harness")
+    ap.add_argument("--tag", default=None)
+    ap.add_argument("--host", default=None, help="filter to a host (e.g. openrouter)")
+    a = ap.parse_args()
+
+    rows = [json.loads(l) for l in (ROOT / "runs.jsonl").read_text(encoding="utf-8", errors="replace").splitlines() if l.strip()]
+    groups = defaultdict(lambda: {"sloc_pass": [], "scores": [], "n": 0, "n_sized": 0})
+    for r in rows:
+        if a.tag and r.get("tag") != a.tag:
+            continue
+        if a.host and r.get("host") != a.host:
+            continue
+        s = r.get("score_pct")
+        if not isinstance(s, (int, float)):
+            continue
+        key = r.get(a.by) or "?"
+        g = groups[key]
+        g["n"] += 1
+        g["scores"].append(float(s))
+        if s >= a.pass_threshold:
+            sl = solution_sloc(r.get("eval"), r["run_id"])
+            if sl:
+                g["sloc_pass"].append(sl)
+                g["n_sized"] += 1
+
+    out = []
+    for key, g in groups.items():
+        if not g["scores"]:
+            continue
+        passrate = 100 * sum(1 for x in g["scores"] if x >= a.pass_threshold) / len(g["scores"])
+        med = statistics.median(g["sloc_pass"]) if g["sloc_pass"] else None
+        mean_score = statistics.mean(g["scores"])
+        # score-per-100-lines: reward passing AND being concise (None if unsized)
+        spl = (mean_score / med * 100) if med else None
+        out.append({"key": key, "n": g["n"], "passrate": passrate, "mean_score": mean_score,
+                    "med_sloc": med, "n_sized": g["n_sized"], "spl": spl})
+
+    print(f"# conciseness by {a.by}"
+          + (f" (tag={a.tag})" if a.tag else "") + (f" (host={a.host})" if a.host else "")
+          + f", pass>= {a.pass_threshold}%\n")
+    print("## A+C: pass% and median solution SLOC among passers (rank neither - judge both)\n")
+    print(f"{'':24} {'n':>4} {'pass%':>6} {'meanScore':>9} {'medSLOC':>8} {'sized':>6} {'score/100ln':>11}")
+    print("-" * 72)
+    for r in sorted(out, key=lambda x: (-(x['spl'] or -1))):
+        med = f"{r['med_sloc']:.0f}" if r['med_sloc'] is not None else "-"
+        spl = f"{r['spl']:.1f}" if r['spl'] is not None else "-"
+        print(f"{r['key'][:24]:24} {r['n']:>4} {r['passrate']:>6.0f} {r['mean_score']:>9.1f} "
+              f"{med:>8} {r['n_sized']:>6} {spl:>11}")
+    print("\nB: 'score per 100 lines' (higher = more correctness per line) ranks the table above.")
+    print("A passer-median-SLOC view: lower medSLOC at similar pass% = the ponytail win.")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
