@@ -42,11 +42,17 @@ def run_bash_script(path: Path, ws: Path, capture: bool):
     text-mode stdin re-inserting \\r on write. Input is bytes (no newline xlate).
     Workspace is passed as $1 (POSIX path). Returns (rc, stdout_str, stderr_str)."""
     src = path.read_text(encoding="utf-8", errors="replace").replace("\r\n", "\n").replace("\r", "\n")
-    r = subprocess.run(
-        ["bash", "-s", posix(ws)],
-        input=src.encode("utf-8"),
-        capture_output=capture, cwd=str(ROOT),
-    )
+    try:
+        # outer backstop: a submission that hangs past the rubric's inner gtimeout
+        # must not hang the run. 180s is well above any healthy setup/rubric.
+        r = subprocess.run(
+            ["bash", "-s", posix(ws)],
+            input=src.encode("utf-8"),
+            capture_output=capture, cwd=str(ROOT), timeout=180,
+        )
+    except subprocess.TimeoutExpired as e:
+        out = (e.stdout.decode("utf-8", "replace") if (capture and e.stdout) else "")
+        return 124, out, "timeout"
     out = r.stdout.decode("utf-8", "replace") if (capture and r.stdout) else ""
     err = r.stderr.decode("utf-8", "replace") if (capture and r.stderr) else ""
     return r.returncode, out, err

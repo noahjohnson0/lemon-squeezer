@@ -34,9 +34,11 @@ An adversarial code review (OpenAI codex, high reasoning) plus a re-score pass c
 - **Broken rows.** `bin/clean-runs` removed 203 non-results / errored / phantom rows (with a backup + audit trail).
 - **run_bash secret scrub + run_id uniqueness.** The agent shell no longer inherits API keys; run_ids carry a random suffix so same-second trials can't collide.
 
-Still open (the honest gaps):
+Still open (the honest gaps), incl. items from the codex re-verification (CODEX-VERIFY.md):
 
-- **Real sandbox.** `run_bash` still runs in the repo tree, so a model could `cat` a rubric mid-run. Needs a container/jail with only the workspace mounted. Until then, contamination via reading the answer key is possible (not yet observed).
+- **Real sandbox + a trusted verdict channel.** Two related holes: (1) `run_bash` runs in the repo tree, so a model could `cat` a rubric mid-run; (2) the rubric reads the submitted module's stdout to collect check verdicts, so an adversarial submission could `print("imports 1")` or `os._exit(0)` after forging all-pass lines and score 100. Neither is exploited by our (non-adversarial) models, but the fix is the same: run submitted code in a child process with its stdout captured SEPARATELY, and only accept verdict lines carrying a private rubric marker. Container/jail with only the workspace mounted.
+- **Portable timeout in rubrics.** Rubrics call `gtimeout` directly (present here at `~/bin/gtimeout`, so current scores are correct) but it is absent on stock Linux CI; add a `TIMEOUT_BIN="$(command -v gtimeout || command -v timeout)"` resolver so they don't silently score correct solutions as static-only failures elsewhere. `matrix-ops` also needs an inner timeout. (Outer 120-180s backstops are now in `cloud-run`/`cloud-rescore`.)
+- **Trim static freebies.** A few rubrics (e.g. base64-codec ~25%) still give an importable non-solution file+compile+no-stdlib credit; gate the no-stdlib bonus on at least one behavioral pass.
 - **Standard external benchmark.** Run squeezer/aider on Aider-polyglot or SWE-bench-lite to put our numbers on the same ruler as everyone else's.
 
 ### 1. Pin sampling: temperature + seed on every run

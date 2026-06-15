@@ -60,7 +60,10 @@ def make_tools(workspace: Path):
     # NOTE: this does NOT stop a model from `cat ../../evals/<eval>/rubric.sh` to
     # read the answer key - real isolation needs a container (see ROADMAP). This is
     # the cheap, always-on half of the fix.
-    _SECRET_RE = re.compile(r"(KEY|TOKEN|SECRET|PASSWORD|OPENROUTER|ANTHROPIC|OPENAI|HF_|HUGGING)", re.I)
+    _SECRET_RE = re.compile(
+        r"(KEY|TOKEN|SECRET|PASSWORD|PASSWD|CREDENTIAL|AUTH|COOKIE|SESSION|PRIVATE|"
+        r"CERT|OPENROUTER|ANTHROPIC|OPENAI|HF_|HUGGING|AWS_|AZURE|GCP_|GOOGLE_|"
+        r"SSH_AUTH_SOCK|GH_|GITHUB_TOKEN)", re.I)
     _safe_env = {k: v for k, v in os.environ.items() if not _SECRET_RE.search(k)}
 
     def run_bash(command: str, timeout: int = 15) -> str:

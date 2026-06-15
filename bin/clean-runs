@@ -47,10 +47,18 @@ def _int(r, k):
         return 0
 
 
+# Raw OpenRouter slugs that early manual runs used as labels before arms were
+# given canonical names. A slug-labeled row is only a phantom if it ALSO looks
+# like one of those one-off probes (here: the great-circle smoke tests). We do
+# NOT remove every slash-labeled row - a future run could legitimately label an
+# arm by its slug.
+KNOWN_PHANTOM_SLUGS = {"openai/gpt-oss-20b", "qwen/qwen3-coder"}
+
+
 def reason_to_remove(r):
     """Return a removal reason string, or None to keep the row."""
     model = str(r.get("model") or "")
-    if "/" in model:
+    if model in KNOWN_PHANTOM_SLUGS:
         return "phantom-label"
     if _int(r, "exit_code") != 0:
         return "errored"

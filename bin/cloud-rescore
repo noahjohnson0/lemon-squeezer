@@ -41,9 +41,16 @@ def run_rubric(eval_name, ws_rel):
     if not rub.exists():
         return None
     src = rub.read_text(encoding="utf-8", errors="replace").replace("\r\n", "\n").replace("\r", "\n")
+    out = ""
     for attempt in range(3):
-        r = subprocess.run(["bash", "-s", posix(ws_rel)], input=src.encode("utf-8"),
-                           capture_output=True, cwd=str(ROOT))
+        try:
+            # outer backstop: a submission that hangs past every inner gtimeout
+            # must not hang the scorer. 120s is far above any healthy rubric.
+            r = subprocess.run(["bash", "-s", posix(ws_rel)], input=src.encode("utf-8"),
+                               capture_output=True, cwd=str(ROOT), timeout=120)
+        except subprocess.TimeoutExpired:
+            out = ""  # treat a hang as a non-result; retry once, then score "?"
+            continue
         out = r.stdout.decode("utf-8", "replace")
         if re.search(r'"score_pct"\s*:\s*"?-?\d+', out):
             return out
