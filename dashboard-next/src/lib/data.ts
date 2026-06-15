@@ -36,6 +36,15 @@ export type Run = {
   tokens_out: number;
   tool_calls: number;
   score_pct: number;
+  cost_usd?: number;       // cloud (OpenRouter) runs only
+  mix?: {                  // present when the run is a multi-model pipeline
+    pipeline: string;
+    primary: string;
+    critic?: string | null;
+    judge?: string | null;
+    architect?: string | null;
+    rounds?: number;
+  };
   telemetry?: Telemetry;
 };
 
@@ -72,8 +81,10 @@ export type Inflight = {
   queued?: QueuedRun[];
 };
 
-export async function loadRuns(): Promise<Run[]> {
-  const r = await fetch(`./runs.jsonl?t=${Date.now()}`, { cache: "no-store" });
+// `rel` lets sub-routes reach the site-root runs.jsonl: "./runs.jsonl" from the
+// "/" page, "../runs.jsonl" from "/cloud/" (trailingSlash is on).
+export async function loadRuns(rel = "./runs.jsonl"): Promise<Run[]> {
+  const r = await fetch(`${rel}?t=${Date.now()}`, { cache: "no-store" });
   if (!r.ok) throw new Error(`runs.jsonl ${r.status}`);
   const text = await r.text();
   const runs: Run[] = [];

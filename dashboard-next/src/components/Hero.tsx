@@ -45,6 +45,9 @@ export default function Hero({ runCount }: Props) {
             </span>
           </div>
           <div className="flex items-baseline gap-4 text-[var(--muted)] text-xs uppercase tracking-wider">
+            <Link href="/cloud" className="hover:text-[var(--accent)] tracking-wider normal-case">
+              ☁️ local vs cloud →
+            </Link>
             <Link href="/bench" className="hover:text-[var(--accent)] tracking-wider normal-case">
               📚 benchmarks →
             </Link>

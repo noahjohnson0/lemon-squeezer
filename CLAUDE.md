@@ -66,6 +66,42 @@ eval-run [--host <name>] <harness> <eval> <model> <tag> [-- harness-flags...]
 12. Append `meta.json` to `runs.jsonl`, run `eval-export` to refresh
     `runs.csv`, `RUNS.md`, and `dashboard-next/public/findings.md`.
 
+## Cloud runs (OpenRouter) — the local lifecycle's twin
+
+`bin/cloud-run` is the cloud counterpart of `eval-run`: same prompts, same
+rubrics, but it drives an **open-weight model rented on OpenRouter** instead of
+local Ollama. No GPU, no lock, no telemetry — a cloud run is just HTTP + local
+rubric scoring, so it's safe to parallelise and runs fine on the Windows box.
+
+```
+# single open model:
+bin/cloud-run <eval> <openrouter/slug> [tag]
+# a multi-model MIX (squeezer_pipeline under the hood):
+bin/cloud-run <eval> --pipeline architect|critique|ensemble|verify \
+    --primary-model <slug> [--architect-model/--critic-model/--judge-model <slug>]
+```
+
+Rows are tagged `host="openrouter"`; mix rows carry a `mix` object and a readable
+`model` label (e.g. `arch:30b<-pro`). Cost (`cost_usd`) comes from OpenRouter's
+per-call `usage.cost`. Auth: `$OPENROUTER_API_KEY` (or `$LEMON_API_KEY`).
+
+**The whole experiment** is driven by `bin/cloud-matrix`: every arm in
+`configs/cloud-arms.json` (singles + mixes) × the eval suite × N trials, run in
+parallel with a **single safe writer** to `runs.jsonl` and a **hard USD budget
+cap**. It's round-robin ordered (a budget cut-off still leaves a complete
+cross-arm comparison on a prefix of the suite) and **resumable** (skips cells
+that already have `trials` rows). Analyse with `bin/cloud-report`.
+
+```
+bin/cloud-matrix --trials 3 --budget 9 --concurrency 8 --tag fable-hunt
+bin/cloud-report --tag fable-hunt --by-eval
+```
+
+Windows gotchas already handled in `cloud-run`: eval `setup.sh`/`rubric.sh` are
+fed to `bash -s` on stdin with CRLF stripped, and the workspace is passed as a
+**ROOT-relative POSIX path** (drive-letter `C:/...` paths don't resolve in MSYS
+bash `[[ -f ]]` tests). Don't "fix" these back to plain `bash script.sh "$WS"`.
+
 ## Adding a new eval
 
 ```
