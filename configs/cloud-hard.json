@@ -1,0 +1,18 @@
+{
+  "_comment": "The HARD eval tier: edge-case-dense / perf-bounded tasks built to de-saturate the leaderboard (the main suite maxed out at ~99%). Open arms here are the cluster that was statistically tied on the easy suite, plus a couple mid models to confirm spread. Closed-frontier arms get added once the spend is approved. Run: bin/cloud-matrix --arms configs/cloud-hard.json --trials 2 --tag hard-tier",
+  "singles": [
+    { "label": "deepseek-v4-pro",   "model": "deepseek/deepseek-v4-pro" },
+    { "label": "deepseek-v4-flash", "model": "deepseek/deepseek-v4-flash" },
+    { "label": "qwen3-max",         "model": "qwen/qwen3-max" },
+    { "label": "glm-5.1",           "model": "z-ai/glm-5.1" },
+    { "label": "gpt-oss-120b",      "model": "openai/gpt-oss-120b" },
+    { "label": "kimi-k2.7-code",    "model": "moonshotai/kimi-k2.7-code" },
+    { "label": "qwen3-coder-30b",   "model": "qwen/qwen3-coder-30b-a3b-instruct" },
+    { "label": "mistral-small-3.2", "model": "mistralai/mistral-small-3.2-24b-instruct" }
+  ],
+  "mixes": [],
+  "suite": [
+    "csv-dialect", "semver-range", "interval-merge", "json-pointer", "mini-template",
+    "dep-resolver", "expr-eval", "sliding-rate-limiter", "myers-diff", "ini-config"
+  ]
+}
