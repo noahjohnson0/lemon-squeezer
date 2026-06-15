@@ -2,6 +2,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Run, scoreClass } from "@/lib/data";
+import { modelCardUrl } from "@/lib/modelMeta";
 
 type ScoreCheck = { name: string; pass: 0 | 1 | number; weight: number; note?: string };
 type Score = { checks: ScoreCheck[]; gained: number; total: number; score_pct: number };
@@ -69,7 +70,13 @@ export default function RunDrawer({
                 <span className="font-mono">{run.eval}</span>
                 <span className="text-sm text-[var(--muted)] font-normal">{run.model}</span>
               </h2>
-              <div className="text-xs text-[var(--muted)] font-mono mb-4 break-all">{run.run_id}</div>
+              <div className="text-xs text-[var(--muted)] font-mono mb-1 break-all">{run.run_id}</div>
+              {modelCardUrl(run.model) && (
+                <a href={modelCardUrl(run.model)!} target="_blank" rel="noopener noreferrer"
+                   className="text-xs text-[var(--accent)] hover:underline mb-4 inline-block">
+                  {run.model} model card ↗
+                </a>
+              )}
 
               <div className="bg-[var(--panel)] border border-[var(--border)] rounded-lg p-3 mb-4">
                 <div className="flex items-center gap-2 flex-wrap mb-2">

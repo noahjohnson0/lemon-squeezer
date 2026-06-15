@@ -2,6 +2,21 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useMemo } from "react";
 import { Run, scoreClass } from "@/lib/data";
+import { MODEL_META, modelCardUrl } from "@/lib/modelMeta";
+
+const short = (s?: string | null) => (s ? s.split("/").pop() : "");
+
+// Plain-English description of a multi-model mix from its pipeline object.
+function mixBlurb(mix: NonNullable<Run["mix"]>): string {
+  const p = short(mix.primary);
+  switch (mix.pipeline) {
+    case "architect": return `Architect mix: ${short(mix.architect)} plans the approach, then ${p} writes the code.`;
+    case "critique":  return `Critique mix: ${p} drafts a solution, ${short(mix.critic)} reviews it, and it refines over ${mix.rounds ?? 1} round(s).`;
+    case "ensemble":  return `Ensemble mix: several models each draft a solution and ${short(mix.judge)} picks the best.`;
+    case "verify":    return `Verify mix: ${p} writes the code and its own tests, then self-corrects until they pass.`;
+    default:          return `Multi-model mix (${mix.pipeline}).`;
+  }
+}
 
 export type ArmRef = { model: string; harness: string };
 
@@ -47,10 +62,17 @@ export default function ArmDrawer({
       meanCost: costN ? cost / costN : 0,
       meanWall: wallN ? wall / wallN : 0,
       perfect: evals.filter((e) => e.mean >= 99.5).length,
+      mix: mine.find((r) => r.mix)?.mix ?? null,
     };
   }, [arm, runs]);
 
   const fmtCost = (c: number) => (c >= 0.01 ? `$${c.toFixed(3)}` : `$${c.toFixed(5)}`);
+
+  const meta = arm ? MODEL_META[arm.model] : undefined;
+  const mix = data?.mix ?? null;
+  const blurb = mix ? mixBlurb(mix) : meta?.blurb;
+  const card = mix ? `https://openrouter.ai/${mix.primary}` : arm ? modelCardUrl(arm.model) : null;
+  const cardLabel = mix ? `${short(mix.primary)} card ↗` : "Model card ↗";
 
   return (
     <AnimatePresence>
@@ -72,6 +94,21 @@ export default function ArmDrawer({
                 <span className="font-mono text-[var(--accent)]">{arm.model}</span>
                 <span className={`chip ${arm.harness}`}>{arm.harness}</span>
               </h2>
+
+              {(blurb || card) && (
+                <div className="mt-3 text-sm text-[var(--muted)] leading-relaxed">
+                  {blurb && <p>{blurb}</p>}
+                  <div className="mt-1.5 flex items-center gap-3 text-xs">
+                    {meta?.note && <span className="chip">{meta.note}</span>}
+                    {card && (
+                      <a href={card} target="_blank" rel="noopener noreferrer"
+                         className="text-[var(--accent)] hover:underline">
+                        {cardLabel}
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
 
               <div className="bg-[var(--panel)] border border-[var(--border)] rounded-lg p-3 my-4 grid grid-cols-2 gap-y-2 text-sm">
                 <div><span className="text-[var(--muted)] text-xs">mean score</span><div className="text-2xl font-bold gradient-text tabular-nums">{data.mean.toFixed(1)}%</div></div>
