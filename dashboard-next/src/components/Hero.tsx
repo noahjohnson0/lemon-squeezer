@@ -38,13 +38,13 @@ export default function Hero({ runCount }: Props) {
           className="flex items-center justify-between gap-3 mb-3 flex-wrap"
         >
           <span className="text-[10px] uppercase tracking-[0.25em] text-[var(--muted)]">
-            open research · squeezing the most out of LLMs
+            open research · a reproducible benchmark for open-weight coding agents
           </span>
           <div className="flex items-baseline gap-2 text-[var(--muted)] text-xs uppercase tracking-wider">
             <span className="text-[var(--accent)] font-bold tabular-nums text-base normal-case tracking-normal">
               {runCount.toLocaleString()}
             </span>
-            <span>scored runs · live</span>
+            <span>scored runs</span>
           </div>
         </motion.div>
 
@@ -54,7 +54,7 @@ export default function Hero({ runCount }: Props) {
           transition={{ duration: 0.6, delay: 0.05 }}
           className="text-4xl md:text-6xl font-bold tracking-tight gradient-text leading-[1.03]"
         >
-          How much can you squeeze<br className="hidden md:block" /> out of an LLM?
+          Which open-weight coding agents<br className="hidden md:block" /> actually finish the work?
         </motion.h1>
 
         <motion.p
@@ -63,13 +63,12 @@ export default function Hero({ runCount }: Props) {
           transition={{ duration: 0.6, delay: 0.15 }}
           className="text-[var(--muted)] text-base md:text-lg mt-4 max-w-3xl leading-relaxed"
         >
-          A reproducible study of what actually makes an LLM <em className="text-[var(--text)] not-italic font-medium">finish real coding work</em> -
-          holding the prompts and rubrics fixed while varying the four things you control:
-          <span className="text-[var(--text)]"> model</span>,
-          <span className="text-[var(--text)]"> harness</span>,
-          <span className="text-[var(--text)]"> config</span>, and
-          <span className="text-[var(--text)]"> venue</span> (a single local GPU, or open weights rented in the cloud).
-          Every score comes from running the produced code, not vibes.
+          <b className="text-[var(--text)]">lemon-squeezer</b> tests open-weight LLM coding agents across{" "}
+          <span className="text-[var(--text)]">model</span>,{" "}
+          <span className="text-[var(--text)]">harness</span>,{" "}
+          <span className="text-[var(--text)]">config</span>, and{" "}
+          <span className="text-[var(--text)]">venue</span> (a single local GPU, or open weights rented in the cloud),
+          then scores each run by <em className="text-[var(--text)] not-italic font-medium">executing the code the agent produced</em> against a deterministic rubric. No human grading, no vibes.
         </motion.p>
 
         <motion.div
@@ -79,10 +78,11 @@ export default function Hero({ runCount }: Props) {
           className="flex flex-wrap gap-2 mt-5 text-xs"
         >
           {[
-            "harness often beats model",
-            "mixes rescue weak models",
-            "reasoning ≠ coding",
-            "a 4070 gets ~97%",
+            `${runCount.toLocaleString()} scored runs`,
+            "40 executable coding evals",
+            "model × harness × config × venue",
+            "score = code that runs",
+            "cost + latency tracked",
           ].map((t) => (
             <span key={t} className="chip">{t}</span>
           ))}

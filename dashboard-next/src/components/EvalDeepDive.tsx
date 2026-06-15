@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Run, bestPer, scoreClass, unique } from "@/lib/data";
+import { Run, meanPer, scoreClass, unique } from "@/lib/data";
 import { EVAL_BLURBS } from "@/lib/blurbs";
 
 export default function EvalDeepDive({
@@ -39,7 +39,7 @@ export default function EvalDeepDive({
             discriminates: "",
           };
           const evalRuns = runs.filter((r) => r.eval === e);
-          const best = bestPer(evalRuns, (r) => `${r.harness}|${r.model}|${r.tag}`);
+          const best = meanPer(evalRuns, (r) => `${r.harness}|${r.model}|${r.tag}`);
           const sorted = [...best.values()].sort((a, b) => b.score_pct - a.score_pct);
           const isOpen = openSet.has(e);
           return (
@@ -59,7 +59,7 @@ export default function EvalDeepDive({
                 </motion.span>
                 <strong className="font-mono">{e}</strong>
                 <span className="text-[var(--muted)] text-xs">
-                  {evalRuns.length} runs · best {sorted[0]?.score_pct ?? "-"}%
+                  {evalRuns.length} runs · top mean {sorted[0]?.score_pct ?? "-"}%
                 </span>
                 <span className="ml-auto text-[var(--muted)] text-xs hidden md:block">
                   {blurb.summary}

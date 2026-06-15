@@ -1,6 +1,6 @@
 "use client";
 import { motion } from "framer-motion";
-import { Run, bestPer, scoreClass, unique } from "@/lib/data";
+import { Run, meanPer, scoreClass, unique } from "@/lib/data";
 
 const HARNESS_COLOR: Record<string, string> = {
   pi: "#ffa657",
@@ -16,8 +16,8 @@ const HARNESS_COLOR: Record<string, string> = {
 export default function HarnessGap({ runs }: { runs: Run[] }) {
   const evals = unique(runs.map((r) => r.eval));
   const harnesses = unique(runs.map((r) => r.harness));
-  // Best score per (eval, harness) - best of best across all (model, tag).
-  const best = bestPer(runs, (r) => `${r.eval}|${r.harness}`);
+  // Mean score per (eval, harness), averaged across all (model, tag) and trials.
+  const best = meanPer(runs, (r) => `${r.eval}|${r.harness}`);
 
   // Sort harnesses by overall avg score so the strongest sits at top legend.
   const harnessAvg = harnesses
@@ -41,8 +41,8 @@ export default function HarnessGap({ runs }: { runs: Run[] }) {
         <span className="chip">{harnesses.length} harnesses</span>
       </div>
       <p className="text-[var(--muted)] text-sm max-w-3xl mb-4">
-        Best score per harness on each eval (max across all models and tags). The
-        spread on a single eval is how much a one-line harness change buys you.
+        Mean score per harness on each eval (averaged across models, tags, and trials).
+        The spread on a single eval is how much the harness choice alone is worth.
       </p>
       <div className="bg-[var(--panel)] border border-[var(--border)] rounded-xl p-4">
         {/* Legend */}

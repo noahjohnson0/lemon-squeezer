@@ -28,3 +28,9 @@ runs/**/workspace/.git/
 # runs.jsonl, not runs/, so nothing deployed depends on these being tracked.
 /runs/
 .gpu.lock/
+# Codex review run artifacts + temp build/screenshot logs. The rendered reviews
+# (CODEX-REVIEW.md / CODEX-DESIGN-REVIEW.md) are kept; these raw logs/prompts are not.
+.codex-*
+.build.log
+.shots/
+.aider.chat.history.md

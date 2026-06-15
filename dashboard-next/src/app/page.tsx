@@ -107,7 +107,7 @@ export default function Page() {
           {loadError ? (
             <span className="text-[var(--bad)]">load: {loadError}</span>
           ) : (
-            <span>live · auto-refresh</span>
+            <span>auto-refresh · live status in the header</span>
           )}
         </div>
       </footer>

@@ -141,6 +141,29 @@ export function bestPer<K>(runs: Run[], keyFn: (r: Run) => K): Map<K, Run> {
   return m;
 }
 
+// MEAN score per cell, not best-of. Averaging the *maximum* of several noisy
+// trials is a winner's-curse: it systematically overstates every cell and lets a
+// single lucky run define the score. meanPer averages all scored trials instead,
+// and returns a representative Run (the latest in the cell) with score_pct set to
+// that mean - so existing consumers that read a Run keep working. n is the trial
+// count, attached for callers that want to gate/annotate low-sample cells.
+export function meanPer<K>(runs: Run[], keyFn: (r: Run) => K): Map<K, Run & { n: number }> {
+  const groups = new Map<K, Run[]>();
+  for (const r of runs) {
+    const k = keyFn(r);
+    (groups.get(k) ?? groups.set(k, []).get(k)!).push(r);
+  }
+  const out = new Map<K, Run & { n: number }>();
+  for (const [k, rs] of groups) {
+    const scored = rs.filter((r) => Number.isFinite(r.score_pct));
+    if (!scored.length) continue;
+    const mean = scored.reduce((s, r) => s + r.score_pct, 0) / scored.length;
+    const rep = rs[rs.length - 1];
+    out.set(k, { ...rep, score_pct: Math.round(mean * 10) / 10, n: scored.length });
+  }
+  return out;
+}
+
 // Bayesian-shrunk score: pulls low-coverage rows toward the global mean.
 //   shrunk = (n*avg + C*mu) / (n + C),  C=3 pseudo-evals
 export function bayesianRank(rows: Array<{ avg: number; count: number }>, allMean: number, C = 3) {

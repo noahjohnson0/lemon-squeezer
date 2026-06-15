@@ -23,6 +23,22 @@ It is all about **open weights** you can own or rent cheaply. The dashboard's he
 
 These four make the existing data honest. Do not build the recommender, write blog posts, or add 20 evals on top of an estimator nobody can defend.
 
+### 0. Integrity audit - 2026-06-15 (codex adversarial review)
+
+An adversarial code review (OpenAI codex, high reasoning) plus a re-score pass closed the most damaging foundation cracks. Done:
+
+- **Rubric denominator collapse (was CRITICAL).** 26 rubrics dropped their behavioral checks on an import error / mid-run exception, so a file that merely existed and compiled could score 100%. Proven: a `matops.py` of just `x = 1` scored 100%. All 26 rubrics were rewritten so every check always emits 0/1 (constant denominator); verified stub -> ~10%, correct -> 100%. All 2,894 affected runs were re-scored against the fixed rubrics with `bin/cloud-rescore`.
+- **Uncontrolled bake-off.** `cloud-matrix`'s resume key ignored the tag, so a new bake-off skipped cells an old tag had already run (aider 154 vs squeezer 55, unpaired). Fixed: tag is now part of the resume key; `bin/bakeoff-report` only compares (eval, model) cells where **both** harnesses ran.
+- **Answer leakage.** `repo-bugfix-ledger` labeled each bug in a comment (`# BUG 1 ...`); removed, so it is now a real localize-and-fix task.
+- **Stats.** `cloud-report` rewritten: aggregate per eval first (trials are correlated), report the mean of per-eval means with a cluster bootstrap CI, and surface n_total / n_scored / n_failed. The dashboard switched from best-of-trials to per-cell means.
+- **Broken rows.** `bin/clean-runs` removed 203 non-results / errored / phantom rows (with a backup + audit trail).
+- **run_bash secret scrub + run_id uniqueness.** The agent shell no longer inherits API keys; run_ids carry a random suffix so same-second trials can't collide.
+
+Still open (the honest gaps):
+
+- **Real sandbox.** `run_bash` still runs in the repo tree, so a model could `cat` a rubric mid-run. Needs a container/jail with only the workspace mounted. Until then, contamination via reading the answer key is possible (not yet observed).
+- **Standard external benchmark.** Run squeezer/aider on Aider-polyglot or SWE-bench-lite to put our numbers on the same ruler as everyone else's.
+
 ### 1. Pin sampling: temperature + seed on every run
 **Why:** `squeezer.py`'s `call_chat` sends `{model, messages, tools, stream}` and nothing else - every result to date is at each provider's silent default temperature, so the bimodal `[0,100,100]` cells are *unrecorded* noise and "reproduce with `cloud-matrix`" is not actually reproducible.
 **First step:** add `--temperature` (default 0.2) and `--seed` args to `squeezer.py` / `squeezer_pipeline.py`, put them in the request body, and persist them into `meta.json`.

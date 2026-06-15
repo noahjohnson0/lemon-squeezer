@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 const LINKS = [
   { href: "/", label: "Overview" },
   { href: "/cloud", label: "Cloud" },
-  { href: "/bench", label: "RAG" },
+  { href: "/bench", label: "RAG eval" },
 ];
 
 export default function SiteNav() {
@@ -53,6 +53,12 @@ export default function SiteNav() {
             <span className={live ? "dot-live" : "dot-idle"} />
             <span className={live ? "text-[var(--good)]" : "text-[var(--faint)]"}>{live ? "live" : "idle"}</span>
           </span>
+          <a
+            href="https://github.com/noahjohnson0/lemon-squeezer#how-it-works"
+            className="text-xs text-[var(--muted)] hover:text-[var(--accent)] transition-colors hidden sm:inline"
+          >
+            Methodology
+          </a>
           <a
             href="https://github.com/noahjohnson0/lemon-squeezer"
             className="text-xs text-[var(--muted)] hover:text-[var(--accent)] transition-colors"

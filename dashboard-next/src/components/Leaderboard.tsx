@@ -1,6 +1,6 @@
 "use client";
 import { motion, AnimatePresence } from "framer-motion";
-import { Run, bayesianRank, bestPer, scoreClass, unique } from "@/lib/data";
+import { Run, bayesianRank, meanPer, scoreClass, unique } from "@/lib/data";
 
 function ScoreCell({ s, runId, onClick }: { s: number; runId?: string; onClick?: (id: string) => void }) {
   const cls = scoreClass(s);
@@ -27,7 +27,8 @@ export default function Leaderboard({
   const models = unique(runs.map((r) => r.model));
   const hosts = unique(runs.map((r) => r.host ?? "4070"));
   // Key includes host now: same model on different hosts is now separate rows.
-  const best = bestPer(runs, (r) => `${r.eval}|${r.harness}|${r.model}|${r.host ?? "4070"}`);
+  // meanPer = mean score per cell across trials (not best-of, which overstates).
+  const best = meanPer(runs, (r) => `${r.eval}|${r.harness}|${r.model}|${r.host ?? "4070"}`);
   const allCells = [...best.values()];
   const allMean =
     allCells.length > 0
@@ -81,10 +82,10 @@ export default function Leaderboard({
         <span className="chip">{ranked.length} configurations</span>
       </div>
       <p className="text-[var(--muted)] text-sm max-w-3xl mb-4">
-        Best score per (harness × model × eval). The <strong>rank</strong> column is a
-        Bayesian-shrunk score: <code className="text-xs">(n·avg + C·μ) / (n + C)</code>{" "}
-        with C=3, so a 1/{evals.length} row of 100% won't outrank a {evals.length}/{evals.length}{" "}
-        row of 95%. Click any cell for the run's score breakdown.
+        Mean score per (harness × model × eval), averaged over trials. The{" "}
+        <strong>rank</strong> column is rank-adjusted: rows covering few evals are pulled
+        toward the overall mean, so a 1/{evals.length} row of 100% can&apos;t outrank a{" "}
+        {evals.length}/{evals.length} row of 95%. Click any cell for its score breakdown.
       </p>
 
       <div className="bg-[var(--panel)] border border-[var(--border)] rounded-xl overflow-hidden">
@@ -112,8 +113,7 @@ export default function Leaderboard({
               <AnimatePresence>
                 {ranked.map((row, idx) => {
                   const rank = idx + 1;
-                  const medal =
-                    rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : `${rank}`;
+                  const medal = `#${rank}`;
                   const covPct = (100 * row.count) / evals.length;
                   const covColor =
                     covPct >= 80 ? "text-[var(--text)]" : covPct >= 40 ? "text-[var(--mid)]" : "text-[var(--muted)]";

@@ -1,6 +1,6 @@
 "use client";
 import { motion } from "framer-motion";
-import { Run, bestPer, scoreClass, unique } from "@/lib/data";
+import { Run, meanPer, scoreClass, unique } from "@/lib/data";
 
 /**
  * The single most important block on the page: "what's the answer".
@@ -18,7 +18,8 @@ export default function Headline({ runs }: { runs: Run[] }) {
   const models = unique(runs.map((r) => r.model));
   const hosts = unique(runs.map((r) => r.host ?? "4070"));
   // Same combo on different hardware = different combo, so include host in the key.
-  const best = bestPer(runs, (r) => `${r.eval}|${r.harness}|${r.model}|${r.host ?? "4070"}`);
+  // meanPer = mean score per cell across trials (not best-of, which overstates).
+  const best = meanPer(runs, (r) => `${r.eval}|${r.harness}|${r.model}|${r.host ?? "4070"}`);
 
   const allCells = [...best.values()];
   const allMean =
@@ -95,13 +96,13 @@ export default function Headline({ runs }: { runs: Run[] }) {
   return (
     <section className="max-w-7xl mx-auto px-6 mt-6">
       <div className="bg-gradient-to-br from-[var(--panel)] to-[var(--panel-2)] border border-[var(--border)] rounded-2xl p-6 md:p-8 glow-y">
-        {/* TL;DR header */}
+        {/* Recommendation header */}
         <div className="flex items-center gap-2 mb-3">
           <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--accent)] font-bold">
-            TL;DR
+            Recommendation
           </span>
           <span className="text-[10px] uppercase tracking-wider text-[var(--muted)]">
-            what should I run on my GPU?
+            the best-scoring setup in this benchmark
           </span>
         </div>
 
@@ -131,11 +132,13 @@ export default function Headline({ runs }: { runs: Run[] }) {
                   </span>
                 </div>
                 <div className="text-sm text-[var(--muted)] mt-3 leading-relaxed">
-                  Bayesian-shrunk avg{" "}
+                  <span title="mean score pulled toward the overall mean when a combo has few evals, so a small lucky sample can't top the table">
+                    Rank-adjusted score
+                  </span>{" "}
                   <span className="text-[var(--text)] font-bold">
                     {champ.shrunk.toFixed(0)}%
                   </span>{" "}
-                  across {champ.count} evals · raw avg {champ.avg.toFixed(0)}%
+                  across {champ.count} evals · raw mean {champ.avg.toFixed(0)}%
                 </div>
                 {champ.bestEval && (
                   <div className="text-xs text-[var(--muted)] mt-2">

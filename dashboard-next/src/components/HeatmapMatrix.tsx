@@ -1,6 +1,6 @@
 "use client";
 import { motion } from "framer-motion";
-import { Run, bestPer, scoreClass, unique } from "@/lib/data";
+import { Run, meanPer, scoreClass, unique } from "@/lib/data";
 
 export default function HeatmapMatrix({
   runs,
@@ -13,7 +13,7 @@ export default function HeatmapMatrix({
   const harnesses = unique(runs.map((r) => r.harness));
   const models = unique(runs.map((r) => r.model));
   const hosts = unique(runs.map((r) => r.host ?? "4070"));
-  const best = bestPer(runs, (r) => `${r.eval}|${r.harness}|${r.model}|${r.host ?? "4070"}`);
+  const best = meanPer(runs, (r) => `${r.eval}|${r.harness}|${r.model}|${r.host ?? "4070"}`);
 
   // 1 row per (host, harness, model) that has at least one run.
   const rows: { host: string; harness: string; model: string }[] = [];
@@ -35,8 +35,8 @@ export default function HeatmapMatrix({
         </span>
       </div>
       <p className="text-[var(--muted)] text-sm max-w-3xl mb-4">
-        Every (harness × model) row, every eval column. Cell color encodes the best
-        score that combination has reached on the eval. Click for the run.
+        Every (harness × model) row, every eval column. Cell color encodes the mean
+        score that combination reached on the eval (averaged over trials). Click for a run.
       </p>
       <div className="bg-[var(--panel)] border border-[var(--border)] rounded-xl p-3 overflow-x-auto">
         <table className="w-full text-xs border-separate border-spacing-1">
