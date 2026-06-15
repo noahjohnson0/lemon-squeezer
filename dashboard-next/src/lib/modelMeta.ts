@@ -10,36 +10,39 @@
 // (context, license, exact params, dates) lives on the linked card.
 export type ModelMeta = { vramQ4GB: number | null; ollamaTag?: string; note?: string; slug?: string; blurb?: string };
 
+// Blurbs below are grounded in OpenRouter's own model descriptions (fetched, not
+// guessed) so the post-cutoff models are described accurately. Refresh with the
+// OpenRouter /models API if specs change.
 export const MODEL_META: Record<string, ModelMeta> = {
   // local-runnable (have a realistic consumer-GPU footprint)
-  "llama-3.1-8b":      { vramQ4GB: 5,    note: "8B dense", slug: "meta-llama/llama-3.1-8b-instruct", blurb: "Meta Llama 3.1, the small 8B dense generalist - weak as a coding agent on its own, very harness-sensitive." },
-  "qwen3-14b":         { vramQ4GB: 9,    note: "14B dense", slug: "qwen/qwen3-14b", blurb: "Alibaba Qwen3 14B dense generalist; a comfortable 12 GB local pick." },
-  "mistral-small-3.2": { vramQ4GB: 14,   note: "24B dense", slug: "mistralai/mistral-small-3.2-24b-instruct", blurb: "Mistral Small 3.2, a 24B dense generalist." },
-  "codestral-2508":    { vramQ4GB: 13,   note: "22B dense, coding", slug: "mistralai/codestral-2508", blurb: "Mistral Codestral (Aug 2025), a ~22B dense coding specialist." },
-  "devstral-2512":     { vramQ4GB: 14,   note: "24B dense, agentic", slug: "mistralai/devstral-2512", blurb: "Mistral Devstral (Dec 2025), a 24B dense model tuned for agentic software tasks." },
-  "gpt-oss-20b":       { vramQ4GB: 14,   ollamaTag: "gpt-oss:20b", note: "20B MoE", slug: "openai/gpt-oss-20b", blurb: "OpenAI's open-weight gpt-oss 20B MoE - the small sibling of gpt-oss-120b." },
-  "qwen3-32b":         { vramQ4GB: 20,   note: "32B dense", slug: "qwen/qwen3-32b", blurb: "Alibaba Qwen3 32B dense generalist." },
-  "qwen3-coder-30b":   { vramQ4GB: 19,   ollamaTag: "qwen3-coder:30b", note: "30B-a3b MoE", slug: "qwen/qwen3-coder-30b-a3b-instruct", blurb: "Qwen3-Coder 30B (3B active MoE), coding-specialized and local-runnable - the strongest agent that fits a 24 GB card." },
-  "llama-3.3-70b":     { vramQ4GB: 40,   note: "70B dense", slug: "meta-llama/llama-3.3-70b-instruct", blurb: "Meta Llama 3.3 70B dense generalist." },
-  "nemotron-3-120b":   { vramQ4GB: 70,   note: "120B-a12b MoE", slug: "nvidia/nemotron-3-super-120b-a12b", blurb: "NVIDIA Nemotron-3 Super, a 120B (12B active) MoE generalist." },
-  "gpt-oss-120b":      { vramQ4GB: 63,   note: "120B MoE", slug: "openai/gpt-oss-120b", blurb: "OpenAI's open-weight gpt-oss 120B MoE - high quality and very cheap to serve; the value pick on this benchmark." },
-  "qwen3-235b-2507":   { vramQ4GB: 140,  note: "235B-a22b MoE", slug: "qwen/qwen3-235b-a22b-2507", blurb: "Qwen3 235B (22B active) MoE flagship (2507 release)." },
+  "llama-3.1-8b":      { vramQ4GB: 5,    note: "8B dense", slug: "meta-llama/llama-3.1-8b-instruct", blurb: "Meta Llama 3.1 8B, the small, fast dense generalist - weak as a coding agent on its own and very harness-sensitive." },
+  "qwen3-14b":         { vramQ4GB: 9,    note: "14.8B dense", slug: "qwen/qwen3-14b", blurb: "Alibaba Qwen3 14B, a dense 14.8B reasoning/dialogue model - a comfortable 12 GB local pick." },
+  "mistral-small-3.2": { vramQ4GB: 14,   note: "24B dense", slug: "mistralai/mistral-small-3.2-24b-instruct", blurb: "Mistral Small 3.2, a 24B dense generalist tuned for instruction-following and function calling." },
+  "codestral-2508":    { vramQ4GB: 13,   note: "~22B dense, coding", slug: "mistralai/codestral-2508", blurb: "Mistral Codestral (Aug 2025), a coding model tuned for low-latency fill-in-the-middle and high-frequency tasks." },
+  "gpt-oss-20b":       { vramQ4GB: 14,   ollamaTag: "gpt-oss:20b", note: "21B MoE (3.6B active), Apache-2.0", slug: "openai/gpt-oss-20b", blurb: "OpenAI's open-weight gpt-oss-20b (21B MoE, 3.6B active, Apache-2.0) - the small sibling of gpt-oss-120b." },
+  "qwen3-32b":         { vramQ4GB: 20,   note: "32.8B dense", slug: "qwen/qwen3-32b", blurb: "Alibaba Qwen3 32B, a dense 32.8B reasoning/dialogue model." },
+  "qwen3-coder-30b":   { vramQ4GB: 19,   ollamaTag: "qwen3-coder:30b", note: "30.5B MoE (8/128 experts)", slug: "qwen/qwen3-coder-30b-a3b-instruct", blurb: "Qwen3-Coder 30B (30.5B MoE, 8 of 128 experts active), coding-specialized and local-runnable - the strongest agent that fits a 24 GB card." },
+  "llama-3.3-70b":     { vramQ4GB: 40,   note: "70B dense", slug: "meta-llama/llama-3.3-70b-instruct", blurb: "Meta Llama 3.3 70B, an instruction-tuned dense multilingual generalist." },
 
   // cloud-scale (do not fit any consumer GPU)
-  "deepseek-v4-flash": { vramQ4GB: null, slug: "deepseek/deepseek-v4-flash", blurb: "DeepSeek V4 Flash - the fast, cheap tier of V4; near the top of this benchmark for a fraction of a cent per task." },
-  "deepseek-v4-pro":   { vramQ4GB: null, slug: "deepseek/deepseek-v4-pro", blurb: "DeepSeek V4 Pro - the frontier-open generalist that tops this leaderboard." },
-  "deepseek-v3.2":     { vramQ4GB: null, slug: "deepseek/deepseek-v3.2", blurb: "DeepSeek V3.2 generalist (the prior-gen flagship)." },
-  "deepseek-r1":       { vramQ4GB: null, slug: "deepseek/deepseek-r1", blurb: "DeepSeek R1, a chain-of-thought reasoning model - strong at math/logic but underperforms at agentic coding here." },
-  "qwen3-coder-480b":  { vramQ4GB: null, slug: "qwen/qwen3-coder", blurb: "Qwen3-Coder 480B MoE, Alibaba's flagship coding model." },
-  "qwen3-coder-plus":  { vramQ4GB: null, slug: "qwen/qwen3-coder-plus", blurb: "Qwen3-Coder Plus, the hosted coding tier." },
-  "qwen3-max":         { vramQ4GB: null, slug: "qwen/qwen3-max", blurb: "Alibaba Qwen3-Max, the large flagship generalist." },
-  "kimi-k2.7-code":    { vramQ4GB: null, slug: "moonshotai/kimi-k2.7-code", blurb: "Moonshot Kimi K2.7 (coding variant), an agentic-coding model." },
-  "kimi-k2-thinking":  { vramQ4GB: null, slug: "moonshotai/kimi-k2-thinking", blurb: "Moonshot Kimi K2 'thinking', the reasoning variant." },
-  "glm-4.6":           { vramQ4GB: null, slug: "z-ai/glm-4.6", blurb: "Zhipu GLM-4.6 generalist." },
-  "glm-4.7":           { vramQ4GB: null, slug: "z-ai/glm-4.7", blurb: "Zhipu GLM-4.7, a strong agentic/coding generalist." },
-  "glm-5.1":           { vramQ4GB: null, slug: "z-ai/glm-5.1", blurb: "Zhipu GLM-5.1, the latest flagship - top-cluster on this benchmark." },
-  "minimax-m2.7":      { vramQ4GB: null, slug: "minimax/minimax-m2.7", blurb: "MiniMax M2.7, an agentic generalist." },
-  "minimax-m3":        { vramQ4GB: null, slug: "minimax/minimax-m3", blurb: "MiniMax M3, the latest agentic generalist." },
+  "devstral-2512":     { vramQ4GB: 62,   note: "123B dense, agentic", slug: "mistralai/devstral-2512", blurb: "Mistral Devstral 2 (Dec 2025), a 123B dense model specialized in agentic coding (256K context)." },
+  "nemotron-3-120b":   { vramQ4GB: 70,   note: "120B hybrid MoE (12B active)", slug: "nvidia/nemotron-3-super-120b-a12b", blurb: "NVIDIA Nemotron 3 Super, a 120B hybrid MoE (12B active) built for compute-efficient multi-step tasks." },
+  "gpt-oss-120b":      { vramQ4GB: 63,   note: "117B MoE", slug: "openai/gpt-oss-120b", blurb: "OpenAI's open-weight gpt-oss-120b (117B MoE) for high-reasoning agentic use - high quality and very cheap to serve; the value pick here." },
+  "qwen3-235b-2507":   { vramQ4GB: 140,  note: "235B MoE (22B active)", slug: "qwen/qwen3-235b-a22b-2507", blurb: "Qwen3 235B-A22B (2507), a multilingual instruction-tuned MoE with 22B active parameters." },
+  "deepseek-v4-flash": { vramQ4GB: null, note: "284B MoE (13B active), 1M ctx", slug: "deepseek/deepseek-v4-flash", blurb: "DeepSeek V4 Flash, an efficiency-tuned MoE (284B total / 13B active, 1M context) - near the top here for a fraction of a cent per task." },
+  "deepseek-v4-pro":   { vramQ4GB: null, note: "1.6T MoE (49B active), 1M ctx", slug: "deepseek/deepseek-v4-pro", blurb: "DeepSeek V4 Pro, a giant MoE (1.6T total / 49B active, 1M context) - the frontier-open generalist that tops this leaderboard." },
+  "deepseek-v3.2":     { vramQ4GB: null, slug: "deepseek/deepseek-v3.2", blurb: "DeepSeek V3.2, a large MoE balancing compute efficiency with strong reasoning and agentic tool-use." },
+  "deepseek-r1":       { vramQ4GB: null, note: "671B, open reasoning", slug: "deepseek/deepseek-r1", blurb: "DeepSeek R1, a 671B open reasoning model with fully open chain-of-thought - strong at math/logic but underperforms at agentic coding here." },
+  "qwen3-coder-480b":  { vramQ4GB: null, note: "480B MoE (35B active)", slug: "qwen/qwen3-coder", blurb: "Qwen3-Coder 480B-A35B, Alibaba's flagship open MoE coding model for agentic tasks." },
+  "qwen3-coder-plus":  { vramQ4GB: null, slug: "qwen/qwen3-coder-plus", blurb: "Qwen3-Coder Plus, Alibaba's proprietary build of Qwen3-Coder 480B, tuned as an autonomous coding agent." },
+  "qwen3-max":         { vramQ4GB: null, slug: "qwen/qwen3-max", blurb: "Alibaba Qwen3-Max, the large flagship generalist (reasoning, instruction-following, long-tail knowledge)." },
+  "kimi-k2.7-code":    { vramQ4GB: null, slug: "moonshotai/kimi-k2.7-code", blurb: "Moonshot Kimi K2.7 Code, a coding-focused model in the K2 family built for end-to-end programming over long contexts." },
+  "kimi-k2-thinking":  { vramQ4GB: null, slug: "moonshotai/kimi-k2-thinking", blurb: "Moonshot Kimi K2 Thinking, the trillion-param-class open reasoning variant for agentic, long-horizon tasks." },
+  "glm-4.6":           { vramQ4GB: null, note: "200K ctx", slug: "z-ai/glm-4.6", blurb: "Z.ai GLM-4.6, a generalist with a 200K context window (up from 128K in 4.5)." },
+  "glm-4.7":           { vramQ4GB: null, slug: "z-ai/glm-4.7", blurb: "Z.ai GLM-4.7, a flagship generalist with stronger programming and more stable multi-step reasoning." },
+  "glm-5.1":           { vramQ4GB: null, slug: "z-ai/glm-5.1", blurb: "Z.ai GLM-5.1, the latest flagship - a major leap in coding and long-horizon tasks; top-cluster here." },
+  "minimax-m2.7":      { vramQ4GB: null, slug: "minimax/minimax-m2.7", blurb: "MiniMax M2.7, an agentic generalist built for long-horizon, real-world productivity tasks." },
+  "minimax-m3":        { vramQ4GB: null, note: "multimodal, 1M ctx", slug: "minimax/minimax-m3", blurb: "MiniMax M3, a multimodal foundation model (text/image/video in, 1M context); used here as a coding agent." },
 };
 
 // Model-card URL for an arm label (OpenRouter page), or null if unknown / a mix.
