@@ -122,8 +122,22 @@ def call_chat(base_url: str, model: str, messages, tools):
         headers["HTTP-Referer"] = "https://github.com/noahjohnson0/lemon-squeezer"
         headers["X-Title"] = "lemon-squeezer"
     req = urllib.request.Request(url, data=body, headers=headers, method="POST")
-    with urllib.request.urlopen(req, timeout=600) as r:
-        return json.loads(r.read())
+    # Retry transient failures (connection timeouts under high concurrency, 429s,
+    # 5xx). Don't retry real 4xx (bad request / auth / 402 no-credit).
+    last = None
+    for attempt in range(4):
+        try:
+            with urllib.request.urlopen(req, timeout=600) as r:
+                return json.loads(r.read())
+        except urllib.error.HTTPError as e:
+            if e.code in (429, 500, 502, 503, 504) and attempt < 3:
+                last = e; time.sleep(1.5 * (attempt + 1)); continue
+            raise
+        except (urllib.error.URLError, TimeoutError, OSError) as e:
+            if attempt < 3:
+                last = e; time.sleep(1.5 * (attempt + 1)); continue
+            raise
+    raise last  # pragma: no cover
 
 
 # ───────────────────────── main agent loop ─────────────────────────
