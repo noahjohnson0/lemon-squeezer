@@ -1,26 +1,116 @@
 @import "tailwindcss";
 
+/* ============================================================================
+   lemon-squeezer design system
+   The whole app references these tokens (var(--panel), var(--accent), .chip,
+   .gradient-text, …). They live here so the entire site is themed in one place.
+   Dark-first: the data viz palette is tuned for a dark canvas.
+   ========================================================================== */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* surfaces */
+  --bg:        #0a0c11;   /* page */
+  --bg-2:      #0d1016;   /* subtle alt bands */
+  --panel:     #12161f;   /* cards */
+  --panel-2:   #171c27;   /* nested / hover */
+  --border:    #232b3a;
+  --border-2:  #2e384a;
+
+  /* text */
+  --text:       #e9eef5;
+  --foreground: #e9eef5;
+  --muted:      #8b97a8;
+  --faint:      #5b6675;
+
+  /* brand — lemon → lime, the "squeeze" */
+  --accent:    #d8e84a;   /* lemon-lime */
+  --accent-2:  #7ee0b8;   /* mint, secondary */
+  --accent-3:  #79c0ff;   /* sky, tertiary (matches data palette) */
+
+  /* score semantics */
+  --good: #56d364;
+  --mid:  #e3b341;
+  --warn: #d2a8ff;
+  --bad:  #f85149;
+
+  /* page background canvas */
+  --background: var(--bg);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--bg);
+  --color-foreground: var(--text);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Fonts: no next/font dependency — a clean system stack + good mono. */
+:root {
+  --font-geist-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-geist-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
 }
 
+html { color-scheme: dark; }
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background:
+    radial-gradient(900px 480px at 12% -8%, rgba(216, 232, 74, 0.07), transparent 60%),
+    radial-gradient(820px 520px at 100% 0%, rgba(126, 224, 184, 0.05), transparent 55%),
+    var(--bg);
+  background-attachment: fixed;
+  color: var(--text);
+  font-family: var(--font-geist-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection { background: rgba(216, 232, 74, 0.28); color: #fff; }
+
+/* tidy scrollbars on the dark canvas */
+* { scrollbar-width: thin; scrollbar-color: var(--border-2) transparent; }
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 6px; }
+*::-webkit-scrollbar-thumb:hover { background: #3a465c; }
+
+a { color: inherit; }
+
+/* keyboard focus visibility */
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+/* ---- reusable bits the components expect ---------------------------------- */
+
+.gradient-text {
+  background: linear-gradient(100deg, var(--accent) 0%, var(--accent-2) 48%, var(--accent-3) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.08rem 0.5rem;
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 32%, transparent);
+  border-radius: 999px;
+  line-height: 1.6;
+}
+
+/* a soft card surface (opt-in) */
+.card {
+  background: linear-gradient(180deg, var(--panel-2), var(--panel));
+  border: 1px solid var(--border);
+  border-radius: 0.9rem;
+}
+
+/* gentle entrance used by hero/sections */
+@keyframes ls-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.ls-rise { animation: ls-rise 0.5s cubic-bezier(.2,.7,.2,1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ls-rise { animation: none; }
 }

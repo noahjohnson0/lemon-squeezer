@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import SiteNav from "@/components/SiteNav";
 
 export const metadata: Metadata = {
-  title: "🍋 Lemon Squeezer — local-LLM coding agent benchmarks",
+  title: "lemon-squeezer — how much can you squeeze out of an LLM?",
   description:
-    "Reproducible benchmarks for local-LLM coding agents on consumer GPUs. Get the absolute most juice possible from a local model.",
+    "Open research into getting the most out of LLMs as coding agents: which model × harness × config × venue (local GPU or open weights in the cloud) actually finishes the work. Reproducible, rubric-scored.",
 };
 
 export default function RootLayout({
@@ -12,7 +13,10 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <SiteNav />
+        {children}
+      </body>
     </html>
   );
 }
