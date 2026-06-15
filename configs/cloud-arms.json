@@ -1,0 +1,51 @@
+{
+  "_comment": "The Fable-destroyer experiment. Each 'arm' is a contender: either a single open-weight model on OpenRouter, or a multi-model MIX (squeezer_pipeline). Prices are $/Mtok (in/out) from the OpenRouter catalog on 2026-06-15, for reference only. cloud-matrix runs every arm across the eval suite. The question: which open arm best approximates Fable 5 on agentic coding, and at what cost?",
+
+  "singles": [
+    {"label": "gpt-oss-20b",        "model": "openai/gpt-oss-20b",                 "price": "0.029/0.14"},
+    {"label": "gpt-oss-120b",       "model": "openai/gpt-oss-120b",                "price": "0.039/0.18"},
+    {"label": "qwen3-coder-30b",    "model": "qwen/qwen3-coder-30b-a3b-instruct",  "price": "0.07/0.27"},
+    {"label": "deepseek-v4-flash",  "model": "deepseek/deepseek-v4-flash",         "price": "0.09/0.18"},
+    {"label": "minimax-m2.7",       "model": "minimax/minimax-m2.7",               "price": "0.25/1.0"},
+    {"label": "qwen3-coder-480b",   "model": "qwen/qwen3-coder",                   "price": "0.22/1.80"},
+    {"label": "glm-4.7",            "model": "z-ai/glm-4.7",                       "price": "0.40/1.75"},
+    {"label": "deepseek-v4-pro",    "model": "deepseek/deepseek-v4-pro",           "price": "0.435/0.87"},
+    {"label": "kimi-k2.7-code",     "model": "moonshotai/kimi-k2.7-code",          "price": "0.75/3.5"},
+    {"label": "qwen3-max",          "model": "qwen/qwen3-max",                     "price": "0.78/3.9"},
+    {"label": "glm-5.1",            "model": "z-ai/glm-5.1",                       "price": "0.98/3.08"}
+  ],
+
+  "mixes": [
+    {"label": "arch:30b<-pro",      "harness": "cloud-architect", "pipeline": "architect",
+     "primary_model": "qwen/qwen3-coder-30b-a3b-instruct", "architect_model": "deepseek/deepseek-v4-pro",
+     "_note": "expensive brain plans, cheap hands implement"},
+
+    {"label": "arch:120b<-qwenmax", "harness": "cloud-architect", "pipeline": "architect",
+     "primary_model": "openai/gpt-oss-120b", "architect_model": "qwen/qwen3-max"},
+
+    {"label": "crit:30b<-pro",      "harness": "cloud-critique",  "pipeline": "critique",
+     "primary_model": "qwen/qwen3-coder-30b-a3b-instruct", "critic_model": "deepseek/deepseek-v4-pro", "rounds": 1,
+     "_note": "cheap draft, frontier review, cheap refine"},
+
+    {"label": "crit:120b<-glm5.1",  "harness": "cloud-critique",  "pipeline": "critique",
+     "primary_model": "openai/gpt-oss-120b", "critic_model": "z-ai/glm-5.1", "rounds": 1},
+
+    {"label": "ens:3cheap<-pro",    "harness": "cloud-ensemble",  "pipeline": "ensemble",
+     "primary_model": "openai/gpt-oss-120b,qwen/qwen3-coder-30b-a3b-instruct,deepseek/deepseek-v4-flash",
+     "judge_model": "deepseek/deepseek-v4-pro",
+     "_note": "3 diverse cheap drafts, frontier judge picks best"},
+
+    {"label": "verify:30b",         "harness": "cloud-verify",    "pipeline": "verify",
+     "primary_model": "qwen/qwen3-coder-30b-a3b-instruct",
+     "_note": "single model writes code + property tests, self-corrects"},
+
+    {"label": "verify:pro",         "harness": "cloud-verify",    "pipeline": "verify",
+     "primary_model": "deepseek/deepseek-v4-pro"}
+  ],
+
+  "suite": [
+    "great-circle", "dijkstra", "knapsack", "huffman", "levenshtein", "lru-cache",
+    "regex-engine", "matrix-ops", "crc-checksum", "hamming-code", "json-schema",
+    "rate-limiter", "bug-fix", "base64-codec", "fft-spectrum", "kalman-filter"
+  ]
+}

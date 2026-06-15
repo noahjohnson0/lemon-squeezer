@@ -1,0 +1,246 @@
+#!/usr/bin/env python3
+"""cloud-run — run a lemon-squeezer eval against an OpenAI-compatible CLOUD
+endpoint (OpenRouter by default), score it with the eval's REAL rubric, and
+append a row to runs.jsonl tagged host="openrouter".
+
+This is the cloud counterpart of bin/eval-run. Where eval-run drives a local
+Ollama on the 4070 (or an M4 Max), cloud-run drives the same squeezer
+tool-calling agent against an open-weight model rented on OpenRouter. Same
+prompts, same rubrics, different venue — that's the whole point.
+
+    python bin/cloud-run <eval> <model-slug> [tag] [options]
+
+Options:
+    --base-url URL    OpenAI-compatible base (default https://openrouter.ai/api/v1)
+    --host NAME       host label written into the run (default "openrouter")
+    --harness NAME    harness label (default "squeezer-cloud")
+    --max-iter N      agent loop cap (default 20)
+    --dry-run         print the run_id it would create and exit
+
+Env: OPENROUTER_API_KEY (or LEMON_API_KEY) — bearer token for the endpoint.
+
+No GPU, no SSH, no lock: a cloud run is just HTTP + local rubric scoring, so
+this is safe to run anywhere (including the Windows box) and to parallelise.
+"""
+from __future__ import annotations
+import argparse, json, os, re, shutil, subprocess, sys, time
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+
+
+def posix(p) -> str:
+    """Forward-slash path for handing to bash. On Windows, backslashes are
+    escape chars to bash and silently corrupt the path."""
+    return str(p).replace("\\", "/")
+
+
+def run_bash_script(path: Path, ws: Path, capture: bool):
+    """Run an eval script via `bash -s` with its source fed on stdin, CR-stripped.
+    Sidesteps three Windows-only failures: backslash paths corrupting the script
+    arg, CRLF line endings (git autocrlf) breaking the shebang/heredocs, and
+    text-mode stdin re-inserting \\r on write. Input is bytes (no newline xlate).
+    Workspace is passed as $1 (POSIX path). Returns (rc, stdout_str, stderr_str)."""
+    src = path.read_text(encoding="utf-8", errors="replace").replace("\r\n", "\n").replace("\r", "\n")
+    r = subprocess.run(
+        ["bash", "-s", posix(ws)],
+        input=src.encode("utf-8"),
+        capture_output=capture, cwd=str(ROOT),
+    )
+    out = r.stdout.decode("utf-8", "replace") if (capture and r.stdout) else ""
+    err = r.stderr.decode("utf-8", "replace") if (capture and r.stderr) else ""
+    return r.returncode, out, err
+
+
+def ts_now() -> str:
+    # Colon-free UTC stamp — matches the existing run_id scheme and is a legal
+    # Windows path component.
+    return time.strftime("%Y-%m-%dT%H-%M-%SZ", time.gmtime())
+
+
+def safe_model(m: str) -> str:
+    return re.sub(r"[^A-Za-z0-9]+", "_", m).strip("_")
+
+
+def parse_score(text: str):
+    """Pull the trailing JSON object out of rubric stdout and return score_pct.
+    Mirrors eval-rescore's tolerant fallback for control-char corruption."""
+    m = re.search(r"\{[\s\S]+\}\s*$", text)
+    if not m:
+        return None
+    blob = m.group(0)
+    try:
+        return json.loads(blob).get("score_pct")
+    except Exception:
+        cleaned = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f]", "", blob).replace("\\", "")
+        try:
+            return json.loads(cleaned).get("score_pct")
+        except Exception:
+            return None
+
+
+def read_num(p: Path, cast, default):
+    try:
+        return cast(p.read_text().strip())
+    except Exception:
+        return default
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("eval")
+    ap.add_argument("model", nargs="?", default=None,
+                    help="single-model slug (default mode). Optional when --pipeline is used.")
+    ap.add_argument("tag", nargs="?", default="cloud")
+    ap.add_argument("--tag", dest="tag_opt", default=None,
+                    help="tag override (takes precedence over the positional tag)")
+    ap.add_argument("--base-url", default="https://openrouter.ai/api/v1")
+    ap.add_argument("--host", default="openrouter")
+    ap.add_argument("--harness", default=None,
+                    help="harness label (default 'squeezer-cloud', or 'cloud-<pipeline>')")
+    ap.add_argument("--label", default=None,
+                    help="value written to meta 'model' + the run_id (a human-readable arm name). "
+                         "Defaults to the slug (single) or a derived combo (pipeline).")
+    ap.add_argument("--max-iter", type=int, default=20)
+    ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--no-append", action="store_true",
+                    help="write meta.json + print the row, but don't append to runs.jsonl "
+                         "(let a matrix driver be the single writer)")
+    # ── mix / pipeline mode ──────────────────────────────────────────────
+    ap.add_argument("--pipeline", choices=["critique", "ensemble", "architect", "verify"],
+                    default=None, help="drive squeezer_pipeline.py (a multi-model mix) instead of a single model")
+    ap.add_argument("--primary-model", default=None, help="pipeline primary/executor (or comma-list for ensemble)")
+    ap.add_argument("--critic-model", default=None, help="critique pipeline reviewer")
+    ap.add_argument("--judge-model", default=None, help="ensemble pipeline judge")
+    ap.add_argument("--architect-model", default=None, help="architect pipeline planner")
+    ap.add_argument("--rounds", type=int, default=1, help="critique pipeline: critique→refine cycles")
+    a = ap.parse_args()
+
+    eval_dir = ROOT / "evals" / a.eval
+    if not (eval_dir / "prompt.md").exists():
+        print(f"cloud-run: no such eval: {a.eval}", file=sys.stderr)
+        return 2
+
+    # Resolve the arm: single model vs pipeline mix.
+    if a.pipeline:
+        primary = a.primary_model or a.model
+        if not primary:
+            print("cloud-run: --pipeline needs --primary-model (or a positional model)", file=sys.stderr)
+            return 2
+        harness = a.harness or f"cloud-{a.pipeline}"
+        if a.label:
+            label = a.label
+        else:
+            # derive a compact, readable arm name from the role models
+            short = lambda s: (s or "").split("/")[-1]
+            roles = {"critique": [a.critic_model], "ensemble": [a.judge_model],
+                     "architect": [a.architect_model]}.get(a.pipeline, [])
+            extra = "+".join(short(r) for r in roles if r)
+            label = f"{a.pipeline}:{'/'.join(short(m) for m in primary.split(','))}" + (f"+{extra}" if extra else "")
+    else:
+        if not a.model:
+            print("cloud-run: need a positional model (or use --pipeline)", file=sys.stderr)
+            return 2
+        primary = a.model
+        harness = a.harness or "squeezer-cloud"
+        label = a.label or a.model
+
+    tag = a.tag_opt or a.tag
+    run_id = f"{ts_now()}_{a.eval}_{harness}_{safe_model(label)}_{tag}"
+    if a.dry_run:
+        print(run_id)
+        return 0
+
+    key = os.environ.get("LEMON_API_KEY") or os.environ.get("OPENROUTER_API_KEY")
+    if not key:
+        print("cloud-run: set OPENROUTER_API_KEY (or LEMON_API_KEY)", file=sys.stderr)
+        return 3
+
+    run_dir = ROOT / "runs" / run_id
+    ws = run_dir / "workspace"
+    ws.mkdir(parents=True, exist_ok=True)
+
+    # Optional starter files / setup, same as eval-run.
+    files_dir = eval_dir / "files"
+    if files_dir.is_dir():
+        for f in files_dir.iterdir():
+            if f.is_file():
+                shutil.copy(f, ws / f.name)
+    # Eval scripts run with cwd=ROOT and get the workspace as a ROOT-relative
+    # POSIX path — drive-letter paths (C:/...) don't resolve in MSYS bash tests.
+    ws_arg = ws.relative_to(ROOT)
+
+    setup = eval_dir / "setup.sh"
+    if setup.exists():
+        run_bash_script(setup, ws_arg, capture=False)
+
+    env = dict(os.environ)
+    env["LEMON_API_KEY"] = key
+    # Force UTF-8 stdio so the agent's echo of model output can't die on a
+    # stray unicode char under Windows' default cp1252 console codec.
+    env["PYTHONUTF8"] = "1"
+    env["PYTHONIOENCODING"] = "utf-8"
+
+    # Drive the agent — single model (squeezer.py) or a mix (squeezer_pipeline.py).
+    if a.pipeline:
+        cmd = [sys.executable, str(ROOT / "bin" / "squeezer_pipeline.py"),
+               "--workspace", str(ws), "--run-dir", str(run_dir),
+               "--prompt-file", str(eval_dir / "prompt.md"),
+               "--base-url", a.base_url,
+               "--pipeline", a.pipeline, "--primary-model", primary]
+        if a.critic_model:    cmd += ["--critic-model", a.critic_model]
+        if a.judge_model:     cmd += ["--judge-model", a.judge_model]
+        if a.architect_model: cmd += ["--architect-model", a.architect_model]
+        cmd += ["--rounds", str(a.rounds)]
+    else:
+        cmd = [sys.executable, str(ROOT / "bin" / "squeezer.py"),
+               "--model", primary,
+               "--prompt-file", str(eval_dir / "prompt.md"),
+               "--workspace", str(ws), "--run-dir", str(run_dir),
+               "--base-url", a.base_url, "--max-iter", str(a.max_iter)]
+    started = time.time()
+    with (run_dir / "stdout.log").open("w", encoding="utf-8") as out:
+        rc = subprocess.run(cmd, stdout=out, stderr=subprocess.STDOUT, env=env).returncode
+    wall = time.time() - started
+
+    # Score with the eval's REAL rubric (bash). python3/gtimeout shims on PATH
+    # make this work on Windows too.
+    _rc, rub_out, rub_err = run_bash_script(eval_dir / "rubric.sh", ws_arg, capture=True)
+    (run_dir / "score.json").write_text(rub_out, encoding="utf-8")
+    if rub_err:
+        (run_dir / "rubric.stderr.log").write_text(rub_err, encoding="utf-8")
+    score = parse_score(rub_out)
+
+    meta = {
+        "run_id": run_id,
+        "ts": run_id.split("_", 1)[0],
+        "eval": a.eval,
+        "harness": harness,
+        "model": label,
+        "tag": tag,
+        "host": a.host,
+        "exit_code": rc,
+        "wall_seconds": round(wall),
+        "tokens_in": read_num(run_dir / "tokens_in", int, 0),
+        "tokens_out": read_num(run_dir / "tokens_out", int, 0),
+        "tool_calls": read_num(run_dir / "tool_calls", int, 0),
+        "score_pct": score if score is not None else "?",
+        "cost_usd": round(read_num(run_dir / "cost", float, 0.0), 6),
+    }
+    if a.pipeline:
+        meta["mix"] = {"pipeline": a.pipeline, "primary": primary,
+                       "critic": a.critic_model, "judge": a.judge_model,
+                       "architect": a.architect_model, "rounds": a.rounds}
+    (run_dir / "meta.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
+    if not a.no_append:
+        with (ROOT / "runs.jsonl").open("a", encoding="utf-8") as f:
+            f.write(json.dumps(meta) + "\n")
+
+    print(json.dumps({"run_id": run_id, **{k: meta[k] for k in
+          ("eval", "model", "score_pct", "wall_seconds",
+           "tokens_in", "tokens_out", "tool_calls", "cost_usd")}}))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

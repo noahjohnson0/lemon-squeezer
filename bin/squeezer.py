@@ -113,7 +113,15 @@ A successful tool result is NOT a stopping condition. After every tool result, d
 def call_chat(base_url: str, model: str, messages, tools):
     url = base_url.rstrip("/") + "/chat/completions"
     body = json.dumps({"model": model, "messages": messages, "tools": tools, "stream": False}).encode()
-    req = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json", "Authorization": "Bearer ollama"}, method="POST")
+    # Auth token: local Ollama ignores it ("ollama"); cloud OpenAI-compatible
+    # endpoints (OpenRouter etc.) read it from $LEMON_API_KEY / $OPENROUTER_API_KEY.
+    tok = os.environ.get("LEMON_API_KEY") or os.environ.get("OPENROUTER_API_KEY") or "ollama"
+    headers = {"Content-Type": "application/json", "Authorization": f"Bearer {tok}"}
+    # OpenRouter attribution headers (harmless elsewhere).
+    if "openrouter.ai" in base_url:
+        headers["HTTP-Referer"] = "https://github.com/noahjohnson0/lemon-squeezer"
+        headers["X-Title"] = "lemon-squeezer"
+    req = urllib.request.Request(url, data=body, headers=headers, method="POST")
     with urllib.request.urlopen(req, timeout=600) as r:
         return json.loads(r.read())
 
@@ -155,6 +163,7 @@ def main():
 
     transcript = []
     tot_in = tot_out = tot_calls = 0
+    tot_cost = 0.0
     started = time.time()
 
     for it in range(args.max_iter):
@@ -170,6 +179,7 @@ def main():
         u = resp.get("usage") or {}
         tot_in  += int(u.get("prompt_tokens", 0))
         tot_out += int(u.get("completion_tokens", 0))
+        tot_cost += float(u.get("cost") or 0)  # OpenRouter reports usd cost per call
 
         choice = (resp.get("choices") or [{}])[0]
         msg = choice.get("message") or {}
@@ -222,6 +232,7 @@ def main():
     (run_dir / "tokens_in").write_text(str(tot_in))
     (run_dir / "tokens_out").write_text(str(tot_out))
     (run_dir / "tool_calls").write_text(str(tot_calls))
+    (run_dir / "cost").write_text(f"{tot_cost:.6f}")
 
     # Persist a session log similar to pi's
     with (run_dir / "squeezer-session.jsonl").open("w") as f:

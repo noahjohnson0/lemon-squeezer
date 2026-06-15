@@ -1,0 +1,235 @@
+#!/usr/bin/env python3
+"""cloud-matrix — drive the whole Fable-destroyer experiment.
+
+Runs every ARM (a single OpenRouter model, or a multi-model MIX) across the eval
+SUITE for N trials, in parallel, with a single safe writer to runs.jsonl and a
+hard USD budget cap. Each cell is one `bin/cloud-run` invocation with
+`--no-append`; cloud-matrix collects the per-run meta.json and appends it.
+
+    python bin/cloud-matrix [--arms configs/cloud-arms.json]
+                            [--trials 4] [--budget 9.0] [--concurrency 6]
+                            [--tag fable-hunt] [--only eval1,eval2] [--dry-run]
+
+Design notes
+------------
+* Cells are ordered round-robin: trial-0 of (eval0 × all arms), then trial-0 of
+  (eval1 × all arms), ... so if the budget cuts us off early we still have a
+  COMPLETE cross-arm comparison on a prefix of the suite — the cleanest partial.
+* Budget is enforced as runs complete; in-flight work can overshoot by at most
+  (concurrency × per-run cost), so set --budget a little under your real balance.
+* Resumable: a cell is skipped if runs.jsonl already holds `trials` rows for that
+  (eval, arm-label, harness) on host=openrouter. Re-run after a top-up to extend.
+* This is HTTP + local rubric scoring only — no GPU, no lock — so it parallelises
+  freely and runs fine on the Windows box.
+
+Env: OPENROUTER_API_KEY (or LEMON_API_KEY).
+"""
+from __future__ import annotations
+import argparse, json, os, subprocess, sys, time
+from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+RUNS_JSONL = ROOT / "runs.jsonl"
+
+
+def load_arms(path: Path):
+    spec = json.loads(path.read_text(encoding="utf-8"))
+    arms = []
+    for s in spec.get("singles", []):
+        arms.append({"kind": "single", "label": s["label"], "model": s["model"],
+                     "harness": s.get("harness", "squeezer-cloud")})
+    for m in spec.get("mixes", []):
+        arms.append({"kind": "mix", "label": m["label"], "harness": m["harness"],
+                     "pipeline": m["pipeline"], "primary_model": m["primary_model"],
+                     "critic_model": m.get("critic_model"), "judge_model": m.get("judge_model"),
+                     "architect_model": m.get("architect_model"), "rounds": m.get("rounds", 1)})
+    return arms, spec.get("suite", [])
+
+
+def existing_counts():
+    """(eval, model-label, harness) -> count of openrouter rows already in runs.jsonl."""
+    counts = {}
+    if not RUNS_JSONL.exists():
+        return counts
+    for line in RUNS_JSONL.read_text(encoding="utf-8", errors="replace").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            r = json.loads(line)
+        except Exception:
+            continue
+        if r.get("host") != "openrouter":
+            continue
+        k = (r.get("eval"), r.get("model"), r.get("harness"))
+        counts[k] = counts.get(k, 0) + 1
+    return counts
+
+
+def build_cmd(cell, eval_name, tag, base_url):
+    arm = cell["arm"]
+    cmd = [sys.executable, str(ROOT / "bin" / "cloud-run"), eval_name,
+           "--no-append", "--tag", tag, "--base-url", base_url,
+           "--label", arm["label"], "--harness", arm["harness"]]
+    if arm["kind"] == "single":
+        cmd.insert(3, arm["model"])  # positional model right after eval_name
+    else:
+        cmd += ["--pipeline", arm["pipeline"], "--primary-model", arm["primary_model"],
+                "--rounds", str(arm["rounds"])]
+        for flag, key in (("--critic-model", "critic_model"),
+                          ("--judge-model", "judge_model"),
+                          ("--architect-model", "architect_model")):
+            if arm.get(key):
+                cmd += [flag, arm[key]]
+    return cmd
+
+
+def run_cell(cell, tag, base_url, env):
+    eval_name = cell["eval"]
+    cmd = build_cmd(cell, eval_name, tag, base_url)
+    t0 = time.time()
+    try:
+        p = subprocess.run(cmd, capture_output=True, text=True, env=env,
+                           encoding="utf-8", errors="replace")
+    except Exception as e:
+        return {"_error": f"spawn: {e!r}", "eval": eval_name, "arm": cell["arm"]["label"]}
+    # cloud-run prints a one-line JSON summary (with run_id) on its last stdout line.
+    run_id = None
+    for ln in reversed((p.stdout or "").strip().splitlines()):
+        ln = ln.strip()
+        if ln.startswith("{"):
+            try:
+                run_id = json.loads(ln).get("run_id")
+                break
+            except Exception:
+                pass
+    if not run_id:
+        return {"_error": f"no run_id (rc={p.returncode}): {(p.stderr or p.stdout or '')[-300:]}",
+                "eval": eval_name, "arm": cell["arm"]["label"]}
+    meta_path = ROOT / "runs" / run_id / "meta.json"
+    try:
+        row = json.loads(meta_path.read_text(encoding="utf-8"))
+    except Exception as e:
+        return {"_error": f"meta read: {e!r}", "eval": eval_name, "arm": cell["arm"]["label"]}
+    row["_wall_driver"] = round(time.time() - t0, 1)
+    return row
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--arms", default=str(ROOT / "configs" / "cloud-arms.json"))
+    ap.add_argument("--trials", type=int, default=4)
+    ap.add_argument("--budget", type=float, default=9.0, help="hard USD cap (stop launching when reached)")
+    ap.add_argument("--concurrency", type=int, default=6)
+    ap.add_argument("--tag", default="fable-hunt")
+    ap.add_argument("--base-url", default="https://openrouter.ai/api/v1")
+    ap.add_argument("--only", default=None, help="comma-separated eval subset")
+    ap.add_argument("--arms-only", default=None, help="comma-separated arm-label subset")
+    ap.add_argument("--dry-run", action="store_true")
+    a = ap.parse_args()
+
+    if not (os.environ.get("OPENROUTER_API_KEY") or os.environ.get("LEMON_API_KEY")):
+        print("cloud-matrix: set OPENROUTER_API_KEY (or LEMON_API_KEY)", file=sys.stderr)
+        return 3
+
+    arms, suite = load_arms(Path(a.arms))
+    if a.only:
+        keep = {s.strip() for s in a.only.split(",")}
+        suite = [e for e in suite if e in keep]
+    if a.arms_only:
+        keep = {s.strip() for s in a.arms_only.split(",")}
+        arms = [arm for arm in arms if arm["label"] in keep]
+
+    counts = existing_counts()
+    arm_pos = {arm["label"]: i for i, arm in enumerate(arms)}
+
+    # Build round-robin cell list: (round, eval, arm), skipping already-satisfied cells.
+    cells = []
+    for ev in suite:
+        for arm in arms:
+            have = counts.get((ev, arm["label"], arm["harness"]), 0)
+            for k in range(max(0, a.trials - have)):
+                cells.append({"round": have + k, "eval": ev, "arm": arm})
+    cells.sort(key=lambda c: (c["round"], suite.index(c["eval"]), arm_pos[c["arm"]["label"]]))
+
+    print(f"arms={len(arms)} suite={len(suite)} trials={a.trials} "
+          f"=> {len(cells)} cells to run (after skipping satisfied). "
+          f"budget=${a.budget} concurrency={a.concurrency}")
+    if a.dry_run:
+        for c in cells[:40]:
+            print(f"  r{c['round']} {c['eval']:14} {c['arm']['label']}")
+        if len(cells) > 40:
+            print(f"  ... +{len(cells)-40} more")
+        return 0
+    if not cells:
+        print("nothing to do — every cell already has enough trials.")
+        return 0
+
+    env = dict(os.environ)
+    env["PYTHONUTF8"] = "1"
+    env["PYTHONIOENCODING"] = "utf-8"
+
+    spent = 0.0
+    done_n = err_n = 0
+    started = time.time()
+    it = iter(cells)
+    inflight = {}
+
+    log_path = ROOT / "runs" / f"_matrix_{time.strftime('%Y-%m-%dT%H-%M-%SZ', time.gmtime())}.log"
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    logf = log_path.open("w", encoding="utf-8")
+
+    def emit(msg):
+        print(msg, flush=True)
+        logf.write(msg + "\n"); logf.flush()
+
+    emit(f"# cloud-matrix start: {len(cells)} cells, budget ${a.budget}")
+
+    with ThreadPoolExecutor(max_workers=a.concurrency) as ex:
+        def submit_next():
+            if spent >= a.budget:
+                return False
+            try:
+                cell = next(it)
+            except StopIteration:
+                return False
+            fut = ex.submit(run_cell, cell, a.tag, a.base_url, env)
+            inflight[fut] = cell
+            return True
+
+        for _ in range(a.concurrency):
+            if not submit_next():
+                break
+
+        while inflight:
+            finished, _ = wait(list(inflight), return_when=FIRST_COMPLETED)
+            for fut in finished:
+                cell = inflight.pop(fut)
+                row = fut.result()
+                if row.get("_error"):
+                    err_n += 1
+                    emit(f"  ERR  {row['eval']:14} {row['arm']:22} {row['_error'][:120]}")
+                else:
+                    # single writer: only this (main) thread appends to runs.jsonl
+                    clean = {k: v for k, v in row.items() if not k.startswith("_")}
+                    with RUNS_JSONL.open("a", encoding="utf-8") as f:
+                        f.write(json.dumps(clean) + "\n")
+                    c = row.get("cost_usd", 0) or 0
+                    spent += c
+                    done_n += 1
+                    emit(f"  ok   {row['eval']:14} {row['model']:24} "
+                         f"score={str(row.get('score_pct')):>4} ${c:.5f} "
+                         f"[{done_n} done, ${spent:.4f}/{a.budget}]")
+                # top up the pool unless we've hit budget
+                submit_next()
+
+    dt = time.time() - started
+    emit(f"# done: {done_n} runs, {err_n} errors, ${spent:.4f} spent, {dt/60:.1f} min")
+    emit(f"# log: {log_path}")
+    logf.close()
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

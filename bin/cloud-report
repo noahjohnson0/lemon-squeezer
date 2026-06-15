@@ -1,0 +1,132 @@
+#!/usr/bin/env python3
+"""cloud-report — aggregate the OpenRouter (host=openrouter) rows in runs.jsonl
+into a leaderboard: per-arm mean score, total/mean cost, mean latency, and the
+score-per-dollar "value" that's the whole point of the Fable-destroyer hunt.
+
+    python bin/cloud-report [--tag fable-hunt] [--json out.json] [--by-eval]
+
+An "arm" is (model, harness) — a single open model OR a multi-model mix. With no
+--tag, every openrouter row counts.
+"""
+from __future__ import annotations
+import argparse, json, statistics, sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+
+
+def load(tag=None):
+    rows = []
+    for line in (ROOT / "runs.jsonl").read_text(encoding="utf-8", errors="replace").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            r = json.loads(line)
+        except Exception:
+            continue
+        if r.get("host") != "openrouter":
+            continue
+        if tag and r.get("tag") != tag:
+            continue
+        # numeric score only
+        s = r.get("score_pct")
+        r["_score"] = float(s) if isinstance(s, (int, float)) else (float(s) if str(s).replace(".", "", 1).isdigit() else None)
+        rows.append(r)
+    return rows
+
+
+def agg(rows):
+    arms = {}
+    for r in rows:
+        key = (r.get("model"), r.get("harness"))
+        a = arms.setdefault(key, {"model": r.get("model"), "harness": r.get("harness"),
+                                  "scores": [], "cost": 0.0, "wall": [], "tin": 0, "tout": 0,
+                                  "evals": set(), "n": 0, "fails": 0})
+        a["n"] += 1
+        a["cost"] += r.get("cost_usd", 0) or 0
+        a["wall"].append(r.get("wall_seconds", 0) or 0)
+        a["tin"] += r.get("tokens_in", 0) or 0
+        a["tout"] += r.get("tokens_out", 0) or 0
+        a["evals"].add(r.get("eval"))
+        if r["_score"] is None:
+            a["fails"] += 1
+        else:
+            a["scores"].append(r["_score"])
+    out = []
+    for a in arms.values():
+        sc = a["scores"]
+        mean = statistics.mean(sc) if sc else 0.0
+        out.append({
+            "model": a["model"], "harness": a["harness"], "n": a["n"],
+            "evals": len(a["evals"]),
+            "mean_score": round(mean, 1),
+            "total_cost": round(a["cost"], 4),
+            "mean_cost": round(a["cost"] / a["n"], 5) if a["n"] else 0,
+            "mean_wall_s": round(statistics.mean(a["wall"]), 1) if a["wall"] else 0,
+            "tokens_in": a["tin"], "tokens_out": a["tout"],
+            # value = mean score per cent spent per run; higher is better bang/buck
+            "score_per_cent": round(mean / (100 * a["cost"] / a["n"]), 1) if a["cost"] else None,
+            "parse_fails": a["fails"],
+        })
+    out.sort(key=lambda x: (-x["mean_score"], x["mean_cost"]))
+    return out
+
+
+def by_eval(rows):
+    evals = sorted({r.get("eval") for r in rows})
+    arms = sorted({(r.get("model"), r.get("harness")) for r in rows})
+    cell = {}
+    for r in rows:
+        if r["_score"] is None:
+            continue
+        cell.setdefault((r.get("model"), r.get("harness")), {}).setdefault(r.get("eval"), []).append(r["_score"])
+    return evals, arms, cell
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--tag", default=None)
+    ap.add_argument("--json", default=None, help="also write the leaderboard to this JSON path")
+    ap.add_argument("--by-eval", action="store_true")
+    a = ap.parse_args()
+
+    rows = load(a.tag)
+    if not rows:
+        print("no openrouter rows" + (f" for tag={a.tag}" if a.tag else ""), file=sys.stderr)
+        return 1
+    board = agg(rows)
+
+    total_cost = sum(r.get("cost_usd", 0) or 0 for r in rows)
+    print(f"# {len(rows)} openrouter runs" + (f" (tag={a.tag})" if a.tag else "") +
+          f", {len({r['eval'] for r in rows})} evals, ${total_cost:.4f} spent total\n")
+    print(f"{'ARM':26} {'harness':16} {'n':>3} {'mean%':>6} {'$/run':>8} {'$/$':>6} {'wall':>6}")
+    print("-" * 78)
+    for r in board:
+        spc = "" if r["score_per_cent"] is None else f"{r['score_per_cent']:.0f}"
+        print(f"{(r['model'] or '?')[:26]:26} {(r['harness'] or '')[:16]:16} {r['n']:>3} "
+              f"{r['mean_score']:>6.1f} {r['mean_cost']:>8.5f} {spc:>6} {r['mean_wall_s']:>5.0f}s")
+
+    if a.by_eval:
+        evals, arms, cell = by_eval(rows)
+        print("\n## per-eval mean score (rows=arm, cols=eval)\n")
+        hdr = "ARM".ljust(26) + "".join(e[:7].rjust(8) for e in evals)
+        print(hdr)
+        for m, h in arms:
+            line = f"{(m or '?')[:26]:26}"
+            for e in evals:
+                vs = cell.get((m, h), {}).get(e)
+                line += (f"{statistics.mean(vs):>8.0f}" if vs else f"{'·':>8}")
+            print(line)
+
+    if a.json:
+        Path(a.json).write_text(json.dumps({
+            "generated_tag": a.tag, "n_runs": len(rows), "total_cost": round(total_cost, 4),
+            "leaderboard": board,
+        }, indent=2), encoding="utf-8")
+        print(f"\nwrote {a.json}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

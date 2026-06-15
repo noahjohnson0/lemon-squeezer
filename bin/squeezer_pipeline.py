@@ -143,6 +143,7 @@ def run_step(name: str, model: str, system_prompt: str, user_prompt: str,
     ]
 
     tot_in = tot_out = tot_calls = 0
+    tot_cost = 0.0
     final_text = ""
     started = time.time()
 
@@ -155,6 +156,7 @@ def run_step(name: str, model: str, system_prompt: str, user_prompt: str,
         u = resp.get("usage") or {}
         tot_in  += int(u.get("prompt_tokens", 0))
         tot_out += int(u.get("completion_tokens", 0))
+        tot_cost += float(u.get("cost") or 0)  # OpenRouter reports usd cost per call
         msg = (resp.get("choices") or [{}])[0].get("message") or {}
         content    = msg.get("content") or ""
         tool_calls = msg.get("tool_calls") or []
@@ -187,9 +189,9 @@ def run_step(name: str, model: str, system_prompt: str, user_prompt: str,
         for m in messages: f.write(json.dumps(m, default=str) + "\n")
 
     elapsed = time.time() - started
-    print(f"[{name}] done — {tot_calls} tools, {tot_in}/{tot_out} tok, {elapsed:.1f}s", flush=True)
+    print(f"[{name}] done — {tot_calls} tools, {tot_in}/{tot_out} tok, ${tot_cost:.5f}, {elapsed:.1f}s", flush=True)
     return {"name": name, "model": model, "tokens_in": tot_in, "tokens_out": tot_out,
-            "tool_calls": tot_calls, "wall_s": round(elapsed, 1), "final": final_text}
+            "tool_calls": tot_calls, "cost": round(tot_cost, 6), "wall_s": round(elapsed, 1), "final": final_text}
 
 
 def pipeline_architect(args, user_prompt: str, ws: Path, run_dir: Path) -> list[dict]:
@@ -297,9 +299,11 @@ def main() -> None:
     tot_in = sum(s["tokens_in"] for s in steps)
     tot_out = sum(s["tokens_out"] for s in steps)
     tot_calls = sum(s["tool_calls"] for s in steps)
+    tot_cost = sum(s.get("cost", 0.0) for s in steps)
     (run_dir / "tokens_in").write_text(str(tot_in))
     (run_dir / "tokens_out").write_text(str(tot_out))
     (run_dir / "tool_calls").write_text(str(tot_calls))
+    (run_dir / "cost").write_text(f"{tot_cost:.6f}")
     (run_dir / "pipeline-summary.json").write_text(json.dumps({
         "pipeline": args.pipeline,
         "steps": steps,
@@ -307,9 +311,10 @@ def main() -> None:
         "critic_model": args.critic_model,
         "judge_model": args.judge_model,
         "rounds": args.rounds,
+        "cost": round(tot_cost, 6),
     }, indent=2))
 
-    print(f"\n══════ PIPELINE DONE — {len(steps)} steps, {tot_in}/{tot_out} tok total ══════")
+    print(f"\n══════ PIPELINE DONE — {len(steps)} steps, {tot_in}/{tot_out} tok, ${tot_cost:.5f} total ══════")
 
 
 if __name__ == "__main__":
