@@ -42,20 +42,28 @@ still queued; treat magnitudes as indicative, the direction as solid.)
 
 ## Cloud leaderboard: a tied cluster, not one winner
 
-Under squeezer, ~100 runs per arm over all 40 evals. The top is a cluster whose
-confidence intervals overlap (statistically tied), not a single champion:
+Under squeezer, ~100 runs per arm over 39 evals (port-scanner excluded - see below).
+The top is a cluster whose confidence intervals overlap (statistically tied), not a
+single champion:
 
 | arm | harness | mean | 95% CI | $/task |
 |---|---|---:|---:|---:|
-| deepseek-v4-pro | single | 97.5% | 93-100 | $0.023 |
-| deepseek-v4-flash | single | 97.0% | 92-100 | $0.0028 |
-| verify:pro | mix | 96.8% | 92-100 | $0.043 |
-| qwen3-max | single | 96.1% | 91-100 | $0.010 |
-| arch:flash<-pro | mix | 96.0% | 91-99 | $0.0089 |
-| arch:120b<-qwen-max | mix | 95.7% | 90-99 | $0.0038 |
-| glm-5.1 | single | 95.3% | 89-100 | $0.016 |
-| kimi-k2.7-code | single | 95.0% | 90-99 | $0.018 |
-| **gpt-oss-120b** | single | 90.4% | 84-96 | **$0.0007** |
+| deepseek-v4-pro | single | 99.4% | 98-100 | $0.024 |
+| deepseek-v4-flash | single | 99.0% | 98-100 | $0.0029 |
+| verify:pro | mix | 98.7% | 97-100 | $0.043 |
+| qwen3-max | single | 98.1% | 96-100 | $0.010 |
+| arch:flash<-pro | mix | 98.0% | 96-100 | $0.0089 |
+| arch:120b<-qwen-max | mix | 97.6% | 95-100 | $0.0039 |
+| glm-5.1 | single | 97.3% | 92-100 | $0.016 |
+| kimi-k2.7-code | single | 97.0% | 94-99 | $0.018 |
+| **gpt-oss-120b** | single | 92.2% | 88-96 | **$0.0007** |
+
+> **port-scanner excluded (environment-dependent).** Its rubric needs live sockets
+> and a firewall-style timeout that don't behave on the scoring box, so ~every arm
+> scored ~20% on it regardless of model - it measured the environment, not the model,
+> and only depressed and widened every arm's numbers. Dropped from headline aggregates
+> (`bin/cloud-report`, dashboard); re-include with `--include-env`. Making it hermetic
+> is on the roadmap.
 
 The honest takeaways:
 

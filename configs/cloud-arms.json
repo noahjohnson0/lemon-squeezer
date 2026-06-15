@@ -87,7 +87,7 @@
     "great-circle", "dijkstra", "knapsack", "huffman", "levenshtein", "lru-cache",
     "regex-engine", "matrix-ops", "crc-checksum", "hamming-code", "json-schema",
     "rate-limiter", "bug-fix", "base64-codec", "fft-spectrum", "kalman-filter",
-    "bloom-filter", "boolean-sat", "sudoku", "port-scanner", "unit-convert",
+    "bloom-filter", "boolean-sat", "sudoku", "unit-convert",
     "password-strength", "regression-ci", "julian-day", "solar-position",
     "kepler-orbit", "projectile-sim", "robot-arm-ik", "dc-circuit", "drone-pid",
     "epidemiology-sir", "chem-balance", "crypto-caesar-break", "crypto-vigenere",

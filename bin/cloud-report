@@ -37,8 +37,14 @@ ROOT = Path(__file__).resolve().parent.parent
 BOOT_B = 2000
 BOOT_SEED = 1234
 
+# Evals that measure the scoring ENVIRONMENT, not the model (every arm gets the
+# same uninformative score), so they are excluded from headline aggregates.
+# port-scanner needs live sockets / a firewall-style timeout that don't behave on
+# the Windows scoring box -> ~every arm lands at 20%. Re-include with --include-env.
+EXCLUDED_EVALS = {"port-scanner"}
 
-def load(tag=None):
+
+def load(tag=None, include_env=False):
     rows = []
     for line in (ROOT / "runs.jsonl").read_text(encoding="utf-8", errors="replace").splitlines():
         line = line.strip()
@@ -51,6 +57,8 @@ def load(tag=None):
         if r.get("host") != "openrouter":
             continue
         if tag and r.get("tag") != tag:
+            continue
+        if not include_env and r.get("eval") in EXCLUDED_EVALS:
             continue
         s = r.get("score_pct")
         r["_score"] = float(s) if isinstance(s, (int, float)) else None
@@ -139,9 +147,11 @@ def main():
     ap.add_argument("--by-eval", action="store_true")
     ap.add_argument("--min-evals", type=int, default=8,
                     help="arms with fewer scored evals than this get no CI and sort last")
+    ap.add_argument("--include-env", action="store_true",
+                    help=f"include environment-dependent evals ({', '.join(sorted(EXCLUDED_EVALS))})")
     a = ap.parse_args()
 
-    rows = load(a.tag)
+    rows = load(a.tag, include_env=a.include_env)
     if not rows:
         print("no openrouter rows" + (f" for tag={a.tag}" if a.tag else ""), file=sys.stderr)
         return 1
