@@ -1,8 +1,0 @@
-Q1: 1991 (python_lang.md)
-Q2: Guido van Rossum began working in the late 1980s; it succeeded the ABC programming language (python_lang.md)
-Q3: 5888 CUDA cores (rtx_4070.md)
-Q4: $599 USD launch MSRP (rtx_4070.md)
-Q5: 16 CPU cores at maximum (m4_max.md)
-Q6: up to 128 GB unified memory (m4_max.md)
-Q7: 2.7.18 (python_lang.md)
-Q8: I don't know — the available references don't contain this.

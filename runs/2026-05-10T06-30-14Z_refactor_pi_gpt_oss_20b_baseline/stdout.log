@@ -1,1 +1,0 @@
-`orders.py` has been refactored. The per‑customer total computation is now centralized in `customer_total(order)`, and this function is used for each customer and for the grand total. The printed output remains unchanged.

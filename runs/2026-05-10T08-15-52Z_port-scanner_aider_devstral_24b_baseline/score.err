@@ -1,5 +1,0 @@
-open_state open
-closed_state closed
-filtered_state closed
-bulk_count 200
-bulk_unique_states ['closed']

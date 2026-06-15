@@ -1,8 +1,0 @@
-PASS H2 + O2 -> H2O
-PASS CH4 + O2 -> CO2 + H2O
-PASS C2H6 + O2 -> CO2 + H2O
-PASS Fe + Cl2 -> FeCl3
-PASS Al + HCl -> AlCl3 + H2
-PASS Al2(SO4)3 + NaOH -> Al(OH)3 + Na2SO4
-PASS KMnO4 + HCl -> KCl + MnCl2 + H2O + Cl2
---- 7 / 7

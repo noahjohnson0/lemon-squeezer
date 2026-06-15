@@ -1,6 +1,0 @@
-init 1
-cov_2x2 1
-converge_pos 0 LinAlgError('0-dimensional array given. Array must be at least two-dimensional')
-converge_vel 0 LinAlgError('0-dimensional array given. Array must be at least two-dimensional')
-predict_advances 1 p0=0.0 p1=3.0
-predict_grows_cov 1

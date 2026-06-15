@@ -1,9 +1,0 @@
-{
-  "checks": [
-    {"name":"file:ik.py","pass":1,"weight":5,"note":""},
-    {"name":"imports","pass":0,"weight":10,"note":"IMPORT_ERROR: NameError("name 'EOF' is not defined")"}
-  ],
-  "gained": 5,
-  "total": 15,
-  "score_pct": 33
-}

@@ -1,6 +1,0 @@
-[TOOL_CALL it=0] search_local {"corpus":"medical","query":"rattlesnake bite first aid","top_k":3}
-[TOOL_CALL it=1] search_local {"corpus":"medical","query":"snakebite first aid procedure management","top_k":3}
-[TOOL_CALL it=2] search_local {"corpus":"medical","query":"first aid for snake bite immobilization wound care","top_k":3}
-[TOOL_CALL it=3] write_answer {"text":"1. **Immediate Action (Positioning, Calming, Jewelry/Tight Clothing):**\n    *   The victim is conscious, anxious, and in pain (medical::Snakebite.md).\n    *   Focus on keeping the victim as
-
-[librarian] done: 4 tools, 4239 in / 1554 out tokens, 25.3s, answer=yes

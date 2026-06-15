@@ -1,9 +1,0 @@
-Q1: The Apple M4 Max was first released for public information in 2024 (m4_max.md)
-Q2: Guido van Rossum began working on Python as a successor to the ABC programming language (python_lang.md)
-Q3: 5888 CUDA cores (rtx_4070.md)
-Q4: $599 USD (rtx_4070.md)
-Q5: The maximum is not specified in the context. The variants given are either 14 CPU cores or 16 CPU cores, but it's not stated which specific M4 Max configuration has more cores (m4_max.md)
-Q6: Up to 128 GB of unified memory (m4_max.md)
-Q7: Python 2.7.18 (python_lang.md)
-I don't know
-Q8: The context doesn't mention how many TFLOPS the RTX 4070 delivers (rtx_4070.md)

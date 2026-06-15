@@ -1,8 +1,0 @@
-ERR H2 + O2 -> H2O ValueError('Equation cannot be balanced')
-ERR CH4 + O2 -> CO2 + H2O AttributeError("'MutableDenseMatrix' object has no attribute 'gcd'")
-ERR C2H6 + O2 -> CO2 + H2O AttributeError("'MutableDenseMatrix' object has no attribute 'gcd'")
-ERR Fe + Cl2 -> FeCl3 ValueError('Equation cannot be balanced')
-ERR Al + HCl -> AlCl3 + H2 AttributeError("'MutableDenseMatrix' object has no attribute 'gcd'")
-ERR Al2(SO4)3 + NaOH -> Al(OH)3 + Na2SO4 ValueError('not enough values to unpack (expected 2, got 1)')
-ERR KMnO4 + HCl -> KCl + MnCl2 + H2O + Cl2 AttributeError("'MutableDenseMatrix' object has no attribute 'gcd'")
---- 0 / 7

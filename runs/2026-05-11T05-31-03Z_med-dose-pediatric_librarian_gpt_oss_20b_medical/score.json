@@ -1,8 +1,0 @@
-{
-  "checks": [
-    {"name":"file:answer.txt","pass":0,"weight":5,"note":""}
-  ],
-  "gained": 0,
-  "total": 5,
-  "score_pct": 0
-}

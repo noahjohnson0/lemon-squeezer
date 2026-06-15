@@ -1,3 +1,0 @@
-[TOOL_CALL it=0] write_file {"path":"ik.py","content":"\"\"\"\n2-link planar arm kinematics.\n\nThis module defines the forward and inverse kinematics for a planar 2‑link arm\nwith a base at the origin. The link lengths are para
-
-[squeezer] done: 1 tools, 786 in / 1565 out tokens, 77.5s

@@ -1,6 +1,0 @@
-[TOOL_CALL it=0] search_local {"top_k":1,"corpus":"context","query":"\"Python\" AND first released"}
-[ASSISTANT it=1] Q1: Python was first released in 1991 (context::python_lang.md)
-
-[{"name": "search_local", "arguments": {"corpus":"context","query":"\"Python\" AND \"Guido van Rossum\" AND started working","top_k":1}}]
-
-[librarian] done: 1 tools, 1301 in / 93 out tokens, 7.8s, answer=yes

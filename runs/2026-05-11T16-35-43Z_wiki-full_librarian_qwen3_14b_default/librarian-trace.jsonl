@@ -1,9 +1,0 @@
-{"iter": 0, "tool": "search_local", "args_keys": ["corpus", "query", "top_k"], "result_chars": 1583}
-{"iter": 0, "tool": "search_local", "args_keys": ["corpus", "query", "top_k"], "result_chars": 1581}
-{"iter": 0, "tool": "search_local", "args_keys": ["corpus", "query", "top_k"], "result_chars": 1582}
-{"iter": 0, "tool": "search_local", "args_keys": ["corpus", "query", "top_k"], "result_chars": 1588}
-{"iter": 0, "tool": "search_local", "args_keys": ["corpus", "query", "top_k"], "result_chars": 1591}
-{"iter": 0, "tool": "search_local", "args_keys": ["corpus", "query", "top_k"], "result_chars": 1592}
-{"iter": 0, "tool": "search_local", "args_keys": ["corpus", "query", "top_k"], "result_chars": 1576}
-{"iter": 0, "tool": "search_local", "args_keys": ["query", "top_k", "corpus"], "result_chars": 1600}
-{"iter": 1, "final_content_chars": 110}

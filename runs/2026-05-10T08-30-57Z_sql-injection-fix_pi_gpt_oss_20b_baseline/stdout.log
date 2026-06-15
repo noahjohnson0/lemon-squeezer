@@ -1,1 +1,0 @@
-The `lookup` function now uses a parameterized query to prevent SQL injection and has the stray execution call removed. No other parts of the file were altered.

@@ -1,9 +1,0 @@
-{
-  "checks": [
-    {"name":"file:answer.txt","pass":0,"weight":5,"note":""},
-    {"name":"used_search_tool","pass":0,"weight":8,"note":"only 0"}
-  ],
-  "gained": 0,
-  "total": 13,
-  "score_pct": 0
-}

@@ -1,3 +1,0 @@
-[TOOL_CALL it=0] write_answer {"text":"Patient 1: GREEN — The patient was able to walk, satisfying the first triage rule.\nPatient 2: BLACK — No breathing was found even after attempting to reposition the airway.\nPatient 3: RED —
-
-[librarian] done: 1 tools, 873 in / 943 out tokens, 18.1s, answer=yes

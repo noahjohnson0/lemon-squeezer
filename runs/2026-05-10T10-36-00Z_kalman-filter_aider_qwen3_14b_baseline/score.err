@@ -1,6 +1,0 @@
-init 1
-cov_2x2 1
-converge_pos 1 got_p=49.624
-converge_vel 1 got_v=0.731
-predict_advances 1 p0=0.0 p1=3.0
-predict_grows_cov 1

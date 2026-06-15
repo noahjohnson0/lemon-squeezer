@@ -1,5 +1,0 @@
-
-## Usage
-- The frontend will automatically fetch Wi-Fi stats every 3 seconds
-- The backend runs on http://localhost:8000
-- The frontend runs on http://localhost:3000

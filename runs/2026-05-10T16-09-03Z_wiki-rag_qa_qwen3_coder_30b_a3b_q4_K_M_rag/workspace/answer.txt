@@ -1,8 +1,0 @@
-Q1: Python was first released in 1991 (source.md)
-Q2: Guido van Rossum began working on Python as a successor to the ABC programming language (source.md)
-Q3: The RTX 4070 has 5888 CUDA cores (source.md)
-Q4: The launch MSRP of the RTX 4070 was $599 USD (source.md)
-Q5: The M4 Max has a maximum of 16 CPU cores (source.md)
-Q6: The maximum unified memory of the M4 Max is 128 GB (source.md)
-Q7: The latest Python 2 release version mentioned is 2.7.18 (source.md)
-Q8: The RTX 4070 delivers 31.5 TFLOPS of theoretical peak compute (source.md)

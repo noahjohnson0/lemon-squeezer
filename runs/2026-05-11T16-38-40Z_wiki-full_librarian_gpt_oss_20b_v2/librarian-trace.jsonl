@@ -1,5 +1,0 @@
-{"iter": 0, "tool": "search_local", "args_keys": ["corpus", "query", "top_k"], "result_chars": 7922}
-{"iter": 1, "tool": "search_local", "args_keys": ["corpus", "query", "top_k"], "result_chars": 8005}
-{"iter": 2, "tool": "search_local", "args_keys": ["corpus", "query", "top_k"], "result_chars": 7969}
-{"iter": 3, "tool": "write_answer", "args_keys": ["text"], "result_chars": 73}
-{"iter": 3, "early_exit": "write_answer"}

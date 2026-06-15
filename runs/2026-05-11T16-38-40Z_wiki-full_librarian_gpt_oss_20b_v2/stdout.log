@@ -1,6 +1,0 @@
-[TOOL_CALL it=0] search_local {"corpus":"wikipedia-en","query":"standard gravity (g) SI units","top_k":5}
-[TOOL_CALL it=1] search_local {"corpus":"wikipedia-en","query":"atomic number 74 element","top_k":5}
-[TOOL_CALL it=2] search_local {"corpus":"wikipedia-en","query":"tungsten atomic mass","top_k":5}
-[TOOL_CALL it=3] write_answer {"text":"The atomic mass of tungsten (W) is 183.84 u. (Isotopes_of_tungsten.md)"}
-
-[librarian] done: 4 tools, 9395 in / 372 out tokens, 26.4s, answer=yes

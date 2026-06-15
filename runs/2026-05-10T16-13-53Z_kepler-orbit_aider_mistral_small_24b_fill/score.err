@@ -1,5 +1,0 @@
-energy_formula 1 got=-0.5
-half_period 0 TypeError("'int' object is not subscriptable")
-full_period 0 TypeError("'int' object is not subscriptable")
-energy_drift 0 TypeError("'int' object is not subscriptable")
-ellipse_apo 0 TypeError("'int' object is not subscriptable")

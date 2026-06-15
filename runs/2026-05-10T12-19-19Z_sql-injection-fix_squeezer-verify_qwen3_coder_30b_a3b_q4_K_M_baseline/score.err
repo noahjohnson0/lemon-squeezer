@@ -1,3 +1,0 @@
-Traceback (most recent call last):
-  File "<stdin>", line 15, in <module>
-TypeError: lookup() takes 1 positional argument but 2 were given

@@ -1,2 +1,0 @@
-/Users/noahjohnson0/repos/lemon-squeezer/evals/first-aid-triage/rubric.sh: line 28: declare: -A: invalid option
-declare: usage: declare [-afFirtx] [-p] [name[=value] ...]

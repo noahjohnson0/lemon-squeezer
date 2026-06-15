@@ -1,3 +1,0 @@
-[TOOL_CALL it=0] read_file {"path":"app.py"}
-
-[squeezer] done: 1 tools, 2373 in / 1522 out tokens, 35.6s

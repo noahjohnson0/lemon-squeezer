@@ -1,8 +1,0 @@
-Q1: I don't know — the available references don't contain this.
-Q2: I don't know — the available references don't contain this.
-Q3: The GeForce RTX 4070 features 5888 CUDA cores (context::rtx_4070.md).
-Q4: The launch MSRP was $599 USD (context::rtx_4070.md).
-Q5: The M4 Max can contain up to 16 CPU cores (12 performance + 4 efficiency) (context::m4_max.md).
-Q6: The M4 Max supports up to 128 GB of unified memory (context::m4_max.md).
-Q7: I don't know — the available references don't contain this.
-Q8: I don't know — the available references don't contain this.

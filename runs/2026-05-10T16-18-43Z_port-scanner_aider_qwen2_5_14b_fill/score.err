@@ -1,5 +1,0 @@
-open_state open
-closed_state filtered
-filtered_state filtered
-bulk_count 200
-bulk_unique_states ['filtered']

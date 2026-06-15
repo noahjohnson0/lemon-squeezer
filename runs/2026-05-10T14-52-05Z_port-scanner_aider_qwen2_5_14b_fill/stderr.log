@@ -1,2 +1,0 @@
-Warning: Input is not a terminal (fd=0).
-/Users/noahjohnson0/repos/lemon-squeezer/bin/harnesses/aider.sh: line 4: 79776 Killed: 9               "$HOME/.local/bin/aider" --model "$aider_model" --no-auto-commits --no-show-model-warnings --no-stream --no-pretty --no-analytics --yes-always --message-file "$prompt_file" "$@"

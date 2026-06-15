@@ -1,5 +1,0 @@
-ny_summer_solstice 0 ERR TypeError('cannot unpack non-iterable NoneType object')
-london_winter_solstice 0 ERR TypeError('cannot unpack non-iterable NoneType object')
-equator_equinox 0 ERR TypeError('cannot unpack non-iterable NoneType object')
-sydney_winter_solstice 0 ERR TypeError('cannot unpack non-iterable NoneType object')
-anchorage_summer_noon 0 ERR TypeError('cannot unpack non-iterable NoneType object')

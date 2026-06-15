@@ -1,9 +1,0 @@
-DEBUG: c1_drops=1
-c1_wait=1
-c2_drops=1
-c3_drops=1
-c4_drops=1
-safe_neg_vol=1
-safe_bad_clarity=1
-safe_high_conc=1
-round_up=1

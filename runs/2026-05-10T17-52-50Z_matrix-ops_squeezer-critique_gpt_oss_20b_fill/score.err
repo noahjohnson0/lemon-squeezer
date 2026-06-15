@@ -1,9 +1,0 @@
-det_2x2 1 -2.0
-det_3x3 1
-det_id 1
-det_zero 1
-inv_2x2 1 [[0.6000000000000001, -0.7000000000000001], [-0.2, 0.4]]
-inv_id 1
-inv_singular 1
-matmul 1
-inv_round_trip 1

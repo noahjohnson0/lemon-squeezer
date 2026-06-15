@@ -1,8 +1,0 @@
-g1_dist 1 4
-g1_path 1 ['A', 'B', 'C', 'D']
-self 1 0.0 ['A']
-nopath 1 inf []
-tie_dist 1 2
-tie_path_valid 1 ['A', 'B', 'D']
-big_dist 1 6
-big_path 1 ['a', 'b', 'c', 'd', 'e']
