@@ -160,12 +160,17 @@ def main() -> int:
     ws = run_dir / "workspace"
     ws.mkdir(parents=True, exist_ok=True)
 
-    # Optional starter files / setup, same as eval-run.
+    # Optional starter files / setup, same as eval-run. Copy RECURSIVELY so evals
+    # with nested starter packages (files/pkg/*.py) populate correctly — not just
+    # top-level files.
     files_dir = eval_dir / "files"
     if files_dir.is_dir():
         for f in files_dir.iterdir():
-            if f.is_file():
-                shutil.copy(f, ws / f.name)
+            dst = ws / f.name
+            if f.is_dir():
+                shutil.copytree(f, dst, dirs_exist_ok=True)
+            elif f.is_file():
+                shutil.copy(f, dst)
     # Eval scripts run with cwd=ROOT and get the workspace as a ROOT-relative
     # POSIX path — drive-letter paths (C:/...) don't resolve in MSYS bash tests.
     ws_arg = ws.relative_to(ROOT)

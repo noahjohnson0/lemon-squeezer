@@ -91,6 +91,8 @@
     "password-strength", "regression-ci", "julian-day", "solar-position",
     "kepler-orbit", "projectile-sim", "robot-arm-ik", "dc-circuit", "drone-pid",
     "epidemiology-sir", "chem-balance", "crypto-caesar-break", "crypto-vigenere",
-    "sql-injection-fix", "nav-dead-reckoning"
+    "sql-injection-fix", "nav-dead-reckoning",
+    "repo-bugfix-ledger", "feature-add-todo-cli", "multifile-refactor-validators",
+    "state-machine-engine"
   ]
 }
