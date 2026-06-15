@@ -38,7 +38,8 @@ def load_arms(path: Path):
     arms = []
     for s in spec.get("singles", []):
         arms.append({"kind": "single", "label": s["label"], "model": s["model"],
-                     "harness": s.get("harness", "squeezer-cloud")})
+                     "harness": s.get("harness", "squeezer-cloud"),
+                     "agent": s.get("agent", "squeezer")})
     for m in spec.get("mixes", []):
         arms.append({"kind": "mix", "label": m["label"], "harness": m["harness"],
                      "pipeline": m["pipeline"], "primary_model": m["primary_model"],
@@ -74,6 +75,8 @@ def build_cmd(cell, eval_name, tag, base_url):
            "--label", arm["label"], "--harness", arm["harness"]]
     if arm["kind"] == "single":
         cmd.insert(3, arm["model"])  # positional model right after eval_name
+        if arm.get("agent") and arm["agent"] != "squeezer":
+            cmd += ["--agent", arm["agent"]]
     else:
         cmd += ["--pipeline", arm["pipeline"], "--primary-model", arm["primary_model"],
                 "--rounds", str(arm["rounds"])]
