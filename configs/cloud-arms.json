@@ -15,7 +15,19 @@
     {"label": "glm-5.1",            "model": "z-ai/glm-5.1",                       "price": "0.98/3.08"},
     {"label": "qwen3-coder-plus",   "model": "qwen/qwen3-coder-plus",              "price": "0.65/3.25"},
     {"label": "minimax-m3",         "model": "minimax/minimax-m3",                 "price": "0.30/1.20"},
-    {"label": "deepseek-r1",        "model": "deepseek/deepseek-r1",               "price": "0.70/2.5"}
+    {"label": "deepseek-r1",        "model": "deepseek/deepseek-r1",               "price": "0.70/2.5"},
+    {"label": "llama-3.1-8b",       "model": "meta-llama/llama-3.1-8b-instruct",   "price": "0.02/0.03"},
+    {"label": "llama-3.3-70b",      "model": "meta-llama/llama-3.3-70b-instruct",  "price": "0.10/0.32"},
+    {"label": "mistral-small-3.2",  "model": "mistralai/mistral-small-3.2-24b-instruct", "price": "0.075/0.20"},
+    {"label": "codestral-2508",     "model": "mistralai/codestral-2508",           "price": "0.30/0.90"},
+    {"label": "devstral-2512",      "model": "mistralai/devstral-2512",            "price": "0.40/2.0"},
+    {"label": "qwen3-14b",          "model": "qwen/qwen3-14b",                     "price": "0.10/0.24"},
+    {"label": "qwen3-32b",          "model": "qwen/qwen3-32b",                     "price": "0.08/0.28"},
+    {"label": "qwen3-235b-2507",    "model": "qwen/qwen3-235b-a22b-2507",          "price": "0.09/0.10"},
+    {"label": "glm-4.6",            "model": "z-ai/glm-4.6",                       "price": "0.43/1.74"},
+    {"label": "kimi-k2-thinking",   "model": "moonshotai/kimi-k2-thinking",        "price": "0.60/2.5"},
+    {"label": "deepseek-v3.2",      "model": "deepseek/deepseek-v3.2",             "price": "0.229/0.343"},
+    {"label": "nemotron-3-120b",    "model": "nvidia/nemotron-3-super-120b-a12b",  "price": "0.09/0.45"}
   ],
 
   "mixes": [
@@ -51,7 +63,24 @@
 
     {"label": "arch:flash<-pro",    "harness": "cloud-architect", "pipeline": "architect",
      "primary_model": "deepseek/deepseek-v4-flash", "architect_model": "deepseek/deepseek-v4-pro",
-     "_note": "does planning help an already-strong cheap executor?"}
+     "_note": "does planning help an already-strong cheap executor?"},
+
+    {"label": "verify:120b",        "harness": "cloud-verify",    "pipeline": "verify",
+     "primary_model": "openai/gpt-oss-120b",
+     "_note": "self-verification on the value-champion single"},
+
+    {"label": "ens:3mid<-glm5.1",   "harness": "cloud-ensemble",  "pipeline": "ensemble",
+     "primary_model": "qwen/qwen3-coder,z-ai/glm-4.7,moonshotai/kimi-k2.7-code",
+     "judge_model": "z-ai/glm-5.1",
+     "_note": "ensemble of 3 strong mids, frontier judge"},
+
+    {"label": "arch:llama8b<-pro",  "harness": "cloud-architect", "pipeline": "architect",
+     "primary_model": "meta-llama/llama-3.1-8b-instruct", "architect_model": "deepseek/deepseek-v4-pro",
+     "_note": "rescue test: can a frontier plan save the weakest executor?"},
+
+    {"label": "crit:llama8b<-pro",  "harness": "cloud-critique",  "pipeline": "critique",
+     "primary_model": "meta-llama/llama-3.1-8b-instruct", "critic_model": "deepseek/deepseek-v4-pro", "rounds": 1,
+     "_note": "rescue test: critique loop on the weakest model"}
   ],
 
   "suite": [
