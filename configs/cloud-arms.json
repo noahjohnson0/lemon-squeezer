@@ -12,7 +12,10 @@
     {"label": "deepseek-v4-pro",    "model": "deepseek/deepseek-v4-pro",           "price": "0.435/0.87"},
     {"label": "kimi-k2.7-code",     "model": "moonshotai/kimi-k2.7-code",          "price": "0.75/3.5"},
     {"label": "qwen3-max",          "model": "qwen/qwen3-max",                     "price": "0.78/3.9"},
-    {"label": "glm-5.1",            "model": "z-ai/glm-5.1",                       "price": "0.98/3.08"}
+    {"label": "glm-5.1",            "model": "z-ai/glm-5.1",                       "price": "0.98/3.08"},
+    {"label": "qwen3-coder-plus",   "model": "qwen/qwen3-coder-plus",              "price": "0.65/3.25"},
+    {"label": "minimax-m3",         "model": "minimax/minimax-m3",                 "price": "0.30/1.20"},
+    {"label": "deepseek-r1",        "model": "deepseek/deepseek-r1",               "price": "0.70/2.5"}
   ],
 
   "mixes": [
@@ -40,12 +43,25 @@
      "_note": "single model writes code + property tests, self-corrects"},
 
     {"label": "verify:pro",         "harness": "cloud-verify",    "pipeline": "verify",
-     "primary_model": "deepseek/deepseek-v4-pro"}
+     "primary_model": "deepseek/deepseek-v4-pro"},
+
+    {"label": "crit:30b<-pro-r2",   "harness": "cloud-critique",  "pipeline": "critique",
+     "primary_model": "qwen/qwen3-coder-30b-a3b-instruct", "critic_model": "deepseek/deepseek-v4-pro", "rounds": 2,
+     "_note": "two critique->refine rounds — does a second pass keep helping?"},
+
+    {"label": "arch:flash<-pro",    "harness": "cloud-architect", "pipeline": "architect",
+     "primary_model": "deepseek/deepseek-v4-flash", "architect_model": "deepseek/deepseek-v4-pro",
+     "_note": "does planning help an already-strong cheap executor?"}
   ],
 
   "suite": [
     "great-circle", "dijkstra", "knapsack", "huffman", "levenshtein", "lru-cache",
     "regex-engine", "matrix-ops", "crc-checksum", "hamming-code", "json-schema",
-    "rate-limiter", "bug-fix", "base64-codec", "fft-spectrum", "kalman-filter"
+    "rate-limiter", "bug-fix", "base64-codec", "fft-spectrum", "kalman-filter",
+    "bloom-filter", "boolean-sat", "sudoku", "port-scanner", "unit-convert",
+    "password-strength", "regression-ci", "julian-day", "solar-position",
+    "kepler-orbit", "projectile-sim", "robot-arm-ik", "dc-circuit", "drone-pid",
+    "epidemiology-sir", "chem-balance", "crypto-caesar-break", "crypto-vigenere",
+    "sql-injection-fix", "nav-dead-reckoning"
   ]
 }
