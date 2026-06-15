@@ -34,7 +34,7 @@ Same agent, same tasks, same scoring across all three, so model-vs-model, harnes
 
 These are real but **early**, and we are deliberate about not overclaiming (see *Honesty* below).
 
-- **The harness can matter as much as the model.** Same `qwen3:14b` on `bug-fix`: 27% through one harness, 100% through another (whole-file rewrites dodge the failure mode that breaks exact-match editing on small models). A weak model with the right harness can beat a strong model with the wrong one.
+- **The harness can matter more than the model.** A controlled cloud bake-off (same model, same evals, only the harness changes) shows aider beating our `squeezer` loop on every model, and the gap explodes on weak ones: `llama-3.1-8b` goes from **23% (squeezer) to 77% (aider)** on identical weights, `qwen3-coder-30b` from 73% to 98%. Strong models barely care (deepseek-v4-flash 97% vs 100%); weak models are rescued by the right harness. See [FINDINGS-CLOUD.md](FINDINGS-CLOUD.md).
 - **For the cloud "which open model" question:** a cluster of cheap open models (deepseek-v4-flash, gpt-oss-120b, kimi, qwen3-max, glm-5.1) lands in the high-90s on our suite, and the cheapest of them, `gpt-oss-120b`, gets ~95% for about **$0.0005 per task**. Multi-model *mixes* mostly do not beat the best single model; they are a **weak-model rescue kit** (a critic loop pulls a 69% model up to ~94%). Full writeup: [FINDINGS-CLOUD.md](FINDINGS-CLOUD.md).
 - **Reasoning models underperform at agentic coding** here, and "coding-specialist" models did not beat strong generalists.
 
