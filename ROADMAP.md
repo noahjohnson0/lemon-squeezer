@@ -8,6 +8,17 @@ The current state of the repo has a credible *direction* but two structural crac
 
 ---
 
+## Product direction: the recommender (the front door)
+
+It is all about **open weights** you can own or rent cheaply. The dashboard's headline should be a recommender, not a raw table:
+
+- **Two competing tiles, both open models:** "Best on YOUR GPU" (the open model that fits your VRAM, its eval score, speed, watts) vs "Best open model in the cloud" (top open arm, its score, $/task). They compete on privacy vs cost vs quality; the visitor picks.
+- **VRAM-tiered, not one answer.** "What should I run" is a function of VRAM (8 / 12 / 16 / 24 / 48 GB), because quality is venue-independent (measured once in the cloud) and fit is a lookup (model size at quant). So we can publish a tier table backed by real agentic-coding scores, not vibes.
+- **Autodetect with override.** Read the GPU *name* via WebGL where the browser allows it, map to a VRAM tier, but default a dropdown the visitor controls (browsers do not expose VRAM).
+- **Methodology consequence:** do quality / harness / mix testing in the CLOUD (parallel, cheap, high-n); use the local GPU only to confirm a model runs/fits and to measure speed + watts per tier. Cloud is ~2x the marginal cost per run but ~27x faster than serial local, so it is the right place to test.
+
+---
+
 ## Now - fix the foundation (the numbers must be trustworthy before anything else ships)
 
 These four make the existing data honest. Do not build the recommender, write blog posts, or add 20 evals on top of an estimator nobody can defend.
