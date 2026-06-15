@@ -68,11 +68,17 @@ def existing_counts():
     return counts
 
 
+SAMPLE_TEMP = None  # set from --temperature in main(); pinned sampling for reproducibility
+SAMPLE_SEED = None
+
+
 def build_cmd(cell, eval_name, tag, base_url):
     arm = cell["arm"]
     cmd = [sys.executable, str(ROOT / "bin" / "cloud-run"), eval_name,
            "--no-append", "--tag", tag, "--base-url", base_url,
            "--label", arm["label"], "--harness", arm["harness"]]
+    if SAMPLE_TEMP is not None: cmd += ["--temperature", str(SAMPLE_TEMP)]
+    if SAMPLE_SEED is not None: cmd += ["--seed", str(SAMPLE_SEED)]
     if arm["kind"] == "single":
         cmd.insert(3, arm["model"])  # positional model right after eval_name
         if arm.get("agent") and arm["agent"] != "squeezer":
@@ -129,8 +135,12 @@ def main() -> int:
     ap.add_argument("--base-url", default="https://openrouter.ai/api/v1")
     ap.add_argument("--only", default=None, help="comma-separated eval subset")
     ap.add_argument("--arms-only", default=None, help="comma-separated arm-label subset")
+    ap.add_argument("--temperature", type=float, default=None, help="pin sampling temperature on every run")
+    ap.add_argument("--seed", type=int, default=None, help="pin sampling seed on every run")
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
+    global SAMPLE_TEMP, SAMPLE_SEED
+    SAMPLE_TEMP, SAMPLE_SEED = a.temperature, a.seed
 
     if not (os.environ.get("OPENROUTER_API_KEY") or os.environ.get("LEMON_API_KEY")):
         print("cloud-matrix: set OPENROUTER_API_KEY (or LEMON_API_KEY)", file=sys.stderr)

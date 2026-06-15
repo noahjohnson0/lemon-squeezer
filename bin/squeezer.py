@@ -145,9 +145,15 @@ def parse_text_tool_calls(content: str):
 
 
 # ───────────────────────── HTTP layer (no deps) ─────────────────────────
-def call_chat(base_url: str, model: str, messages, tools):
+def call_chat(base_url: str, model: str, messages, tools, temperature=None, seed=None):
     url = base_url.rstrip("/") + "/chat/completions"
-    body = json.dumps({"model": model, "messages": messages, "tools": tools, "stream": False}).encode()
+    payload = {"model": model, "messages": messages, "tools": tools, "stream": False}
+    # Pinned sampling for reproducibility (omitted when None = provider default).
+    if temperature is not None:
+        payload["temperature"] = temperature
+    if seed is not None:
+        payload["seed"] = seed
+    body = json.dumps(payload).encode()
     # Auth token: local Ollama ignores it ("ollama"); cloud OpenAI-compatible
     # endpoints (OpenRouter etc.) read it from $LEMON_API_KEY / $OPENROUTER_API_KEY.
     tok = os.environ.get("LEMON_API_KEY") or os.environ.get("OPENROUTER_API_KEY") or "ollama"
@@ -185,6 +191,9 @@ def main():
     p.add_argument("--base-url", default=(os.environ.get("OLLAMA_API_BASE") or "http://localhost:11434") + "/v1",
                    help="Override via $OLLAMA_API_BASE (e.g. http://192.168.x.x:11434 for a remote Ollama host)")
     p.add_argument("--max-iter", type=int, default=24)
+    p.add_argument("--temperature", type=float, default=None,
+                   help="pin sampling temperature for reproducibility (default: provider default)")
+    p.add_argument("--seed", type=int, default=None, help="pin sampling seed (provider permitting)")
     p.add_argument("--system", default=None,
                    help="Override the default system prompt with raw text or @path/to/file.md")
     args = p.parse_args()
@@ -217,7 +226,8 @@ def main():
 
     for it in range(args.max_iter):
         try:
-            resp = call_chat(args.base_url, args.model, messages, TOOLS_SCHEMA)
+            resp = call_chat(args.base_url, args.model, messages, TOOLS_SCHEMA,
+                             temperature=args.temperature, seed=args.seed)
         except urllib.error.HTTPError as e:
             transcript.append({"iter": it, "http_error": e.code, "body": e.read().decode("utf-8", "replace")[:400]})
             print(f"HTTP {e.code}", file=sys.stderr); break

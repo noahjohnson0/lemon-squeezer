@@ -57,19 +57,28 @@ def agg(rows):
     for a in arms.values():
         sc = a["scores"]
         mean = statistics.mean(sc) if sc else 0.0
+        # 95% CI on the mean (scores are continuous 0-100, so SEM-based, not Wilson),
+        # clamped to [0,100]. Sort by the lower bound so a lucky 1-run 100% can't top.
+        if len(sc) >= 2:
+            sem = statistics.stdev(sc) / (len(sc) ** 0.5)
+            half = 1.96 * sem
+        else:
+            half = 50.0  # n<2: huge uncertainty, parks it low
+        lo = max(0.0, mean - half)
+        hi = min(100.0, mean + half)
         out.append({
             "model": a["model"], "harness": a["harness"], "n": a["n"],
             "evals": len(a["evals"]),
             "mean_score": round(mean, 1),
+            "ci_lo": round(lo, 1), "ci_hi": round(hi, 1),
             "total_cost": round(a["cost"], 4),
             "mean_cost": round(a["cost"] / a["n"], 5) if a["n"] else 0,
             "mean_wall_s": round(statistics.mean(a["wall"]), 1) if a["wall"] else 0,
             "tokens_in": a["tin"], "tokens_out": a["tout"],
-            # value = mean score per cent spent per run; higher is better bang/buck
             "score_per_cent": round(mean / (100 * a["cost"] / a["n"]), 1) if a["cost"] else None,
             "parse_fails": a["fails"],
         })
-    out.sort(key=lambda x: (-x["mean_score"], x["mean_cost"]))
+    out.sort(key=lambda x: (-x["ci_lo"], x["mean_cost"]))
     return out
 
 
@@ -100,12 +109,15 @@ def main():
     total_cost = sum(r.get("cost_usd", 0) or 0 for r in rows)
     print(f"# {len(rows)} openrouter runs" + (f" (tag={a.tag})" if a.tag else "") +
           f", {len({r['eval'] for r in rows})} evals, ${total_cost:.4f} spent total\n")
-    print(f"{'ARM':26} {'harness':16} {'n':>3} {'mean%':>6} {'$/run':>8} {'$/$':>6} {'wall':>6}")
-    print("-" * 78)
+    print("ranked by lower bound of the 95% CI (n<3 flagged *; n<2 parked low)\n")
+    print(f"{'ARM':24} {'harness':15} {'n':>3} {'mean%':>6} {'95% CI':>13} {'$/run':>8} {'$/$':>5} {'wall':>5}")
+    print("-" * 88)
     for r in board:
         spc = "" if r["score_per_cent"] is None else f"{r['score_per_cent']:.0f}"
-        print(f"{(r['model'] or '?')[:26]:26} {(r['harness'] or '')[:16]:16} {r['n']:>3} "
-              f"{r['mean_score']:>6.1f} {r['mean_cost']:>8.5f} {spc:>6} {r['mean_wall_s']:>5.0f}s")
+        flag = "*" if r["n"] < 3 else " "
+        ci = f"[{r['ci_lo']:.0f}-{r['ci_hi']:.0f}]"
+        print(f"{(r['model'] or '?')[:24]:24} {(r['harness'] or '')[:15]:15} {r['n']:>2}{flag} "
+              f"{r['mean_score']:>6.1f} {ci:>13} {r['mean_cost']:>8.5f} {spc:>5} {r['mean_wall_s']:>4.0f}s")
 
     if a.by_eval:
         evals, arms, cell = by_eval(rows)

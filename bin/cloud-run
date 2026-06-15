@@ -102,6 +102,8 @@ def main() -> int:
                     help="value written to meta 'model' + the run_id (a human-readable arm name). "
                          "Defaults to the slug (single) or a derived combo (pipeline).")
     ap.add_argument("--max-iter", type=int, default=20)
+    ap.add_argument("--temperature", type=float, default=None, help="pin sampling temperature (reproducibility)")
+    ap.add_argument("--seed", type=int, default=None, help="pin sampling seed")
     ap.add_argument("--agent", choices=["squeezer", "aider"], default="squeezer",
                     help="which single-model harness to drive (for the harness bake-off). "
                          "aider uses its own edit format, so it also drives non-tool-calling models.")
@@ -225,6 +227,8 @@ def main() -> int:
                "--prompt-file", str(eval_dir / "prompt.md"),
                "--workspace", str(ws), "--run-dir", str(run_dir),
                "--base-url", a.base_url, "--max-iter", str(a.max_iter)]
+        if a.temperature is not None: cmd += ["--temperature", str(a.temperature)]
+        if a.seed is not None:        cmd += ["--seed", str(a.seed)]
     started = time.time()
     with (run_dir / "stdout.log").open("w", encoding="utf-8") as out:
         rc = subprocess.run(cmd, stdout=out, stderr=subprocess.STDOUT, env=env,
@@ -265,6 +269,9 @@ def main() -> int:
         "score_pct": score if score is not None else "?",
         "cost_usd": round(read_num(run_dir / "cost", float, 0.0), 6),
     }
+    if a.temperature is not None: meta["temperature"] = a.temperature
+    if a.seed is not None:        meta["seed"] = a.seed
+    if a.agent != "squeezer":     meta["agent"] = a.agent
     if a.pipeline:
         meta["mix"] = {"pipeline": a.pipeline, "primary": primary,
                        "critic": a.critic_model, "judge": a.judge_model,
