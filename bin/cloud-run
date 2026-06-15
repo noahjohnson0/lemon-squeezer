@@ -151,7 +151,10 @@ def main() -> int:
         print(run_id)
         return 0
 
-    key = os.environ.get("LEMON_API_KEY") or os.environ.get("OPENROUTER_API_KEY")
+    # Local endpoints (Ollama etc.) need no key; cloud (OpenRouter) does.
+    is_local = "openrouter.ai" not in a.base_url
+    key = (os.environ.get("LEMON_API_KEY") or os.environ.get("OPENROUTER_API_KEY")
+           or ("ollama" if is_local else None))
     if not key:
         print("cloud-run: set OPENROUTER_API_KEY (or LEMON_API_KEY)", file=sys.stderr)
         return 3

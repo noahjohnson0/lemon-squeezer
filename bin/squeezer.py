@@ -13,7 +13,7 @@ Loops until the model emits no tool_calls or until --max-iter is reached.
 We exist to A/B against pi and aider with a clean, no-magic baseline.
 """
 from __future__ import annotations
-import argparse, json, os, subprocess, sys, time, urllib.request, urllib.error
+import argparse, json, os, re, subprocess, sys, time, urllib.request, urllib.error
 from pathlib import Path
 
 
@@ -109,6 +109,41 @@ SYSTEM_PROMPT = """You are a coding agent. You operate on a project workspace vi
 A successful tool result is NOT a stopping condition. After every tool result, decide the next step toward fully satisfying the user's request. Only stop when every requirement is addressed. When you stop, emit a final assistant message summarizing what you did."""
 
 
+# ─────────────── text tool-call fallback (for local models) ───────────────
+def parse_text_tool_calls(content: str):
+    """Some models (esp. local ones via Ollama — qwen2.5-coder, etc.) emit tool
+    calls as JSON *text* in the content instead of the native `tool_calls` field.
+    Best-effort recover them so those models can still act as agents. Returns a
+    list shaped like OpenAI tool_calls, or [] if none found. Native tool_calls
+    always take precedence (this only runs when there are none)."""
+    if not content:
+        return []
+    # Prefer fenced ```json ... ``` blocks; fall back to any balanced-looking object.
+    blobs = re.findall(r"```(?:json|tool_call)?\s*(\{.*?\})\s*```", content, re.S)
+    if not blobs:
+        blobs = re.findall(r"(\{(?:[^{}]|\{[^{}]*\})*\})", content, re.S)
+    calls = []
+    for blob in blobs:
+        try:
+            obj = json.loads(blob)
+        except Exception:
+            continue
+        if not isinstance(obj, dict):
+            continue
+        name = obj.get("name") or obj.get("tool") or (obj.get("function") or {}).get("name")
+        args = obj.get("arguments")
+        if args is None:
+            args = obj.get("parameters")
+        if args is None and isinstance(obj.get("function"), dict):
+            args = obj["function"].get("arguments")
+        if not name or args is None:
+            continue
+        calls.append({"id": f"text-{len(calls)}", "type": "function",
+                      "function": {"name": name,
+                                   "arguments": args if isinstance(args, str) else json.dumps(args)}})
+    return calls
+
+
 # ───────────────────────── HTTP layer (no deps) ─────────────────────────
 def call_chat(base_url: str, model: str, messages, tools):
     url = base_url.rstrip("/") + "/chat/completions"
@@ -199,6 +234,12 @@ def main():
         msg = choice.get("message") or {}
         content    = msg.get("content") or ""
         tool_calls = msg.get("tool_calls") or []
+        # Fallback: recover text-formatted tool calls from models that don't use
+        # the native tool_calls field (common with local Ollama models).
+        if not tool_calls and content:
+            recovered = parse_text_tool_calls(content)
+            if recovered:
+                tool_calls = recovered
 
         # Echo to stdout for the harness shim's stdout.log
         if content:
