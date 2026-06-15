@@ -45,10 +45,6 @@ class Account:
 
     def balance(self):
         """Balance in the account's natural (normal-balance) sign."""
-        # BUG 1 (wrong sign): debit-normal accounts should be debits - credits,
-        # credit-normal should be credits - debits. This returns debits - credits
-        # for *every* account type, so liability/equity/revenue balances come out
-        # with the wrong sign.
         return self._debits - self._credits
 
     def __repr__(self):

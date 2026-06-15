@@ -1,0 +1,216 @@
+#!/usr/bin/env python3
+"""cloud-rescore - re-run eval rubrics against each run's SAVED workspace and
+update its score, in place.
+
+Why: when a rubric is fixed (e.g. the denominator-collapse hardening that stopped
+import-broken stubs from scoring 100%), every past run scored by the old rubric is
+now wrong. The produced code is preserved in runs/<id>/workspace, so we can simply
+re-score it with the current rubric - no need to re-run the (paid) model.
+
+    bin/cloud-rescore --only matrix-ops,dijkstra      # dry run, just these evals
+    bin/cloud-rescore --evals-with-pattern            # dry run, all hardened evals
+    bin/cloud-rescore --only matrix-ops --apply       # write the new scores
+    bin/cloud-rescore --all --apply --concurrency 8   # re-score everything
+
+Updates, on --apply: runs/<id>/score.json, runs/<id>/meta.json, and the matching
+row in runs.jsonl. Non-targeted rows are left byte-for-byte alone. Runs whose
+workspace is missing are skipped (reported).
+"""
+from __future__ import annotations
+import argparse, json, os, re, subprocess, sys, time
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+RUNS = ROOT / "runs.jsonl"
+
+
+def posix(p):
+    return str(p).replace("\\", "/")
+
+
+def run_rubric(eval_name, ws_rel):
+    """Run evals/<eval>/rubric.sh against ws (ROOT-relative posix path), the exact
+    way cloud-run does: bash -s on stdin, CRLF stripped, cwd=ROOT.
+
+    Retries when the output carries no score_pct: under heavy concurrency a bash/
+    python spawn can transiently fail and return empty, which must NOT be recorded
+    as a real failure. A genuine empty workspace still produces valid JSON (score 0),
+    so a missing score_pct means the invocation itself flaked - retry it."""
+    rub = ROOT / "evals" / eval_name / "rubric.sh"
+    if not rub.exists():
+        return None
+    src = rub.read_text(encoding="utf-8", errors="replace").replace("\r\n", "\n").replace("\r", "\n")
+    for attempt in range(3):
+        r = subprocess.run(["bash", "-s", posix(ws_rel)], input=src.encode("utf-8"),
+                           capture_output=True, cwd=str(ROOT))
+        out = r.stdout.decode("utf-8", "replace")
+        if re.search(r'"score_pct"\s*:\s*"?-?\d+', out):
+            return out
+        time.sleep(0.5 * (attempt + 1))  # back off and retry the flaked spawn
+    return out
+
+
+def parse(text):
+    m = re.search(r"\{[\s\S]+\}\s*$", text or "")
+    if not m:
+        return None
+    blob = m.group(0)
+    try:
+        return json.loads(blob)
+    except Exception:
+        cleaned = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f]", "", blob).replace("\\", "")
+        try:
+            return json.loads(cleaned)
+        except Exception:
+            return None
+
+
+def score_only(text):
+    """Last-resort: pull the integer score_pct directly. The rubric computes
+    gained/total/score_pct as plain integers, so this survives even when a note
+    with a stray quote/backslash corrupts the checks array and breaks full JSON."""
+    if not text:
+        return None
+    hits = re.findall(r'"score_pct"\s*:\s*"?(-?\d+)"?', text)
+    return int(hits[-1]) if hits else None
+
+
+def hardened_evals():
+    """Evals whose rubric uses the import-guarded check pattern (the ones we fix).
+    Detect by any of the hardening markers, since the rewrite may drop the old
+    'while IFS= read' / 'IMPORT_ERR' phrasing."""
+    out = []
+    marker = re.compile(r"IMPORT_ERR|imports_and_runs|def chk|BEHAV|\"imports\"")
+    for d in sorted((ROOT / "evals").iterdir()):
+        rp = d / "rubric.sh"
+        if rp.is_file() and marker.search(rp.read_text(encoding="utf-8", errors="replace")):
+            out.append(d.name)
+    return out
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    g = ap.add_mutually_exclusive_group()
+    g.add_argument("--only", default=None, help="comma-separated eval subset")
+    g.add_argument("--all", action="store_true", help="re-score every run")
+    g.add_argument("--evals-with-pattern", action="store_true",
+                   help="re-score runs of evals using the import-guarded rubric pattern (default)")
+    ap.add_argument("--apply", action="store_true")
+    ap.add_argument("--concurrency", type=int, default=8)
+    ap.add_argument("--only-unscored", action="store_true",
+                    help="only re-score rows whose current score_pct is non-numeric ('?')")
+    a = ap.parse_args()
+
+    rows = [json.loads(l) for l in RUNS.read_text(encoding="utf-8", errors="replace").splitlines() if l.strip()]
+
+    if a.only:
+        targets = {s.strip() for s in a.only.split(",")}
+    elif a.all:
+        targets = {r.get("eval") for r in rows}
+    else:
+        targets = set(hardened_evals())
+    print(f"target evals ({len(targets)}): {','.join(sorted(targets))}"
+          + (" | only unscored ('?') rows" if a.only_unscored else "") + "\n")
+
+    todo = []
+    skipped_no_ws = 0
+    for i, r in enumerate(rows):
+        if r.get("eval") not in targets:
+            continue
+        if a.only_unscored and isinstance(r.get("score_pct"), (int, float)):
+            continue
+        ws = ROOT / "runs" / r["run_id"] / "workspace"
+        if not ws.is_dir():
+            skipped_no_ws += 1
+            continue
+        todo.append((i, r))
+
+    print(f"runs to re-score: {len(todo)} (skipped {skipped_no_ws} missing workspace)")
+    if not todo:
+        return 0
+
+    def work(item):
+        i, r = item
+        ws_rel = Path("runs") / r["run_id"] / "workspace"
+        out = run_rubric(r["eval"], ws_rel)
+        d = parse(out)
+        # full parse gives checks+score; if notes corrupted the JSON, still recover
+        # the integer score directly so a real run never silently keeps a stale value.
+        new = d.get("score_pct") if d else score_only(out)
+        return i, r, d, new
+
+    results = []
+    with ThreadPoolExecutor(max_workers=a.concurrency) as ex:
+        for n, res in enumerate(ex.map(work, todo), 1):
+            results.append(res)
+            if n % 200 == 0:
+                print(f"  ...{n}/{len(todo)}")
+
+    # tally changes
+    def num(x):
+        return float(x) if isinstance(x, (int, float)) else None
+    changed = up = down = same = newfail = fixed = 0
+    deltas = []
+    for i, r, d, new in results:
+        old = num(r.get("score_pct"))
+        nw = num(new)
+        if old is None and nw is not None:
+            fixed += 1
+        if nw is None and old is not None:
+            newfail += 1
+        if old is not None and nw is not None:
+            dd = nw - old
+            deltas.append(dd)
+            if dd > 0.5: up += 1
+            elif dd < -0.5: down += 1
+            else: same += 1
+            if abs(dd) > 0.5: changed += 1
+
+    print(f"\nscored changes: {changed} changed ({down} down, {up} up, {same} same), "
+          f"{fixed} '?'->scored, {newfail} scored->'?'")
+    if deltas:
+        import statistics
+        drops = [x for x in deltas if x < -0.5]
+        print(f"mean delta = {statistics.mean(deltas):+.1f} pts | "
+              f"runs that dropped: {len(drops)} (mean drop {statistics.mean(drops):.1f} pts)" if drops else
+              f"mean delta = {statistics.mean(deltas):+.1f} pts | no drops")
+
+    if not a.apply:
+        # show the biggest drops as a sanity check
+        worst = sorted([(num(r.get('score_pct')), num(new), r) for i,r,d,new in results
+                        if num(r.get('score_pct')) is not None and num(new) is not None],
+                       key=lambda t: (t[1]-t[0]))[:12]
+        print("\nbiggest drops (old -> new):")
+        for old, nw, r in worst:
+            print(f"  {old:5.0f} -> {nw:5.0f}  {r['eval']:22} {r.get('model','?')[:22]}")
+        print("\n(dry run - pass --apply to write score.json/meta.json/runs.jsonl)")
+        return 0
+
+    # write: score.json (only when the full breakdown parsed) + meta.json + row.
+    # `new` is the recovered score (full parse OR regex fallback); a run only gets
+    # "?" when even the integer score couldn't be recovered (truly no output).
+    wrote_breakdown = 0
+    for i, r, d, new in results:
+        rid = r["run_id"]
+        if d is not None:
+            (ROOT / "runs" / rid / "score.json").write_text(json.dumps(d, indent=2), encoding="utf-8")
+            wrote_breakdown += 1
+        rows[i]["score_pct"] = new if new is not None else "?"
+        mp = ROOT / "runs" / rid / "meta.json"
+        if mp.exists():
+            try:
+                m = json.loads(mp.read_text(encoding="utf-8"))
+                m["score_pct"] = rows[i]["score_pct"]
+                mp.write_text(json.dumps(m, indent=2), encoding="utf-8")
+            except Exception:
+                pass
+    with RUNS.open("w", encoding="utf-8", newline="\n") as f:
+        for r in rows:
+            f.write(json.dumps(r) + "\n")
+    print(f"\napplied: {len(results)} runs re-scored, {wrote_breakdown} full breakdowns -> runs.jsonl")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

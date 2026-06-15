@@ -29,7 +29,4 @@ def top_accounts(ledger, n):
     descending. Ties are broken by name (ascending)."""
     items = [(name, acct.balance()) for name, acct in ledger.accounts.items()]
     items.sort(key=lambda kv: (-abs(kv[1]), kv[0]))
-    # BUG 3 (off-by-one): this returns n-1 rows instead of n, because the
-    # slice upper bound is `n - 1`. top_accounts(ledger, 3) should return 3
-    # accounts but returns only 2.
     return items[: n - 1]

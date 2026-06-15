@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 # Read all runs, write CSV + Markdown tables + a per-eval/per-model leaderboard.
 set -euo pipefail
-ROOT="$HOME/repos/lemon-squeezer"
+# Derive ROOT from this script's location (bin/..) so it works on every machine.
+# (Was hardcoded to $HOME/repos/lemon-squeezer, which is wrong on the Windows box
+# where the repo lives at $HOME/lemon-squeezer - eval-export silently no-op'd there.)
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # Always rebuild runs.jsonl from per-run meta.json (source of truth)
 : > "$ROOT/runs.jsonl"

@@ -5,54 +5,109 @@ declare -a checks
 add() {
   local n="$1" p="$2" w="$3" note="${4:-}"
   [[ "$p" != "1" ]] && p=0
+  # sanitize note: strip backslashes, replace double-quotes with single,
+  # collapse tabs/newlines so the JSON below never breaks.
+  note="${note//\\/}"
+  note="${note//\"/\'}"
+  note="${note//$'\t'/ }"
+  note="${note//$'\n'/ }"
   checks+=("$(printf '%s\t%s\t%s\t%s' "$n" "$p" "$w" "$note")")
 }
+
 T="$WS/dijkstra.py"
-add "file:dijkstra.py" "$([[ -f "$T" ]] && echo 1 || echo 0)" 5
-if [[ -f "$T" ]]; then
-  python3 -m py_compile "$T" 2>/dev/null && add "compiles" 1 5 || add "compiles" 0 5
-  RES=$(cd "$WS" && gtimeout 10 python3 - <<'PY' 2>&1
+
+# --- static checks (always emitted) ---------------------------------------
+have_file=0; [[ -f "$T" ]] && have_file=1
+add "file:dijkstra.py" "$have_file" 5
+
+compiles=0
+if [[ "$have_file" == "1" ]]; then
+  python3 -m py_compile "$T" 2>/dev/null && compiles=1
+fi
+add "compiles" "$compiles" 5
+
+# heapq usage (cheap static signal, never aborts)
+heapq=0
+[[ "$have_file" == "1" ]] && grep -q 'heapq' "$T" 2>/dev/null && heapq=1
+add "uses_heapq" "$heapq" 4
+
+# --- behavioral checks ----------------------------------------------------
+# The python block ALWAYS prints exactly one "name pass [note]" line per
+# declared check via chk(). On import error (or any per-case exception) the
+# corresponding check prints pass=0 instead of vanishing, so the set of
+# emitted check names - and therefore the denominator - is CONSTANT.
+declare -a BEHAV=(imports g1_dist g1_path self nopath tie_dist tie_path_valid big_dist big_path)
+declare -A SCORE
+for n in "${BEHAV[@]}"; do SCORE["$n"]=0; done
+declare -A NOTE
+for n in "${BEHAV[@]}"; do NOTE["$n"]=""; done
+
+RES=""
+if [[ "$have_file" == "1" ]]; then
+  RES=$(cd "$WS" && gtimeout 10 python3 - <<'PY' 2>/dev/null
 import sys
-try: from dijkstra import shortest_path
-except Exception as e: print("IMPORT_ERR", e); sys.exit(1)
-# Graph 1: classic
+
+ok = True
+try:
+    from dijkstra import shortest_path
+except Exception as e:
+    print("IMPORT_ERR", repr(e), file=sys.stderr)
+    ok = False
+
+def chk(name, fn):
+    if not ok:
+        print(name, 0, "import_failed")
+        return
+    try:
+        print(name, 1 if fn() else 0)
+    except Exception as ex:
+        print(name, 0, repr(ex)[:60])
+
+# importable at all?
+print("imports", 1 if ok else 0)
+
+# Graph 1: classic - A->B->C->D = 1+2+1 = 4 (vs A->C->D = 4+1 = 5)
 g1 = {"A":[("B",1),("C",4)], "B":[("C",2),("D",5)], "C":[("D",1)], "D":[]}
-# A->C: A->B->C = 3 (vs A->C = 4)
-d,p = shortest_path(g1, "A", "D")
-print("g1_dist", 1 if d == 4 else 0, d)
-print("g1_path", 1 if p == ["A","B","C","D"] else 0, p)
+chk("g1_dist",  lambda: shortest_path(g1, "A", "D")[0] == 4)
+chk("g1_path",  lambda: shortest_path(g1, "A", "D")[1] == ["A","B","C","D"])
 # Source == dest
-d,p = shortest_path(g1, "A", "A")
-print("self", 1 if d == 0 and p == ["A"] else 0, d, p)
+chk("self",     lambda: shortest_path(g1, "A", "A")[0] == 0 and shortest_path(g1, "A", "A")[1] == ["A"])
 # No path
 g2 = {"A":[("B",1)], "B":[], "C":[]}
-d,p = shortest_path(g2, "A", "C")
-print("nopath", 1 if d == float('inf') and p == [] else 0, d, p)
+chk("nopath",   lambda: shortest_path(g2, "A", "C") == (float('inf'), []))
 # Tie-breaker (any valid shortest path acceptable)
 g3 = {"A":[("B",1),("C",1)], "B":[("D",1)], "C":[("D",1)], "D":[]}
-d,p = shortest_path(g3, "A", "D")
-print("tie_dist", 1 if d == 2 else 0, d)
-print("tie_path_valid", 1 if p in (["A","B","D"], ["A","C","D"]) else 0, p)
-# Larger graph
+chk("tie_dist", lambda: shortest_path(g3, "A", "D")[0] == 2)
+chk("tie_path_valid", lambda: shortest_path(g3, "A", "D")[1] in (["A","B","D"], ["A","C","D"]))
+# Larger graph - a->b->c->d->e = 2+1+1+2 = 6
 g4 = {"a":[("b",2),("c",5)], "b":[("c",1),("d",4)], "c":[("d",1)], "d":[("e",2)], "e":[]}
-d,p = shortest_path(g4, "a", "e")
-# a->b->c->d->e = 2+1+1+2 = 6
-print("big_dist", 1 if d == 6 else 0, d)
-print("big_path", 1 if p == ["a","b","c","d","e"] else 0, p)
+chk("big_dist", lambda: shortest_path(g4, "a", "e")[0] == 6)
+chk("big_path", lambda: shortest_path(g4, "a", "e")[1] == ["a","b","c","d","e"])
 PY
 )
-  echo "$RES" >&2
-  while IFS= read -r line; do
-    [[ -z "$line" ]] && continue
-    name=$(echo "$line" | awk '{print $1}')
-    pass=$(echo "$line" | awk '{print $2}')
-    note=$(echo "$line" | cut -d' ' -f3-)
-    [[ "$name" == "IMPORT_ERR" ]] && continue
-    add "$name" "$pass" 8 "$note"
-  done < <(echo "$RES")
-else
-  for n in compiles g1_dist self nopath; do add "$n" 0 5; done
 fi
+echo "$RES" >&2
+
+# Parse whatever the python emitted; default-0 entries already seeded above.
+while IFS= read -r line; do
+  [[ -z "$line" ]] && continue
+  name=$(printf '%s' "$line" | awk '{print $1}')
+  pass=$(printf '%s' "$line" | awk '{print $2}')
+  note=$(printf '%s' "$line" | cut -d' ' -f3-)
+  [[ "$name" == "IMPORT_ERR" ]] && continue
+  if [[ -n "${SCORE[$name]+x}" ]]; then
+    SCORE["$name"]="$pass"
+    NOTE["$name"]="$note"
+  fi
+done < <(printf '%s\n' "$RES")
+
+# Emit every behavioral check at a fixed weight, ALWAYS.
+add "imports" "${SCORE[imports]}" 6 "${NOTE[imports]}"
+for n in g1_dist g1_path self nopath tie_dist tie_path_valid big_dist big_path; do
+  add "$n" "${SCORE[$n]}" 8 "${NOTE[$n]}"
+done
+
+# --- emit JSON (the ONLY thing on stdout) ---------------------------------
 total=0; gained=0
 {
   printf '{\n  "checks": [\n'

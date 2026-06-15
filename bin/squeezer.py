@@ -55,13 +55,21 @@ def make_tools(workspace: Path):
                 break
         return "\n".join(out) if out else "(empty)"
 
+    # Strip secrets from the shell the agent drives: it should never be able to
+    # `echo $OPENROUTER_API_KEY` (exfiltration) or otherwise see our credentials.
+    # NOTE: this does NOT stop a model from `cat ../../evals/<eval>/rubric.sh` to
+    # read the answer key - real isolation needs a container (see ROADMAP). This is
+    # the cheap, always-on half of the fix.
+    _SECRET_RE = re.compile(r"(KEY|TOKEN|SECRET|PASSWORD|OPENROUTER|ANTHROPIC|OPENAI|HF_|HUGGING)", re.I)
+    _safe_env = {k: v for k, v in os.environ.items() if not _SECRET_RE.search(k)}
+
     def run_bash(command: str, timeout: int = 15) -> str:
         try:
             r = subprocess.run(
                 ["bash", "-c", command],
                 cwd=str(workspace),
                 capture_output=True, text=True,
-                timeout=timeout,
+                timeout=timeout, env=_safe_env,
             )
             out = r.stdout[-4000:]
             err = r.stderr[-2000:]

@@ -49,7 +49,12 @@ def load_arms(path: Path):
 
 
 def existing_counts():
-    """(eval, model-label, harness) -> count of openrouter rows already in runs.jsonl."""
+    """(eval, model-label, harness, tag) -> count of openrouter rows already present.
+
+    The tag is PART of the key: a fresh --tag (e.g. a controlled bake-off) must run
+    its own paired cells, not silently skip them because a different experiment
+    (--tag fable-hunt) already happened to run the same model+harness. Leaving tag
+    out is what made the original bake-off uncontrolled (aider 154 vs squeezer 55)."""
     counts = {}
     if not RUNS_JSONL.exists():
         return counts
@@ -63,7 +68,7 @@ def existing_counts():
             continue
         if r.get("host") != "openrouter":
             continue
-        k = (r.get("eval"), r.get("model"), r.get("harness"))
+        k = (r.get("eval"), r.get("model"), r.get("harness"), r.get("tag"))
         counts[k] = counts.get(k, 0) + 1
     return counts
 
@@ -161,7 +166,7 @@ def main() -> int:
     cells = []
     for ev in suite:
         for arm in arms:
-            have = counts.get((ev, arm["label"], arm["harness"]), 0)
+            have = counts.get((ev, arm["label"], arm["harness"], a.tag), 0)
             for k in range(max(0, a.trials - have)):
                 cells.append({"round": have + k, "eval": ev, "arm": arm})
     cells.sort(key=lambda c: (c["round"], suite.index(c["eval"]), arm_pos[c["arm"]["label"]]))

@@ -1,0 +1,107 @@
+#!/usr/bin/env python3
+"""bakeoff-report - an HONEST harness comparison.
+
+The original bake-off was uncontrolled: the resume key ignored the tag, so the
+aider arm ran far more cells than the squeezer arm and the two sides were not
+paired. Comparing their raw means is meaningless.
+
+This tool only compares harnesses on the (eval, model) cells where BOTH harnesses
+actually ran - a paired comparison. For each such cell it takes each harness's
+mean over its trials, then reports:
+
+  * per-harness mean over the shared cells
+  * the mean paired delta (harnessA - harnessB) and how often each wins
+  * the per-model breakdown
+
+    bin/bakeoff-report --a aider-cloud --b squeezer-cloud [--tag bakeoff]
+
+With no --tag, every openrouter row is eligible (use this only if you trust that
+both harnesses ran under the same sampling conditions).
+"""
+from __future__ import annotations
+import argparse, json, statistics, sys
+from collections import defaultdict
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+
+
+def load(tag):
+    rows = []
+    for line in (ROOT / "runs.jsonl").read_text(encoding="utf-8", errors="replace").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            r = json.loads(line)
+        except Exception:
+            continue
+        if r.get("host") != "openrouter":
+            continue
+        if tag and r.get("tag") != tag:
+            continue
+        s = r.get("score_pct")
+        if not isinstance(s, (int, float)):
+            s = 0.0  # failures count as 0
+        r["_score"] = float(s)
+        rows.append(r)
+    return rows
+
+
+def cell_means(rows, harness):
+    """(eval, model) -> mean score for this harness."""
+    by = defaultdict(list)
+    for r in rows:
+        if r.get("harness") != harness:
+            continue
+        by[(r.get("eval"), r.get("model"))].append(r["_score"])
+    return {k: statistics.mean(v) for k, v in by.items()}
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--a", default="aider-cloud")
+    ap.add_argument("--b", default="squeezer-cloud")
+    ap.add_argument("--tag", default=None)
+    a = ap.parse_args()
+
+    rows = load(a.tag)
+    A = cell_means(rows, a.a)
+    B = cell_means(rows, a.b)
+    shared = sorted(set(A) & set(B))
+    if not shared:
+        print(f"no shared (eval, model) cells between {a.a} and {a.b}"
+              + (f" for tag={a.tag}" if a.tag else ""), file=sys.stderr)
+        return 1
+
+    deltas = [A[k] - B[k] for k in shared]
+    a_mean = statistics.mean(A[k] for k in shared)
+    b_mean = statistics.mean(B[k] for k in shared)
+    a_wins = sum(1 for d in deltas if d > 0.5)
+    b_wins = sum(1 for d in deltas if d < -0.5)
+    ties = len(deltas) - a_wins - b_wins
+
+    print(f"# PAIRED harness bake-off: {a.a} vs {a.b}"
+          + (f" (tag={a.tag})" if a.tag else "") )
+    print(f"# {len(shared)} shared (eval, model) cells - the only fair comparison\n")
+    print(f"  {a.a:16} mean over shared cells: {a_mean:.1f}%")
+    print(f"  {a.b:16} mean over shared cells: {b_mean:.1f}%")
+    print(f"  mean paired delta ({a.a} - {a.b}): {statistics.mean(deltas):+.1f} pts")
+    print(f"  wins: {a.a} {a_wins} | {a.b} {b_wins} | ties {ties}\n")
+
+    # per-model
+    by_model = defaultdict(list)
+    for (ev, model) in shared:
+        by_model[model].append(A[(ev, model)] - B[(ev, model)])
+    print(f"  {'model':24} {'cells':>5} {'d(a-b)':>8} {'a%':>6} {'b%':>6}")
+    print("  " + "-" * 54)
+    for model in sorted(by_model):
+        cells = [(ev, m) for (ev, m) in shared if m == model]
+        am = statistics.mean(A[c] for c in cells)
+        bm = statistics.mean(B[c] for c in cells)
+        print(f"  {model[:24]:24} {len(cells):>5} {am-bm:>+8.1f} {am:>6.0f} {bm:>6.0f}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

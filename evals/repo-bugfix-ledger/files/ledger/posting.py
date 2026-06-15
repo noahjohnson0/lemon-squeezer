@@ -49,12 +49,6 @@ class Ledger:
             else:
                 raise ValueError("side must be 'debit' or 'credit'")
 
-        # BUG 2 (missing edge case / wrong validation): a transaction is only
-        # valid when debits == credits. This check is missing entirely, so an
-        # unbalanced transaction is happily applied, silently corrupting the
-        # books. (The correct code must reject total_debit != total_credit
-        # BEFORE mutating any account.)
-
         for e in entries:
             acct = self.accounts[e["account"]]
             if e["side"] == "debit":

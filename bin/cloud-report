@@ -1,18 +1,41 @@
 #!/usr/bin/env python3
 """cloud-report - aggregate the OpenRouter (host=openrouter) rows in runs.jsonl
-into a leaderboard: per-arm mean score, total/mean cost, mean latency, and the
-score-per-dollar "value" that's the whole point of the Fable-destroyer hunt.
+into an honest leaderboard.
 
     python bin/cloud-report [--tag fable-hunt] [--json out.json] [--by-eval]
+                            [--min-evals 8]
 
 An "arm" is (model, harness) - a single open model OR a multi-model mix. With no
 --tag, every openrouter row counts.
+
+Statistics (why it's done this way)
+-----------------------------------
+Trials of the same eval are NOT independent observations - they share the task,
+so naively treating every run as one IID sample understates uncertainty and lets
+a couple of lucky runs on one easy eval dominate. So we aggregate in two stages:
+
+  1. per eval: mean score over that eval's trials (failures count as 0).
+  2. per arm:  the reported score is the mean of those per-eval means - every
+               eval gets equal weight regardless of how many trials it happened
+               to get.
+
+The 95% interval is a CLUSTER bootstrap over evals (resample the per-eval means
+with replacement, B times, take the 2.5/97.5 percentiles of the resampled arm
+mean). That propagates "we only tested N evals" into the interval honestly. Arms
+with fewer than --min-evals evals get no interval (reported as insufficient) and
+sort to the bottom - a tiny suite can't earn a confident rank. Seeded, so the
+report is reproducible.
+
+Failures (score_pct not numeric, i.e. "?") are reported explicitly as
+n_failed and counted as 0 in the eval mean - never silently dropped.
 """
 from __future__ import annotations
-import argparse, json, statistics, sys
+import argparse, json, random, statistics, sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+BOOT_B = 2000
+BOOT_SEED = 1234
 
 
 def load(tag=None):
@@ -29,56 +52,73 @@ def load(tag=None):
             continue
         if tag and r.get("tag") != tag:
             continue
-        # numeric score only
         s = r.get("score_pct")
-        r["_score"] = float(s) if isinstance(s, (int, float)) else (float(s) if str(s).replace(".", "", 1).isdigit() else None)
+        r["_score"] = float(s) if isinstance(s, (int, float)) else None
         rows.append(r)
     return rows
 
 
-def agg(rows):
+def _boot_ci(eval_means, rng, b=BOOT_B):
+    """95% cluster bootstrap CI of the mean of per-eval means."""
+    k = len(eval_means)
+    if k < 2:
+        return None, None
+    samples = []
+    for _ in range(b):
+        resample = [eval_means[rng.randrange(k)] for _ in range(k)]
+        samples.append(sum(resample) / k)
+    samples.sort()
+    lo = samples[int(0.025 * b)]
+    hi = samples[min(b - 1, int(0.975 * b))]
+    return round(lo, 1), round(hi, 1)
+
+
+def agg(rows, min_evals):
+    rng = random.Random(BOOT_SEED)
     arms = {}
     for r in rows:
         key = (r.get("model"), r.get("harness"))
         a = arms.setdefault(key, {"model": r.get("model"), "harness": r.get("harness"),
-                                  "scores": [], "cost": 0.0, "wall": [], "tin": 0, "tout": 0,
-                                  "evals": set(), "n": 0, "fails": 0})
-        a["n"] += 1
+                                  "by_eval": {}, "cost": 0.0, "wall": [], "tin": 0, "tout": 0,
+                                  "n_total": 0, "n_scored": 0, "n_failed": 0})
+        a["n_total"] += 1
         a["cost"] += r.get("cost_usd", 0) or 0
         a["wall"].append(r.get("wall_seconds", 0) or 0)
         a["tin"] += r.get("tokens_in", 0) or 0
         a["tout"] += r.get("tokens_out", 0) or 0
-        a["evals"].add(r.get("eval"))
+        ev = r.get("eval")
+        # a failed run scores 0 (it did not demonstrably succeed), and is also tallied.
+        val = r["_score"] if r["_score"] is not None else 0.0
+        a["by_eval"].setdefault(ev, []).append(val)
         if r["_score"] is None:
-            a["fails"] += 1
+            a["n_failed"] += 1
         else:
-            a["scores"].append(r["_score"])
+            a["n_scored"] += 1
+
     out = []
     for a in arms.values():
-        sc = a["scores"]
-        mean = statistics.mean(sc) if sc else 0.0
-        # 95% CI on the mean (scores are continuous 0-100, so SEM-based, not Wilson),
-        # clamped to [0,100]. Sort by the lower bound so a lucky 1-run 100% can't top.
-        if len(sc) >= 2:
-            sem = statistics.stdev(sc) / (len(sc) ** 0.5)
-            half = 1.96 * sem
+        eval_means = [statistics.mean(v) for v in a["by_eval"].values()]
+        n_evals = len(eval_means)
+        mean = statistics.mean(eval_means) if eval_means else 0.0
+        if n_evals >= min_evals:
+            lo, hi = _boot_ci(eval_means, rng)
         else:
-            half = 50.0  # n<2: huge uncertainty, parks it low
-        lo = max(0.0, mean - half)
-        hi = min(100.0, mean + half)
+            lo = hi = None  # insufficient eval coverage to claim an interval
         out.append({
-            "model": a["model"], "harness": a["harness"], "n": a["n"],
-            "evals": len(a["evals"]),
+            "model": a["model"], "harness": a["harness"],
+            "n_total": a["n_total"], "n_scored": a["n_scored"], "n_failed": a["n_failed"],
+            "evals": n_evals,
             "mean_score": round(mean, 1),
-            "ci_lo": round(lo, 1), "ci_hi": round(hi, 1),
+            "ci_lo": lo, "ci_hi": hi,
             "total_cost": round(a["cost"], 4),
-            "mean_cost": round(a["cost"] / a["n"], 5) if a["n"] else 0,
+            "mean_cost": round(a["cost"] / a["n_total"], 5) if a["n_total"] else 0,
             "mean_wall_s": round(statistics.mean(a["wall"]), 1) if a["wall"] else 0,
             "tokens_in": a["tin"], "tokens_out": a["tout"],
-            "score_per_cent": round(mean / (100 * a["cost"] / a["n"]), 1) if a["cost"] else None,
-            "parse_fails": a["fails"],
+            "score_per_dollar": round(mean / (100 * a["cost"] / a["n_total"]), 1) if a["cost"] else None,
         })
-    out.sort(key=lambda x: (-x["ci_lo"], x["mean_cost"]))
+    # Sort: arms WITH an interval first (by lower bound), then insufficient ones by mean.
+    out.sort(key=lambda x: (x["ci_lo"] is None, -(x["ci_lo"] if x["ci_lo"] is not None else x["mean_score"]),
+                            x["mean_cost"]))
     return out
 
 
@@ -87,9 +127,8 @@ def by_eval(rows):
     arms = sorted({(r.get("model"), r.get("harness")) for r in rows})
     cell = {}
     for r in rows:
-        if r["_score"] is None:
-            continue
-        cell.setdefault((r.get("model"), r.get("harness")), {}).setdefault(r.get("eval"), []).append(r["_score"])
+        val = r["_score"] if r["_score"] is not None else 0.0
+        cell.setdefault((r.get("model"), r.get("harness")), {}).setdefault(r.get("eval"), []).append(val)
     return evals, arms, cell
 
 
@@ -98,30 +137,34 @@ def main():
     ap.add_argument("--tag", default=None)
     ap.add_argument("--json", default=None, help="also write the leaderboard to this JSON path")
     ap.add_argument("--by-eval", action="store_true")
+    ap.add_argument("--min-evals", type=int, default=8,
+                    help="arms with fewer scored evals than this get no CI and sort last")
     a = ap.parse_args()
 
     rows = load(a.tag)
     if not rows:
         print("no openrouter rows" + (f" for tag={a.tag}" if a.tag else ""), file=sys.stderr)
         return 1
-    board = agg(rows)
+    board = agg(rows, a.min_evals)
 
     total_cost = sum(r.get("cost_usd", 0) or 0 for r in rows)
+    n_failed = sum(1 for r in rows if r["_score"] is None)
     print(f"# {len(rows)} openrouter runs" + (f" (tag={a.tag})" if a.tag else "") +
-          f", {len({r['eval'] for r in rows})} evals, ${total_cost:.4f} spent total\n")
-    print("ranked by lower bound of the 95% CI (n<3 flagged *; n<2 parked low)\n")
-    print(f"{'ARM':24} {'harness':15} {'n':>3} {'mean%':>6} {'95% CI':>13} {'$/run':>8} {'$/$':>5} {'wall':>5}")
-    print("-" * 88)
+          f", {len({r['eval'] for r in rows})} evals, {n_failed} unscored, ${total_cost:.4f} spent total\n")
+    print("score = mean of per-eval means; 95% CI = cluster bootstrap over evals; "
+          f"arms with <{a.min_evals} evals shown as 'insf' and sorted last\n")
+    print(f"{'ARM':24} {'harness':15} {'ev':>3} {'n':>4} {'fail':>4} {'mean%':>6} {'95% CI':>13} {'$/run':>8} {'/$':>5} {'wall':>5}")
+    print("-" * 100)
     for r in board:
-        spc = "" if r["score_per_cent"] is None else f"{r['score_per_cent']:.0f}"
-        flag = "*" if r["n"] < 3 else " "
-        ci = f"[{r['ci_lo']:.0f}-{r['ci_hi']:.0f}]"
-        print(f"{(r['model'] or '?')[:24]:24} {(r['harness'] or '')[:15]:15} {r['n']:>2}{flag} "
-              f"{r['mean_score']:>6.1f} {ci:>13} {r['mean_cost']:>8.5f} {spc:>5} {r['mean_wall_s']:>4.0f}s")
+        spd = "" if r["score_per_dollar"] is None else f"{r['score_per_dollar']:.0f}"
+        ci = "insf" if r["ci_lo"] is None else f"[{r['ci_lo']:.0f}-{r['ci_hi']:.0f}]"
+        print(f"{(r['model'] or '?')[:24]:24} {(r['harness'] or '')[:15]:15} {r['evals']:>3} "
+              f"{r['n_total']:>4} {r['n_failed']:>4} {r['mean_score']:>6.1f} {ci:>13} "
+              f"{r['mean_cost']:>8.5f} {spd:>5} {r['mean_wall_s']:>4.0f}s")
 
     if a.by_eval:
         evals, arms, cell = by_eval(rows)
-        print("\n## per-eval mean score (rows=arm, cols=eval)\n")
+        print("\n## per-eval mean score (rows=arm, cols=eval; failures=0)\n")
         hdr = "ARM".ljust(26) + "".join(e[:7].rjust(8) for e in evals)
         print(hdr)
         for m, h in arms:
@@ -133,7 +176,8 @@ def main():
 
     if a.json:
         Path(a.json).write_text(json.dumps({
-            "generated_tag": a.tag, "n_runs": len(rows), "total_cost": round(total_cost, 4),
+            "generated_tag": a.tag, "n_runs": len(rows), "n_failed": n_failed,
+            "total_cost": round(total_cost, 4), "min_evals": a.min_evals,
             "leaderboard": board,
         }, indent=2), encoding="utf-8")
         print(f"\nwrote {a.json}")

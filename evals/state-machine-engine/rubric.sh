@@ -1,17 +1,56 @@
 #!/usr/bin/env bash
 # Score a state-machine-engine workspace.
+#
+# HARDENING NOTES (why this looks the way it does):
+#  * CONSTANT DENOMINATOR. Every declared check is ALWAYS emitted exactly once,
+#    pass=1 or pass=0, regardless of how broken the submission is. The python
+#    block never sys.exit()s; an import failure just flips a flag and every
+#    behavioral check reports 0. A final bash sweep adds any check the python
+#    block somehow failed to print (e.g. a hard crash/timeout mid-run) as 0.
+#  * NO STDOUT POISONING. Protocol lines from the python block are prefixed with
+#    a unique sentinel (@@CHK@@). The bash parser accepts ONLY sentinel lines
+#    whose check name is on a fixed whitelist, and dedups them (first wins).
+#    A submission that print()s "audit_log 1" on import cannot inflate the
+#    denominator or fake a pass: no sentinel, not whitelisted, and deduped.
+#  * STDOUT vs STDERR. The python block prints diagnostics to stderr; only
+#    sentinel protocol lines go to stdout. The rubric's own final JSON is the
+#    only thing this script writes to stdout.
 set -u
 WS="${1:?workspace dir required}"
 [[ -d "$WS" ]] || { echo "{\"error\":\"workspace not found\"}"; exit 1; }
 
+# Fixed whitelist of behavioral check names + the explicit imports check.
+# This list is the single source of truth for the behavioral denominator.
+BEHAV=(imports builds initial_state history_seeded invalid_is_exc avail_cart \
+       cannot_ship_from_cart ship_from_cart_raises failed_fire_no_corrupt \
+       checkout guard_can_fire_amount pay_big_rejected pay_noamount_rejected \
+       pay_ok avail_paid ship_ok deliver_ok history_full audit_log \
+       refund_from_shipped cancel_from_pending independent_machines \
+       bad_initial_raises)
+BEHAV_WEIGHT=4
+
 declare -a checks
+declare -A seen=()
 add() {
   local n="$1" p="$2" w="$3" note="${4:-}"
+  [[ -n "${seen[$n]:-}" ]] && return   # first occurrence of a name wins
+  seen[$n]=1
   [[ "$p" != "1" ]] && p=0
-  # sanitize note: drop backslashes, swap double-quotes for single
+  # sanitize note: drop backslashes, swap double-quotes for single, kill tabs/newlines
   note="${note//\\/}"
   note="${note//\"/\'}"
+  note="${note//$'\t'/ }"
+  note="${note//$'\n'/ }"
   checks+=("$(printf '%s\t%s\t%s\t%s' "$n" "$p" "$w" "$note")")
+}
+
+# Add every behavioral check at its weight, defaulting to 0 with the given note.
+# Used as the final sweep so the denominator is constant no matter what.
+sweep_behav() {
+  local note="${1:-not reached}" n
+  for n in "${BEHAV[@]}"; do
+    add "$n" 0 "$BEHAV_WEIGHT" "$note"
+  done
 }
 
 E="$WS/engine.py"
@@ -20,28 +59,47 @@ add "file:engine.py" "$([[ -f "$E" ]] && echo 1 || echo 0)" 3
 add "file:order_workflow.py" "$([[ -f "$O" ]] && echo 1 || echo 0)" 3
 
 if [[ -f "$E" && -f "$O" ]]; then
-  python3 -m py_compile "$E" "$O" 2>/dev/null && add "compiles" 1 4 || add "compiles" 0 4
+  if python3 -m py_compile "$E" "$O" 2>/dev/null; then
+    add "compiles" 1 4
+  else
+    add "compiles" 0 4
+  fi
 
-  RES=$(cd "$WS" && gtimeout 15 python3 - <<'PY' 2>&1
-import sys
+  # The python block emits protocol lines as: <SENT> <name> <0|1> [note...]
+  # where <SENT> is a per-run RANDOM nonce the submission cannot predict.
+  # Defense in depth: at the OS fd level we point the submission's stdout (fd 1)
+  # at stderr, so ANY print() the submission does -- on import, in fire(), in a
+  # hook -- lands on stderr and can NEVER reach the protocol stream. Protocol
+  # lines are written to a saved dup of the original stdout. So neither
+  # forged sentinel lines nor noisy prints can fake a pass or alter the count.
+  SENT="@@CHK_$(head -c 12 /dev/urandom | od -An -tx1 | tr -d ' \n')@@"
+  RES=$( cd "$WS" && LEMON_SENT="$SENT" gtimeout 15 python3 - <<'PY' 2>>/dev/null
+import sys, os
 
-# Every check name this script is responsible for. Any not explicitly emitted
-# below is reported as a failure in the final sweep -> constant denominator.
-EXPECTED = [
-    "builds", "initial_state", "history_seeded", "invalid_is_exc", "avail_cart",
-    "cannot_ship_from_cart", "ship_from_cart_raises", "failed_fire_no_corrupt",
-    "checkout", "guard_can_fire_amount", "pay_big_rejected",
-    "pay_noamount_rejected", "pay_ok", "avail_paid", "ship_ok", "deliver_ok",
-    "history_full", "audit_log", "refund_from_shipped", "cancel_from_pending",
-    "independent_machines", "bad_initial_raises",
-]
+SENT = os.environ.get("LEMON_SENT", "@@CHK@@")
 _seen = set()
+
+# Reserve the REAL stdout for the protocol, then redirect fd 1 -> fd 2 so the
+# submission's prints cannot pollute the protocol stream.
+_proto_fd = os.dup(1)
+try:
+    os.dup2(2, 1)            # anything written to fd 1 now goes to stderr
+    sys.stdout = os.fdopen(2, "w", closefd=False)
+except Exception:
+    _proto_fd = 1            # fallback: best-effort, still nonce-protected
+
+def _proto_write(s):
+    try:
+        os.write(_proto_fd, s.encode("utf-8", "replace"))
+    except Exception:
+        pass
 
 def emit(name, ok, note=""):
     if name in _seen:
         return
     _seen.add(name)
-    print("%s %d %s" % (name, 1 if ok else 0, note))
+    note = str(note).replace("\n", " ").replace("\t", " ")
+    _proto_write("%s %s %d %s\n" % (SENT, name, 1 if ok else 0, note))
 
 def check(name, fn):
     try:
@@ -50,22 +108,32 @@ def check(name, fn):
     except Exception as e:
         emit(name, False, repr(e)[:70])
 
+# ---- import (never sys.exit; failure -> flag, every check still emitted) ----
+imports_ok = True
+StateMachine = Transition = InvalidTransition = None
+build_order_machine = has_funds = get_audit_log = None
 try:
     import engine
     from engine import StateMachine, Transition, InvalidTransition
     import order_workflow
     from order_workflow import build_order_machine, has_funds, get_audit_log
 except Exception as e:
-    print("IMPORT_ERR", repr(e)[:120])
-    sys.exit(1)
+    imports_ok = False
+    sys.stderr.write("IMPORT_ERR %s\n" % (repr(e)[:120],))
 
-# ---- generic engine basics ----
-try:
-    m = build_order_machine()
-    emit("builds", True)
-except Exception as e:
-    emit("builds", False, repr(e)[:80])
-    m = None
+emit("imports", imports_ok, "" if imports_ok else "import failed")
+
+# ---- build the machine (only if imports worked) ----
+m = None
+if imports_ok:
+    try:
+        m = build_order_machine()
+        emit("builds", True)
+    except Exception as e:
+        emit("builds", False, repr(e)[:80])
+        m = None
+else:
+    emit("builds", False, "no import")
 
 if m is not None:
     check("initial_state", lambda: (m.state == "cart", "got=%r" % (m.state,)))
@@ -171,44 +239,45 @@ if m is not None:
             return False, "wrong exc %s" % type(e).__name__
     check("bad_initial_raises", _bad_initial)
 
-# Final sweep: anything not emitted (e.g. builds failed, exec stopped early)
-# is a failure. Guarantees a constant denominator.
+# Final python-side sweep: every EXPECTED behavioral check that didn't get
+# emitted (build failed, or import failed, or some path skipped it) is a 0.
+EXPECTED = [
+    "imports", "builds", "initial_state", "history_seeded", "invalid_is_exc",
+    "avail_cart", "cannot_ship_from_cart", "ship_from_cart_raises",
+    "failed_fire_no_corrupt", "checkout", "guard_can_fire_amount",
+    "pay_big_rejected", "pay_noamount_rejected", "pay_ok", "avail_paid",
+    "ship_ok", "deliver_ok", "history_full", "audit_log",
+    "refund_from_shipped", "cancel_from_pending", "independent_machines",
+    "bad_initial_raises",
+]
 for name in EXPECTED:
     if name not in _seen:
         emit(name, False, "not reached")
 PY
 )
-  echo "$RES" >&2
-  if echo "$RES" | grep -q "^IMPORT_ERR"; then
-    note=$(echo "$RES" | sed -n 's/^IMPORT_ERR //p' | head -1)
-    for n in builds initial_state history_seeded invalid_is_exc avail_cart \
-             cannot_ship_from_cart ship_from_cart_raises failed_fire_no_corrupt \
-             checkout guard_can_fire_amount pay_big_rejected pay_noamount_rejected \
-             pay_ok avail_paid ship_ok deliver_ok history_full audit_log \
-             refund_from_shipped cancel_from_pending independent_machines \
-             bad_initial_raises; do
-      add "$n" 0 4 "import failed: $note"
-    done
-  else
-    while IFS= read -r line; do
-      [[ -z "$line" ]] && continue
-      name=$(echo "$line" | awk '{print $1}')
-      pass=$(echo "$line" | awk '{print $2}')
-      note=$(echo "$line" | cut -d' ' -f3-)
-      [[ "$name" == "IMPORT_ERR" ]] && continue
-      add "$name" "$pass" 4 "$note"
-    done < <(echo "$RES")
-  fi
+  # Dump raw protocol output to stderr for debugging (never to stdout).
+  printf '%s\n' "$RES" >&2
+
+  # Parse ONLY protocol lines carrying the per-run nonce AND a whitelisted name.
+  # The nonce ($SENT) is unpredictable, so a submission cannot forge a line.
+  declare -A is_behav=()
+  for n in "${BEHAV[@]}"; do is_behav[$n]=1; done
+  while IFS= read -r line; do
+    [[ "$line" == "$SENT "* ]] || continue         # must carry the run nonce
+    rest="${line#"$SENT" }"
+    name=$(printf '%s' "$rest" | awk '{print $1}')
+    pass=$(printf '%s' "$rest" | awk '{print $2}')
+    note=$(printf '%s' "$rest" | cut -d' ' -f3-)
+    [[ -n "${is_behav[$name]:-}" ]] || continue    # ignore non-whitelisted names
+    add "$name" "$pass" "$BEHAV_WEIGHT" "$note"
+  done < <(printf '%s\n' "$RES")
+
+  # Sweep: any whitelisted behavioral check not emitted by python (crash,
+  # timeout, truncated stdout) is added as 0. Guarantees constant denominator.
+  sweep_behav "not emitted"
 else
   add "compiles" 0 4
-  for n in builds initial_state history_seeded invalid_is_exc avail_cart \
-           cannot_ship_from_cart ship_from_cart_raises failed_fire_no_corrupt \
-           checkout guard_can_fire_amount pay_big_rejected pay_noamount_rejected \
-           pay_ok avail_paid ship_ok deliver_ok history_full audit_log \
-           refund_from_shipped cancel_from_pending independent_machines \
-           bad_initial_raises; do
-    add "$n" 0 4 "missing files"
-  done
+  sweep_behav "missing files"
 fi
 
 # emit

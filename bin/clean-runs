@@ -1,0 +1,144 @@
+#!/usr/bin/env python3
+"""clean-runs - remove broken / worthless rows from runs.jsonl.
+
+A "result" is a row where a model actually attempted the task and we scored what
+it produced. Rows that are NOT results pollute every aggregate (they drag means
+toward 0, split arms, or crown phantoms), so we drop them - but transparently:
+every removed row is written to runs/_removed.jsonl with the reason, and the
+original is backed up first.
+
+Removal policy (a row is dropped if ANY rule matches; first match wins):
+
+  non-result        tokens_out == 0 AND tool_calls == 0
+                    The model emitted nothing: a 402 (out of credit), a crashed
+                    connection, or a model that can't drive tools at all. There
+                    is no produced code to score, so the 0 is an artifact, not a
+                    measurement. (A model that genuinely tried but failed has
+                    tokens_out > 0 and stays - that 0 is real signal.)
+
+  phantom-label     model contains "/"  (e.g. "openai/gpt-oss-20b")
+                    Early manual runs labelled arms by raw OpenRouter slug instead
+                    of the canonical arm name. They are n=1 duplicates of a
+                    properly-named arm and can crown the leaderboard. Drop.
+
+  errored           exit_code != 0
+                    The harness/eval exited non-zero: the run did not complete.
+                    Any score on such a row (incl. stray 100s) is corrupt.
+
+Usage:
+    bin/clean-runs                 # dry run: report what WOULD be removed
+    bin/clean-runs --apply         # back up, rewrite runs.jsonl, write audit
+    bin/clean-runs --apply --quiet
+"""
+from __future__ import annotations
+import argparse, json, shutil, sys
+from collections import Counter
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+RUNS = ROOT / "runs.jsonl"
+
+
+def _int(r, k):
+    v = r.get(k, 0)
+    try:
+        return int(v or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+def reason_to_remove(r):
+    """Return a removal reason string, or None to keep the row."""
+    model = str(r.get("model") or "")
+    if "/" in model:
+        return "phantom-label"
+    if _int(r, "exit_code") != 0:
+        return "errored"
+    if _int(r, "tokens_out") == 0 and _int(r, "tool_calls") == 0:
+        return "non-result"
+    return None
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--apply", action="store_true",
+                    help="actually rewrite runs.jsonl (default: dry run)")
+    ap.add_argument("--quiet", action="store_true")
+    a = ap.parse_args()
+
+    raw = RUNS.read_text(encoding="utf-8", errors="replace").splitlines()
+    keep, removed, bad_json = [], [], 0
+    for line in raw:
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            r = json.loads(line)
+        except Exception:
+            bad_json += 1
+            continue
+        why = reason_to_remove(r)
+        if why:
+            r["_removed_reason"] = why
+            removed.append(r)
+        else:
+            keep.append(r)
+
+    by_reason = Counter(r["_removed_reason"] for r in removed)
+    if not a.quiet:
+        total = len(keep) + len(removed)
+        print(f"runs.jsonl: {total} parseable rows ({bad_json} unparseable skipped)")
+        print(f"  keep:    {len(keep)}")
+        print(f"  remove:  {len(removed)}")
+        for why, c in by_reason.most_common():
+            print(f"     {why:14} {c}")
+        # which models lost rows (helps document coverage gaps)
+        lost = Counter((r.get("model"), r["_removed_reason"]) for r in removed)
+        print("\n  removed by (model, reason):")
+        for (m, why), c in lost.most_common(25):
+            print(f"     {c:4}  {m}  [{why}]")
+
+    if not a.apply:
+        print("\n(dry run - pass --apply to rewrite. nothing changed.)")
+        return 0
+
+    # back up the original, write the audit trail, then rewrite.
+    arch = ROOT / "runs"
+    arch.mkdir(exist_ok=True)
+    backup = arch / "runs.jsonl.pre-clean.bak"
+    shutil.copyfile(RUNS, backup)
+
+    audit = arch / "_removed.jsonl"
+    with audit.open("w", encoding="utf-8") as f:
+        for r in removed:
+            f.write(json.dumps(r) + "\n")
+
+    with RUNS.open("w", encoding="utf-8", newline="\n") as f:
+        for r in keep:
+            f.write(json.dumps(r) + "\n")
+
+    # Relocate each removed run's runs/<id>/ dir OUT of the eval-export glob
+    # (eval-export rebuilds runs.jsonl from runs/*/meta.json; if we left these
+    # in place, the next export would resurrect every row we just removed).
+    quarantine = arch / "_removed_dirs"
+    quarantine.mkdir(exist_ok=True)
+    moved = 0
+    for r in removed:
+        src = arch / r["run_id"]
+        if src.is_dir():
+            dst = quarantine / r["run_id"]
+            if dst.exists():
+                shutil.rmtree(dst)
+            shutil.move(str(src), str(dst))
+            moved += 1
+
+    print(f"\nbacked up original -> {backup.relative_to(ROOT)}")
+    print(f"wrote audit ({len(removed)} rows) -> {audit.relative_to(ROOT)}")
+    print(f"relocated {moved} broken run dirs -> {quarantine.relative_to(ROOT)}/")
+    print(f"rewrote runs.jsonl: {len(keep)} rows")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -2,71 +2,140 @@
 set -u
 WS="${1:?workspace}"
 declare -a checks
+# sanitize: strip backslashes and double-quotes from notes so the JSON stays valid
 add() {
   local n="$1" p="$2" w="$3" note="${4:-}"
   [[ "$p" != "1" ]] && p=0
+  note="${note//\\/}"
+  note="${note//\"/\'}"
   checks+=("$(printf '%s\t%s\t%s\t%s' "$n" "$p" "$w" "$note")")
 }
+
 T="$WS/spectrum.py"
-add "file:spectrum.py" "$([[ -f "$T" ]] && echo 1 || echo 0)" 5
-if [[ -f "$T" ]]; then
-  python3 -m py_compile "$T" 2>/dev/null && add "compiles" 1 5 || add "compiles" 0 5
-  RES=$(cd "$WS" && gtimeout 15 python3 - <<'PY' 2>&1
+file_ok=0; [[ -f "$T" ]] && file_ok=1
+add "file:spectrum.py" "$file_ok" 5
+
+compile_ok=0
+if [[ "$file_ok" == "1" ]]; then
+  python3 -m py_compile "$T" 2>/dev/null && compile_ok=1
+fi
+add "compiles" "$compile_ok" 5
+
+# Behavioral block ALWAYS runs and ALWAYS emits exactly these lines:
+#   imports dom_50hz dom_440hz dom_dc_reject spec_len spec_first_dc spec_last_nyq empty_raises
+# chk() prints pass=0 (never aborts/skips) on import failure or any per-case exception,
+# so the denominator is identical for every submission.
+RES=$(cd "$WS" && gtimeout 15 python3 - <<'PY' 2>&1
 import sys, math
-try: from spectrum import magnitude_spectrum, dominant_freq
-except Exception as e: print("IMPORT_ERR", e); sys.exit(1)
+
+ok = True
+try:
+    from spectrum import magnitude_spectrum, dominant_freq
+except Exception as e:
+    print("IMPORT_ERR", repr(e)[:80], file=sys.stderr)
+    ok = False
+
+def san(s):
+    return str(s).replace("\\", "").replace('"', "'").replace("\n", " ")
+
+def chk(name, fn, note=""):
+    if not ok:
+        print(name, 0, "import_failed")
+        return
+    try:
+        passed, n = fn()
+        print(name, 1 if passed else 0, san(n))
+    except Exception as ex:
+        print(name, 0, san(repr(ex)[:50]))
+
+print("imports", 1 if ok else 0, "ok" if ok else "import_failed")
+
 # 50 Hz pure tone, fs=1000, N=1024 -> bin 51 (51*1000/1024=49.80 Hz)
 fs, N = 1000.0, 1024
 x = [math.sin(2*math.pi*50*n/fs) for n in range(N)]
-try:
+def c_dom50():
     f = dominant_freq(x, fs)
     bin_freq = 51 * fs / N
-    print("dom_50hz", 1 if abs(f - bin_freq) < fs/N else 0, f"got={f:.3f} expected~{bin_freq:.3f}")
-except Exception as e: print("dom_50hz", 0, repr(e))
+    return abs(f - bin_freq) < fs/N, "got=%.3f expected~%.3f" % (f, bin_freq)
+chk("dom_50hz", c_dom50)
+
 # 440 Hz sine, fs=8000, N=4096 -> bin 225 (225*8000/4096=439.45)
 fs2, N2 = 8000.0, 4096
 x2 = [math.sin(2*math.pi*440*n/fs2) for n in range(N2)]
-try:
+def c_dom440():
     f = dominant_freq(x2, fs2)
-    print("dom_440hz", 1 if abs(f - 439.45) < 1.0 else 0, f"got={f:.3f}")
-except Exception as e: print("dom_440hz", 0, repr(e))
+    return abs(f - 439.45) < 1.0, "got=%.3f" % f
+chk("dom_440hz", c_dom440)
+
 # DC offset + tone: must reject DC and find tone
 x3 = [5.0 + 0.1*math.sin(2*math.pi*50*n/fs) for n in range(N)]
-try:
+def c_domdc():
     f = dominant_freq(x3, fs)
-    print("dom_dc_reject", 1 if abs(f - 49.80) < 1.0 else 0, f"got={f:.3f}")
-except Exception as e: print("dom_dc_reject", 0, repr(e))
-# spectrum length = N//2+1
-try:
-    fr, mg = magnitude_spectrum(x, fs)
-    print("spec_len",      1 if len(fr) == N//2+1 and len(mg) == N//2+1 else 0, f"got={len(fr)}")
-    print("spec_first_dc", 1 if abs(fr[0] - 0.0) < 1e-9 else 0, f"got={fr[0]}")
-    print("spec_last_nyq", 1 if abs(fr[-1] - fs/2) < 1e-3 else 0, f"got={fr[-1]}")
-except Exception as e:
-    for n in ["spec_len","spec_first_dc","spec_last_nyq"]: print(n, 0, repr(e))
-# zero-length raises
-try: magnitude_spectrum([], fs); print("empty_raises", 0)
-except ValueError: print("empty_raises", 1)
-except Exception as e: print("empty_raises", 0, repr(e))
+    return abs(f - 49.80) < 1.0, "got=%.3f" % f
+chk("dom_dc_reject", c_domdc)
+
+# spectrum shape / endpoints
+def _spec():
+    return magnitude_spectrum(x, fs)
+def c_speclen():
+    fr, mg = _spec()
+    return (len(fr) == N//2+1 and len(mg) == N//2+1), "got=%d" % len(fr)
+chk("spec_len", c_speclen)
+def c_specdc():
+    fr, mg = _spec()
+    return abs(fr[0] - 0.0) < 1e-9, "got=%s" % fr[0]
+chk("spec_first_dc", c_specdc)
+def c_specnyq():
+    fr, mg = _spec()
+    return abs(fr[-1] - fs/2) < 1e-3, "got=%s" % fr[-1]
+chk("spec_last_nyq", c_specnyq)
+
+# zero-length raises ValueError
+def c_empty():
+    try:
+        magnitude_spectrum([], fs)
+        return False, "no_raise"
+    except ValueError:
+        return True, "ValueError"
+    except Exception as e:
+        return False, san(repr(e)[:40])
+chk("empty_raises", c_empty)
 PY
 )
-  echo "$RES" >&2
-  while IFS= read -r line; do
-    [[ -z "$line" ]] && continue
-    name=$(echo "$line" | awk '{print $1}')
-    pass=$(echo "$line" | awk '{print $2}')
-    note=$(echo "$line" | cut -d' ' -f3-)
-    [[ "$name" == "IMPORT_ERR" ]] && continue
-    add "$name" "$pass" 11 "$note"
-  done < <(echo "$RES")
-else
-  for n in compiles dom_50hz spec_len; do add "$n" 0 5; done
-fi
+echo "$RES" >&2
+
+# Fixed set of behavioral checks. Each is filled from RES if present, else scored 0.
+# This guarantees a CONSTANT denominator regardless of what python managed to emit.
+declare -A bres
+declare -A bnote
+while IFS= read -r line; do
+  [[ -z "$line" ]] && continue
+  name=$(echo "$line" | awk '{print $1}')
+  [[ "$name" == "IMPORT_ERR" ]] && continue
+  pass=$(echo "$line" | awk '{print $2}')
+  note=$(echo "$line" | cut -d' ' -f3-)
+  bres["$name"]="$pass"
+  bnote["$name"]="$note"
+done < <(echo "$RES")
+
+emit() { # name weight
+  local n="$1" w="$2" p="${bres[$1]:-0}" note="${bnote[$1]:-not_emitted}"
+  add "$n" "$p" "$w" "$note"
+}
+emit "imports"       8
+emit "dom_50hz"      11
+emit "dom_440hz"     11
+emit "dom_dc_reject" 11
+emit "spec_len"      11
+emit "spec_first_dc" 11
+emit "spec_last_nyq" 11
+emit "empty_raises"  11
+
 total=0; gained=0
 {
   printf '{\n  "checks": [\n'
   first=1
-  for c in "${checks[@]}"; do
+  for c in ${checks[@]+"${checks[@]}"}; do
     IFS=$'\t' read -r name pass weight note <<<"$c"
     total=$((total+weight)); [[ "$pass" == "1" ]] && gained=$((gained+weight))
     [[ $first -eq 0 ]] && printf ',\n'

@@ -23,7 +23,7 @@ No GPU, no SSH, no lock: a cloud run is just HTTP + local rubric scoring, so
 this is safe to run anywhere (including the Windows box) and to parallelise.
 """
 from __future__ import annotations
-import argparse, json, os, re, shutil, subprocess, sys, time
+import argparse, json, os, re, shutil, subprocess, sys, time, uuid
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -76,7 +76,10 @@ def parse_score(text: str):
         try:
             return json.loads(cleaned).get("score_pct")
         except Exception:
-            return None
+            # last resort: the rubric computes score_pct as a plain integer, so
+            # recover it directly even if a note's stray quote broke the JSON.
+            hits = re.findall(r'"score_pct"\s*:\s*"?(-?\d+)', text)
+            return int(hits[-1]) if hits else None
 
 
 def read_num(p: Path, cast, default):
@@ -151,7 +154,11 @@ def main() -> int:
         label = a.label or a.model
 
     tag = a.tag_opt or a.tag
-    run_id = f"{ts_now()}_{a.eval}_{harness}_{safe_model(label)}_{tag}"
+    # Trailing short token makes run_id unique even when many trials of the same
+    # (eval, arm, tag) launch within the same one-second timestamp - otherwise they
+    # collide on the same run_dir and overwrite each other's workspace/meta.
+    uniq = uuid.uuid4().hex[:6]
+    run_id = f"{ts_now()}_{a.eval}_{harness}_{safe_model(label)}_{tag}_{uniq}"
     if a.dry_run:
         print(run_id)
         return 0
@@ -243,7 +250,13 @@ def main() -> int:
         (run_dir / "tokens_in").write_text(str(tin))
         (run_dir / "tokens_out").write_text(str(tout))
         (run_dir / "tool_calls").write_text("0")
-        (run_dir / "cost").write_text("0.000000")
+        # aider reports its own spend: "Cost: $X message, $Y session". Take the
+        # last session total (cumulative across the run). Previously hardcoded to
+        # 0, which made every aider-cloud arm look free on the cost leaderboard.
+        sess = re.findall(r"\$\s*([0-9.]+)\s*session", log)
+        msg = re.findall(r"Cost:\s*\$\s*([0-9.]+)\s*message", log)
+        cost = float(sess[-1]) if sess else (sum(float(x) for x in msg) if msg else 0.0)
+        (run_dir / "cost").write_text(f"{cost:.6f}")
 
     # Score with the eval's REAL rubric (bash). python3/gtimeout shims on PATH
     # make this work on Windows too.
