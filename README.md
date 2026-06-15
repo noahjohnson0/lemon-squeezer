@@ -31,7 +31,7 @@ Same prompts, same rubrics, different venue. That's the whole point — every re
 **1. (Local) The harness matters more than the model.** Same `qwen3:14b` on `bug-fix`:
 pi → 27% (the model botches exact-string-match edits) vs aider → 100% (whole-file rewrites sidestep the failure mode). A weak model with the right harness beats a strong model with the wrong one.
 
-**2. (Cloud) The "Fable destroyer" — _results pending the current sweep._** We're testing whether a *mix* of cheap open models (an expensive model that plans + a cheap one that implements, an ensemble judged by a frontier-open model, draft→critique→refine, self-verifying test loops) can match a single frontier-open model at a fraction of the cost. See [FINDINGS.md](FINDINGS.md) and the live [dashboard](https://noahjohnson0.github.io/lemon-squeezer/cloud).
+**2. (Cloud) The "Fable destroyer" is a single cheap open model — not a clever mix.** Across 751 runs (18 arms × 16 evals), `deepseek-v4-flash` scored **100% at ~$0.0018/task**, and `gpt-oss-120b` is the value king (95% at **$0.0005/task**). The multi-model mixes (architect / critique / ensemble / verify) mostly *lost* to the best single — they're a **weak-model rescue kit** (a critic loop drags `qwen3-coder-30b` from 69%→94%), not a quality-ceiling raiser. Full writeup in [FINDINGS-CLOUD.md](FINDINGS-CLOUD.md); live [dashboard](https://noahjohnson0.github.io/lemon-squeezer/cloud). For context, the **RTX 4070 hits 97%** on the same tasks with the right harness.
 
 ## How it works
 
