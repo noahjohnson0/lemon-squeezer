@@ -102,6 +102,9 @@ def main() -> int:
                     help="value written to meta 'model' + the run_id (a human-readable arm name). "
                          "Defaults to the slug (single) or a derived combo (pipeline).")
     ap.add_argument("--max-iter", type=int, default=20)
+    ap.add_argument("--agent", choices=["squeezer", "aider"], default="squeezer",
+                    help="which single-model harness to drive (for the harness bake-off). "
+                         "aider uses its own edit format, so it also drives non-tool-calling models.")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--no-append", action="store_true",
                     help="write meta.json + print the row, but don't append to runs.jsonl "
@@ -189,7 +192,8 @@ def main() -> int:
     env["PYTHONUTF8"] = "1"
     env["PYTHONIOENCODING"] = "utf-8"
 
-    # Drive the agent - single model (squeezer.py) or a mix (squeezer_pipeline.py).
+    # Drive the agent: a mix (squeezer_pipeline), aider, or single squeezer.
+    aider_run = (a.agent == "aider") and not a.pipeline
     if a.pipeline:
         cmd = [sys.executable, str(ROOT / "bin" / "squeezer_pipeline.py"),
                "--workspace", str(ws), "--run-dir", str(run_dir),
@@ -200,6 +204,21 @@ def main() -> int:
         if a.judge_model:     cmd += ["--judge-model", a.judge_model]
         if a.architect_model: cmd += ["--architect-model", a.architect_model]
         cmd += ["--rounds", str(a.rounds)]
+    elif aider_run:
+        # aider drives the SAME model via its own edit format (works even on
+        # non-tool-calling models). litellm routing: ollama_chat/ for local,
+        # openrouter/ for cloud.
+        aider_bin = shutil.which("aider") or os.path.expanduser("~/.local/bin/aider.exe")
+        aider_model = (f"ollama_chat/{primary}" if is_local else f"openrouter/{primary}")
+        if is_local:
+            env["OLLAMA_API_BASE"] = a.base_url.replace("/v1", "").rstrip("/")
+        else:
+            env["OPENROUTER_API_KEY"] = key
+        starter = [str(p.relative_to(ws)) for p in sorted(ws.rglob("*")) if p.is_file()]
+        prompt_text = (eval_dir / "prompt.md").read_text(encoding="utf-8")
+        cmd = [aider_bin, "--model", aider_model, "--yes-always", "--no-auto-commits",
+               "--no-stream", "--no-pretty", "--no-analytics", "--no-show-model-warnings",
+               "--no-git", "--no-check-update", *starter, "--message", prompt_text]
     else:
         cmd = [sys.executable, str(ROOT / "bin" / "squeezer.py"),
                "--model", primary,
@@ -208,8 +227,19 @@ def main() -> int:
                "--base-url", a.base_url, "--max-iter", str(a.max_iter)]
     started = time.time()
     with (run_dir / "stdout.log").open("w", encoding="utf-8") as out:
-        rc = subprocess.run(cmd, stdout=out, stderr=subprocess.STDOUT, env=env).returncode
+        rc = subprocess.run(cmd, stdout=out, stderr=subprocess.STDOUT, env=env,
+                            cwd=(str(ws) if aider_run else None)).returncode
     wall = time.time() - started
+
+    if aider_run:
+        # aider writes no counter files; parse "Tokens: N sent, M received" from its log.
+        log = (run_dir / "stdout.log").read_text(encoding="utf-8", errors="replace")
+        tin = sum(int(x.replace(",", "")) for x in re.findall(r"Tokens:\s*([\d,]+)\s*sent", log))
+        tout = sum(int(x.replace(",", "")) for x in re.findall(r"sent,\s*([\d,]+)\s*received", log))
+        (run_dir / "tokens_in").write_text(str(tin))
+        (run_dir / "tokens_out").write_text(str(tout))
+        (run_dir / "tool_calls").write_text("0")
+        (run_dir / "cost").write_text("0.000000")
 
     # Score with the eval's REAL rubric (bash). python3/gtimeout shims on PATH
     # make this work on Windows too.
