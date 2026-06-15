@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""cloud-run — run a lemon-squeezer eval against an OpenAI-compatible CLOUD
+"""cloud-run - run a lemon-squeezer eval against an OpenAI-compatible CLOUD
 endpoint (OpenRouter by default), score it with the eval's REAL rubric, and
 append a row to runs.jsonl tagged host="openrouter".
 
 This is the cloud counterpart of bin/eval-run. Where eval-run drives a local
 Ollama on the 4070 (or an M4 Max), cloud-run drives the same squeezer
 tool-calling agent against an open-weight model rented on OpenRouter. Same
-prompts, same rubrics, different venue — that's the whole point.
+prompts, same rubrics, different venue - that's the whole point.
 
     python bin/cloud-run <eval> <model-slug> [tag] [options]
 
@@ -17,7 +17,7 @@ Options:
     --max-iter N      agent loop cap (default 20)
     --dry-run         print the run_id it would create and exit
 
-Env: OPENROUTER_API_KEY (or LEMON_API_KEY) — bearer token for the endpoint.
+Env: OPENROUTER_API_KEY (or LEMON_API_KEY) - bearer token for the endpoint.
 
 No GPU, no SSH, no lock: a cloud run is just HTTP + local rubric scoring, so
 this is safe to run anywhere (including the Windows box) and to parallelise.
@@ -53,7 +53,7 @@ def run_bash_script(path: Path, ws: Path, capture: bool):
 
 
 def ts_now() -> str:
-    # Colon-free UTC stamp — matches the existing run_id scheme and is a legal
+    # Colon-free UTC stamp - matches the existing run_id scheme and is a legal
     # Windows path component.
     return time.strftime("%Y-%m-%dT%H-%M-%SZ", time.gmtime())
 
@@ -164,7 +164,7 @@ def main() -> int:
     ws.mkdir(parents=True, exist_ok=True)
 
     # Optional starter files / setup, same as eval-run. Copy RECURSIVELY so evals
-    # with nested starter packages (files/pkg/*.py) populate correctly — not just
+    # with nested starter packages (files/pkg/*.py) populate correctly - not just
     # top-level files.
     files_dir = eval_dir / "files"
     if files_dir.is_dir():
@@ -175,7 +175,7 @@ def main() -> int:
             elif f.is_file():
                 shutil.copy(f, dst)
     # Eval scripts run with cwd=ROOT and get the workspace as a ROOT-relative
-    # POSIX path — drive-letter paths (C:/...) don't resolve in MSYS bash tests.
+    # POSIX path - drive-letter paths (C:/...) don't resolve in MSYS bash tests.
     ws_arg = ws.relative_to(ROOT)
 
     setup = eval_dir / "setup.sh"
@@ -189,7 +189,7 @@ def main() -> int:
     env["PYTHONUTF8"] = "1"
     env["PYTHONIOENCODING"] = "utf-8"
 
-    # Drive the agent — single model (squeezer.py) or a mix (squeezer_pipeline.py).
+    # Drive the agent - single model (squeezer.py) or a mix (squeezer_pipeline.py).
     if a.pipeline:
         cmd = [sys.executable, str(ROOT / "bin" / "squeezer_pipeline.py"),
                "--workspace", str(ws), "--run-dir", str(run_dir),

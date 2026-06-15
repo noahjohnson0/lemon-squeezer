@@ -27,7 +27,7 @@ print(out.get('range_m','None'), out.get('max_height_m','None'), out.get('flight
 " "$1"
   }
 
-  # Test 1: no-drag, v0=50, theta=45 — analytic range = 50^2*sin(90)/9.81 = 254.842
+  # Test 1: no-drag, v0=50, theta=45 - analytic range = 50^2*sin(90)/9.81 = 254.842
   OUT1=$(cd "$WS" && gtimeout 30 python3 projectile.py 50 45 0 0.01 1 2>&1 || true)
   read R1 H1 T1 < <(parse_out "$OUT1")
   # range tolerance: 0.5%
@@ -46,7 +46,7 @@ print(1 if abs(got-want)/abs(want) < tol else 0)
   # flight time analytic = 2*v0*sin(theta)/g = 7.207
   add "no_drag:flight_time_correct" "$(py_check_close "$T1" "7.207" "0.01")" 10 "got T=$T1 want ~7.207"
 
-  # Test 2: WITH drag — range MUST be less than no-drag analytic
+  # Test 2: WITH drag - range MUST be less than no-drag analytic
   OUT2=$(cd "$WS" && gtimeout 30 python3 projectile.py 50 45 0.47 0.01 1 2>&1 || true)
   read R2 H2 T2 < <(parse_out "$OUT2")
   add "drag:range_smaller_than_nodrag" "$(python3 -c "
@@ -58,7 +58,7 @@ try: h2=float('$H2'); print(1 if 10 < h2 < 63 else 0)
 except: print(0)
 ")" 5 "got H=$H2"
 
-  # Test 3: very heavy drag — range must collapse further
+  # Test 3: very heavy drag - range must collapse further
   OUT3=$(cd "$WS" && gtimeout 30 python3 projectile.py 50 45 2.0 0.05 0.5 2>&1 || true)
   read R3 H3 T3 < <(parse_out "$OUT3")
   add "heavy_drag:range_much_smaller" "$(python3 -c "
@@ -66,14 +66,14 @@ try: r2=float('$R2'); r3=float('$R3'); print(1 if r3 < r2 else 0)
 except: print(0)
 ")" 10 "got R3=$R3, must be < R2=$R2"
 
-  # RK4 marker — penalize obvious Euler. Look for k1, k2, k3, k4 multi-stage pattern.
+  # RK4 marker - penalize obvious Euler. Look for k1, k2, k3, k4 multi-stage pattern.
   if grep -qE 'k1|k_1' "$T" && grep -qE 'k2|k_2' "$T" && grep -qE 'k3|k_3' "$T" && grep -qE 'k4|k_4' "$T"; then
     add "uses_rk4_pattern" 1 10
   else
     add "uses_rk4_pattern" 0 10 "no k1..k4 found"
   fi
 
-  # Output format: 6-decimal places — check with regex on first run
+  # Output format: 6-decimal places - check with regex on first run
   if echo "$OUT1" | grep -qE '^range_m [0-9]+\.[0-9]{6}$' && \
      echo "$OUT1" | grep -qE '^max_height_m [0-9]+\.[0-9]{6}$' && \
      echo "$OUT1" | grep -qE '^flight_time_s [0-9]+\.[0-9]{6}$'; then

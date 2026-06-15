@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# librarian-cascade — two-model RAG pipeline.
+# librarian-cascade - two-model RAG pipeline.
 #
 # Convention: the harness contract uses a single $model arg, but a cascade
 # needs two. We interpret $model as "<retriever>+<answerer>" with literal '+'.

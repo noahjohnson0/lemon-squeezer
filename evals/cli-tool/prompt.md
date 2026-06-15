@@ -9,4 +9,4 @@ Build a CLI tool `mywc.py` (a small `wc` clone). Requirements:
 3. Supports `--help` / `-h`, which prints a usage line and exits 0.
 4. If the file doesn't exist, prints an error to stderr and exits non-zero.
 
-Create only `mywc.py`. Don't run it — just write it.
+Create only `mywc.py`. Don't run it - just write it.

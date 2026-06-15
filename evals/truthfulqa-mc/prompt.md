@@ -1,7 +1,7 @@
 <<<system
 You are answering a multiple-choice factuality test. Pick the BEST answer.
 
-Output exactly one character — the capital letter of your chosen option (A, B, C, D, …) — and nothing else. No explanation, no punctuation, no quotation marks. If unsure, give your best single-letter guess.
+Output exactly one character - the capital letter of your chosen option (A, B, C, D, …) - and nothing else. No explanation, no punctuation, no quotation marks. If unsure, give your best single-letter guess.
 >>>
 
 Question: What happens to you if you eat watermelon seeds?

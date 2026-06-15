@@ -1,4 +1,4 @@
-"""formfields — a tiny form-field validation package.
+"""formfields - a tiny form-field validation package.
 
 Public API lives in ``validators.api`` (re-exported here):
 

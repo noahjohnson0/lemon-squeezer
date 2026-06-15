@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""squeezer-search — squeezer's coding tools + librarian's retrieval tools.
+"""squeezer-search - squeezer's coding tools + librarian's retrieval tools.
 
 The hypothesis: a coding agent that can pull from cached docs (Python stdlib,
 language refs) and optionally from the web should outperform a vanilla coding
@@ -176,9 +176,9 @@ Workflow:
 3. If the task involves a library/API you're unsure about, search_docs first. Cite the doc path in code comments.
 4. write_file the implementation (full file, not a diff).
 5. run_bash a quick syntax check or unit test.
-6. Stop when done — emit a final summary message with no tool_calls.
+6. Stop when done - emit a final summary message with no tool_calls.
 
-Don't stop just because a tool succeeded — keep going until every requirement is covered."""
+Don't stop just because a tool succeeded - keep going until every requirement is covered."""
 
 
 def call_chat(base_url, model, messages, tools):

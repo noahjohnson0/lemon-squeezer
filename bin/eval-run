@@ -64,7 +64,7 @@ if [[ "${LEMON_NO_LOCK:-0}" != "1" ]]; then
   done
   echo "$$" > "$LOCK/owner.pid"
 fi
-# We have the lock — promote pending → running. The pending entry is removed
+# We have the lock - promote pending → running. The pending entry is removed
 # now, but the run_dir + .sampling flag will surface us under "Running" instead.
 rm -rf "$PENDING_DIR"
 
@@ -105,7 +105,7 @@ echo
 
 # Optional setup: drop starter files into the workspace before the harness runs.
 # If setup.sh writes a prompt.md into the workspace, prefer that over the eval's
-# static one — lets RAG/needle-haystack evals generate dynamic prompts per run.
+# static one - lets RAG/needle-haystack evals generate dynamic prompts per run.
 if [[ -f "$SETUP" ]]; then
   ( cd "$WS" && bash "$SETUP" "$WS" "$EVAL_DIR" )
   if [[ -f "$WS/prompt.md" ]]; then
@@ -127,7 +127,7 @@ RUN_TIMEOUT="${LEMON_RUN_TIMEOUT:-600}"
 case "$HARNESS" in
   squeezer-critique|squeezer-ensemble|squeezer-architect|squeezer-verify)
     RUN_TIMEOUT="${LEMON_PIPELINE_TIMEOUT:-1800}" ;;
-  # Librarian/cascade harnesses do many search round-trips per turn — they
+  # Librarian/cascade harnesses do many search round-trips per turn - they
   # need longer than coding evals. (gpt-oss:20b on wiki-rag-tool ran 22 min.)
   librarian|librarian-cascade)
     RUN_TIMEOUT="${LEMON_LIBRARIAN_TIMEOUT:-1800}" ;;
@@ -152,7 +152,7 @@ fi
 EXIT=$?
 # Exit 124 = timeout
 if [[ "$EXIT" == "124" ]]; then
-  echo "[eval-run] HARD TIMEOUT after ${RUN_TIMEOUT}s — killing harness" >> "$RUN_DIR/stderr.log"
+  echo "[eval-run] HARD TIMEOUT after ${RUN_TIMEOUT}s - killing harness" >> "$RUN_DIR/stderr.log"
 fi
 set -e
 WALL=$(( $(date +%s) - START ))
@@ -190,7 +190,7 @@ print(json.dumps({
 }, indent=2))
 PY
 
-# Stop sampler AFTER meta.json is initialized — sampler appends telemetry to it
+# Stop sampler AFTER meta.json is initialized - sampler appends telemetry to it
 if [[ -n "$SAMPLER_PID" && -x "$ROOT/bin/sampler" ]]; then
   "$ROOT/bin/sampler" stop "$RUN_DIR" "$SAMPLER_PID" >/dev/null 2>&1 || true
 fi

@@ -26,7 +26,7 @@ try:
 except Exception as e:
     print("vdiv_vp", 0, repr(e)); print("vdiv_mid", 0, repr(e))
 
-# Three-resistor network — a node connects to gnd through 4 ohm and 5 ohm in parallel,
+# Three-resistor network - a node connects to gnd through 4 ohm and 5 ohm in parallel,
 # fed from vp through 1 ohm. R_par = 4*5/9 = 20/9. V at node = 10 * (20/9)/(1+20/9) = 200/29 ≈ 6.8966
 nl2 = "V1 vp gnd 10\nR1 vp a 1\nR2 a gnd 4\nR3 a gnd 5\n"
 try:
@@ -53,7 +53,7 @@ except Exception as e:
 # Truly floating subnetwork: nodes b, c only connect to each other, with no path to gnd
 nl5 = "V1 vp gnd 10\nR1 vp a 100\nR2 a gnd 200\nR3 b c 50\n"
 try:
-    solve(nl5); print("floating_raises", 0, "no raise — must reject singular system")
+    solve(nl5); print("floating_raises", 0, "no raise - must reject singular system")
 except ValueError: print("floating_raises", 1)
 except Exception as e: print("floating_raises", 0, repr(e))
 PY

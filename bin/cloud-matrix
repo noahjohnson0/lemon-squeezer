@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""cloud-matrix — drive the whole Fable-destroyer experiment.
+"""cloud-matrix - drive the whole Fable-destroyer experiment.
 
 Runs every ARM (a single OpenRouter model, or a multi-model MIX) across the eval
 SUITE for N trials, in parallel, with a single safe writer to runs.jsonl and a
@@ -14,12 +14,12 @@ Design notes
 ------------
 * Cells are ordered round-robin: trial-0 of (eval0 × all arms), then trial-0 of
   (eval1 × all arms), ... so if the budget cuts us off early we still have a
-  COMPLETE cross-arm comparison on a prefix of the suite — the cleanest partial.
+  COMPLETE cross-arm comparison on a prefix of the suite - the cleanest partial.
 * Budget is enforced as runs complete; in-flight work can overshoot by at most
   (concurrency × per-run cost), so set --budget a little under your real balance.
 * Resumable: a cell is skipped if runs.jsonl already holds `trials` rows for that
   (eval, arm-label, harness) on host=openrouter. Re-run after a top-up to extend.
-* This is HTTP + local rubric scoring only — no GPU, no lock — so it parallelises
+* This is HTTP + local rubric scoring only - no GPU, no lock - so it parallelises
   freely and runs fine on the Windows box.
 
 Env: OPENROUTER_API_KEY (or LEMON_API_KEY).
@@ -163,7 +163,7 @@ def main() -> int:
             print(f"  ... +{len(cells)-40} more")
         return 0
     if not cells:
-        print("nothing to do — every cell already has enough trials.")
+        print("nothing to do - every cell already has enough trials.")
         return 0
 
     env = dict(os.environ)

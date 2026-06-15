@@ -1,15 +1,15 @@
 # Refactor the `validators` form-field package
 
-The `validators/` package validates form fields. There are four field modules —
-`email_field.py`, `phone_field.py`, `postcode_field.py`, `name_field.py` — and a
+The `validators/` package validates form fields. There are four field modules -
+`email_field.py`, `phone_field.py`, `postcode_field.py`, `name_field.py` - and a
 public API module `api.py`. Each field module exposes a `check(value)` function
 returning a `(ok, error)` tuple, where `error` is `None` when valid and
 otherwise a short lowercase reason string (e.g. `"required"`, `"invalid email"`).
 
 Two problems:
 
-1. **Duplication.** The "required" guard — the block that rejects missing or
-   blank input with the error `"required"` — has been copy-pasted into all four
+1. **Duplication.** The "required" guard - the block that rejects missing or
+   blank input with the error `"required"` - has been copy-pasted into all four
    field modules. That duplicated logic should live in **one** shared place.
 
 2. **An inconsistency / bug.** Because the guard was copy-pasted, the copies

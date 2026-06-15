@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""librarian — single-purpose RAG agent harness.
+"""librarian - single-purpose RAG agent harness.
 
 Modeled on squeezer.py but with a different toolset: instead of read/write/bash,
 the agent gets retrieval tools over one or more local corpora (FTS5) plus an
 optional web search. The point is to test how well a local model behaves as a
-"librarian" — pull facts from references, ground answers, abstain when the
+"librarian" - pull facts from references, ground answers, abstain when the
 corpus doesn't contain the answer.
 
 Tools exposed:
@@ -13,7 +13,7 @@ Tools exposed:
   - web_search(query, top_k=5)            # only if --allow-web
   - write_answer(text)                    # writes workspace/answer.txt and ENDS the loop
 
-Corpora are passed in via $LEMON_CORPORA — colon-separated "name=path" pairs:
+Corpora are passed in via $LEMON_CORPORA - colon-separated "name=path" pairs:
   LEMON_CORPORA="wiki=/Users/noahjohnson0/refs/lemon-test:py=/Users/noahjohnson0/refs/python-docs"
 
 If --workspace/context/ exists, those files are added as an implicit corpus
@@ -50,7 +50,7 @@ def _dispatch_search(corpus_dir: Path, query: str, top: int = 5):
 # ───────────────────────── embedding rerank helper ─────────────────────────
 # We use Ollama's /api/embed batch endpoint with nomic-embed-text. Cheap (~50ms
 # for 30 short texts on the 4070). The rerank is what bridges the vocabulary
-# gap between question wording and article wording — the bottleneck the
+# gap between question wording and article wording - the bottleneck the
 # FTS-only librarian couldn't cross.
 
 EMBED_MODEL = os.environ.get("LEMON_EMBED_MODEL", "nomic-embed-text")
@@ -165,8 +165,8 @@ def _question_tokens(question: str) -> list:
 
 def _question_to_fts_variants(question: str) -> list:
     """Generate 2-3 keyword query variants from a natural-language question.
-    Different variants have different recall profiles — long-keyword for
-    distinctiveness, short-keyword for breadth — and the union typically
+    Different variants have different recall profiles - long-keyword for
+    distinctiveness, short-keyword for breadth - and the union typically
     finds the right article even when a single variant misses."""
     tokens = _question_tokens(question)
     if not tokens:
@@ -174,7 +174,7 @@ def _question_to_fts_variants(question: str) -> list:
     variants = []
     # Variant 1: all content tokens (up to 12)
     variants.append(" ".join(tokens[:12]))
-    # Variant 2: top 4-5 by length (proxy for distinctiveness — longer
+    # Variant 2: top 4-5 by length (proxy for distinctiveness - longer
     # words tend to be more specific / less common)
     by_len = sorted(set(tokens), key=lambda t: -len(t))
     if len(by_len) >= 3:
@@ -250,7 +250,7 @@ def make_tools(workspace: Path, corpora: dict[str, Path], allow_web: bool, embed
     def search_multi(queries: list, corpora_list: list = None, top_k_per_query: int = 3) -> str:
         """Multi-query expansion: run several search queries across one or more
         corpora and return the deduplicated, interleaved top results. This is
-        the big lever for RAG recall — passing 3-5 paraphrased queries across
+        the big lever for RAG recall - passing 3-5 paraphrased queries across
         the right corpora typically lifts retrieval accuracy by 10-20pp."""
         if not corpora:
             return "ERROR: no corpora configured"
@@ -298,7 +298,7 @@ def make_tools(workspace: Path, corpora: dict[str, Path], allow_web: bool, embed
                         top_fts_per_corpus: int = 4, top_rerank: int = 8) -> str:
         """Hybrid retrieval: FTS5 keyword fan-out across corpora, then EMBEDDING
         rerank using nomic-embed-text. This bridges the vocabulary gap that
-        single-query FTS5 can't cross — "EPA bleach water disinfection" won't
+        single-query FTS5 can't cross - "EPA bleach water disinfection" won't
         match "Household chlorine treatment for emergency drinking water" by
         keyword, but their embeddings are close. Typical published lift over
         FTS-only is +20-40pp on factoid retrieval.
@@ -387,7 +387,7 @@ def make_tools(workspace: Path, corpora: dict[str, Path], allow_web: bool, embed
             return f"ERROR: unknown corpus '{corpus}'. Available: {list(corpora)}"
         corpus_dir = corpora[corpus]
         # ZIM-backed: fetch the article from kiwix-serve.
-        # Defensively strip a leading book-name prefix — the model sometimes
+        # Defensively strip a leading book-name prefix - the model sometimes
         # includes it from memory even though search_semantic now shows the
         # bare slug.
         if _is_zim_corpus(corpus_dir):
@@ -414,7 +414,7 @@ def make_tools(workspace: Path, corpora: dict[str, Path], allow_web: bool, embed
     def web_search(query: str, top_k: int = 5) -> str:
         if not allow_web:
             return "ERROR: web access disabled (this is offline mode)"
-        # DuckDuckGo HTML — no API key, no JS. Best effort.
+        # DuckDuckGo HTML - no API key, no JS. Best effort.
         url = "https://duckduckgo.com/html/?" + urllib.parse.urlencode({"q": query})
         req = urllib.request.Request(url, headers={"User-Agent": "lemon-librarian/0.1"})
         try:
@@ -422,7 +422,7 @@ def make_tools(workspace: Path, corpora: dict[str, Path], allow_web: bool, embed
                 html = r.read().decode("utf-8", "replace")
         except Exception as e:
             return f"ERROR: {e!r}"
-        # Rough scrape — DDG result anchors
+        # Rough scrape - DDG result anchors
         import re
         hits = re.findall(r'class="result__a"[^>]*href="([^"]+)"[^>]*>([^<]+)</a>', html)
         if not hits:
@@ -436,7 +436,7 @@ def make_tools(workspace: Path, corpora: dict[str, Path], allow_web: bool, embed
     def write_answer(text: str) -> str:
         (workspace / "answer.txt").write_text(text)
         state["answer_written"] = True
-        return f"OK: answer.txt ({len(text)} bytes). End of session — no further tool calls needed."
+        return f"OK: answer.txt ({len(text)} bytes). End of session - no further tool calls needed."
 
     return (
         {
@@ -465,11 +465,11 @@ def make_schema(corpora: dict[str, Path], allow_web: bool) -> list[dict]:
         }},
         {"type": "function", "function": {
             "name": "search_semantic",
-            "description": "STRONGLY PREFERRED for new questions. Hybrid retrieval: FTS5 keyword fan-out across corpora + EMBEDDING RERANK using a local embedding model (nomic-embed-text). This bridges the vocabulary gap between question wording and article wording that FTS alone cannot — 'EPA bleach water disinfection' will find articles titled 'Household chlorine for emergency drinking water' because their embeddings are close. Returns snippets sorted by question↔snippet cosine similarity with a sim= score per result. Slower than search_local (~1-3s overhead per call) but dramatically better recall.",
+            "description": "STRONGLY PREFERRED for new questions. Hybrid retrieval: FTS5 keyword fan-out across corpora + EMBEDDING RERANK using a local embedding model (nomic-embed-text). This bridges the vocabulary gap between question wording and article wording that FTS alone cannot - 'EPA bleach water disinfection' will find articles titled 'Household chlorine for emergency drinking water' because their embeddings are close. Returns snippets sorted by question↔snippet cosine similarity with a sim= score per result. Slower than search_local (~1-3s overhead per call) but dramatically better recall.",
             "parameters": {"type": "object", "required": ["question"], "properties": {
-                "question": {"type": "string", "description": "The question or topic you're researching. Use natural language — the embedder handles paraphrase."},
+                "question": {"type": "string", "description": "The question or topic you're researching. Use natural language - the embedder handles paraphrase."},
                 "corpora_list": {"type": "array", "items": {"type": "string", "enum": corpus_names},
-                                 "description": "Optional subset of corpora to search. If omitted, searches ALL configured corpora — usually right for a first attempt."},
+                                 "description": "Optional subset of corpora to search. If omitted, searches ALL configured corpora - usually right for a first attempt."},
                 "top_fts_per_corpus": {"type": "integer", "default": 4, "minimum": 1, "maximum": 10},
                 "top_rerank": {"type": "integer", "default": 8, "minimum": 1, "maximum": 20},
             }},
@@ -479,9 +479,9 @@ def make_schema(corpora: dict[str, Path], allow_web: bool) -> list[dict]:
             "description": "PREFERRED retrieval entrypoint. Multi-query, multi-corpus search: pass 3-5 PARAPHRASED queries (synonyms, technical vs. lay terms, narrow vs. broad) and optionally a subset of corpora; returns the deduplicated, interleaved best hits. This dramatically improves recall when a single FTS query would miss the answer because of vocabulary mismatch.",
             "parameters": {"type": "object", "required": ["queries"], "properties": {
                 "queries": {"type": "array", "items": {"type": "string"},
-                            "description": "3-5 paraphrased search queries. Make them DIVERSE — synonyms, technical-vs-lay, narrow-vs-broad. Example: ['EPA bleach water disinfection', 'sodium hypochlorite drinking water dose', 'emergency water purification chlorine ratio']."},
+                            "description": "3-5 paraphrased search queries. Make them DIVERSE - synonyms, technical-vs-lay, narrow-vs-broad. Example: ['EPA bleach water disinfection', 'sodium hypochlorite drinking water dose', 'emergency water purification chlorine ratio']."},
                 "corpora_list": {"type": "array", "items": {"type": "string", "enum": corpus_names},
-                                 "description": "Optional subset of corpora. If omitted or empty, searches ALL configured corpora — usually the right default for a first attempt."},
+                                 "description": "Optional subset of corpora. If omitted or empty, searches ALL configured corpora - usually the right default for a first attempt."},
                 "top_k_per_query": {"type": "integer", "default": 3, "minimum": 1, "maximum": 10},
             }},
         }},
@@ -495,14 +495,14 @@ def make_schema(corpora: dict[str, Path], allow_web: bool) -> list[dict]:
         }},
         {"type": "function", "function": {
             "name": "write_answer",
-            "description": "Write the FINAL answer to the user's question. Calling this ends the session — only call it once you have everything you need.",
+            "description": "Write the FINAL answer to the user's question. Calling this ends the session - only call it once you have everything you need.",
             "parameters": {"type": "object", "required": ["text"], "properties": {"text": {"type": "string"}}},
         }},
     ]
     if allow_web:
         s.append({"type": "function", "function": {
             "name": "web_search",
-            "description": "Search the public web (DuckDuckGo). Returns title + URL only — read_local cannot fetch URLs. Use sparingly; prefer search_local first.",
+            "description": "Search the public web (DuckDuckGo). Returns title + URL only - read_local cannot fetch URLs. Use sparingly; prefer search_local first.",
             "parameters": {"type": "object", "required": ["query"], "properties": {
                 "query": {"type": "string"},
                 "top_k": {"type": "integer", "default": 5},
@@ -516,18 +516,18 @@ SYSTEM_PROMPT = """You are a careful research librarian. You answer the user's q
 CRITICAL RETRIEVAL STRATEGY:
 You have a HYBRID retrieval tool, search_semantic, that does FTS5 keyword search across every corpus AND reranks the candidates by embedding similarity to your question. This bridges the vocabulary gap that pure keyword search can't cross.
 
-Your FIRST action on almost every question should be search_semantic with the original question phrased naturally. The embedder handles paraphrase — you don't need to think up synonyms.
+Your FIRST action on almost every question should be search_semantic with the original question phrased naturally. The embedder handles paraphrase - you don't need to think up synonyms.
 
-Example — question: "How long should I boil cloudy water at sea level to make it safe to drink?"
+Example - question: "How long should I boil cloudy water at sea level to make it safe to drink?"
   GOOD: search_semantic(question="how long boil cloudy water to make it safe to drink at sea level")
-  BAD:  search_local(query="boil water") — too narrow, will miss articles using different wording
+  BAD:  search_local(query="boil water") - too narrow, will miss articles using different wording
 
 Workflow:
-1. FIRST CALL — search_semantic with the question phrased naturally. Look at the sim= scores; sim ≥ 0.65 is usually a strong match, sim ≥ 0.55 is plausible, sim < 0.50 is shaky.
+1. FIRST CALL - search_semantic with the question phrased naturally. Look at the sim= scores; sim ≥ 0.65 is usually a strong match, sim ≥ 0.55 is plausible, sim < 0.50 is shaky.
 2. If a top-ranked snippet contains the answer, skip directly to write_answer.
-3. If no snippet is sufficient (top sim too low or snippets don't contain the specific fact), call read_local on the 1-3 most-promising articles to see the full text. The path comes from the search result line (looks like "corpus::path") — pass JUST the path part to read_local with corpus="<corpus_name>".
-4. If a question's answer is truly absent across every relevant corpus even after reading the most-promising articles, say "I don't know — the available references don't contain this." Do NOT guess from prior knowledge.
-5. When you cite a fact, put the corpus::path slug in parentheses, e.g. "(wikipedia-en::Standard_gravity)". Do NOT add a .md / .html suffix — these are kiwix-served articles, not markdown files.
+3. If no snippet is sufficient (top sim too low or snippets don't contain the specific fact), call read_local on the 1-3 most-promising articles to see the full text. The path comes from the search result line (looks like "corpus::path") - pass JUST the path part to read_local with corpus="<corpus_name>".
+4. If a question's answer is truly absent across every relevant corpus even after reading the most-promising articles, say "I don't know - the available references don't contain this." Do NOT guess from prior knowledge.
+5. When you cite a fact, put the corpus::path slug in parentheses, e.g. "(wikipedia-en::Standard_gravity)". Do NOT add a .md / .html suffix - these are kiwix-served articles, not markdown files.
 6. When you have a complete answer, call write_answer ONCE with the full final text. Do not call any tools after write_answer.
 
 Be concise. Prefer numbers and short factual sentences over prose.
@@ -563,7 +563,7 @@ def main():
 
     corpora = parse_corpora(os.environ.get("LEMON_CORPORA"), workspace)
     if not corpora:
-        print("[librarian] WARN: no corpora available — search_local will always error", file=sys.stderr)
+        print("[librarian] WARN: no corpora available - search_local will always error", file=sys.stderr)
 
     tool_impls, state = make_tools(workspace, corpora, args.allow_web,
                                    embed_base=_ollama_base_for_embed(args.base_url))

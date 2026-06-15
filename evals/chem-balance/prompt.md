@@ -17,7 +17,7 @@ def balance(equation: str) -> tuple[list[int], list[int]]:
 
 Requirements:
 - Parse formulas with multi-letter elements (e.g. `Fe`, `Cl`), digit subscripts (e.g. `H2O`, `Al2(SO4)3`), and parenthesised groups.
-- Solve the balancing as a linear-algebra problem (build the element-count matrix, find a positive integer null-vector). You may use `numpy`, `scipy`, `sympy`, `fractions`, `math.gcd`, etc. — whatever you need. Do NOT hardcode answers per equation.
+- Solve the balancing as a linear-algebra problem (build the element-count matrix, find a positive integer null-vector). You may use `numpy`, `scipy`, `sympy`, `fractions`, `math.gcd`, etc. - whatever you need. Do NOT hardcode answers per equation.
 - Coefficients must be reduced to smallest positive integers (no common factor > 1).
 - For unbalanceable input, raise `ValueError`.
 

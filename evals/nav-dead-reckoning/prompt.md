@@ -36,7 +36,7 @@ def reckon_track(start: tuple[float, float],
 ```
 
 Reference: from (40.0, -74.0), heading 90° at 10 kt for 1 hour should give
-approximately (40.000, -73.782) — about 18.5 km east. Normalize output
+approximately (40.000, -73.782) - about 18.5 km east. Normalize output
 longitude to [-180, 180).
 
 Save your code to `reckon.py` in the workspace root.

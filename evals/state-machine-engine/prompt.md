@@ -2,15 +2,15 @@
 
 You are implementing a small, reusable **finite state-machine engine** plus a
 concrete **order lifecycle** definition that runs on top of it. The starter
-files in this workspace contain stub signatures and docstrings only — fill them
+files in this workspace contain stub signatures and docstrings only - fill them
 in. Do **not** change the public names, signatures, or module layout; the test
 harness imports these exact symbols.
 
 ## Files
 
-- `engine.py` — the generic, domain-agnostic engine: the `StateMachine` class,
+- `engine.py` - the generic, domain-agnostic engine: the `StateMachine` class,
   the `Transition` dataclass/record, and the `InvalidTransition` exception.
-- `order_workflow.py` — uses `engine.py` to build the order state machine
+- `order_workflow.py` - uses `engine.py` to build the order state machine
   (`build_order_machine()`), plus the guard functions it references.
 
 You may NOT add third-party dependencies. Standard library only.
@@ -21,7 +21,7 @@ You may NOT add third-party dependencies. Standard library only.
 
 ### `class InvalidTransition(Exception)`
 Raised when a transition is attempted that is not allowed from the current
-state, or whose guard rejects it. Already declared as a stub — keep it a
+state, or whose guard rejects it. Already declared as a stub - keep it a
 subclass of `Exception`.
 
 ### `class Transition`
@@ -31,7 +31,7 @@ A record describing one allowed edge. It has these attributes:
 - `dest` (str): the state the machine moves to.
 - `guard` (callable or None): optional `guard(machine, **kwargs) -> bool`.
   When present and it returns a falsy value, the transition is **rejected**
-  (treated exactly like a disallowed transition — see `fire` below).
+  (treated exactly like a disallowed transition - see `fire` below).
 
 ### `class StateMachine`
 
@@ -75,7 +75,7 @@ Methods:
 
 - `available_events() -> list[str]`
   The sorted, de-duplicated list of event names that have **any** transition
-  from the current state (ignoring guards — purely structural).
+  from the current state (ignoring guards - purely structural).
 
 ---
 
@@ -104,7 +104,7 @@ with side-branches `cancelled` and `refunded`.
 - `refund`    : `paid`     -> `refunded`
 - `refund`    : `shipped`  -> `refunded`
 
-Note `cancel` and `refund` are each used by multiple edges — that's expected;
+Note `cancel` and `refund` are each used by multiple edges - that's expected;
 the right edge is selected by the current state.
 
 ### Guard: `has_funds(machine, **kwargs) -> bool`

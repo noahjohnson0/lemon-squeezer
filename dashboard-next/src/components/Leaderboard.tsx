@@ -10,7 +10,7 @@ function ScoreCell({ s, runId, onClick }: { s: number; runId?: string; onClick?:
       className={`score-${cls} px-2 py-1 rounded text-xs font-bold tabular-nums min-w-[36px] text-center transition-transform hover:scale-110 disabled:cursor-default`}
       disabled={!runId}
     >
-      {Number.isFinite(s) ? s : "–"}
+      {Number.isFinite(s) ? s : "-"}
     </button>
   );
 }
@@ -143,7 +143,7 @@ export default function Leaderboard({
                           {c ? (
                             <ScoreCell s={c.score_pct} runId={c.run_id} onClick={onSelectRun} />
                           ) : (
-                            <span className="score-empty px-2 py-1 rounded text-xs">–</span>
+                            <span className="score-empty px-2 py-1 rounded text-xs">-</span>
                           )}
                         </td>
                       ))}

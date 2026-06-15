@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""inflight-watcher — write a static inflight.json describing currently-running evals.
+"""inflight-watcher - write a static inflight.json describing currently-running evals.
 
 Polls runs/ for directories that DON'T yet have meta.json (== unfinished) and surfaces
 them with their elapsed time, latest GPU sample, and last stdout line.
 
 inflight.json is just a static file. When this script isn't running, the file goes stale
-and the dashboard treats it as "no live runs". Works fine on GH Pages — just always empty
+and the dashboard treats it as "no live runs". Works fine on GH Pages - just always empty
 because nothing's writing it remotely.
 """
 from __future__ import annotations
@@ -111,7 +111,7 @@ def scan() -> list[dict]:
     return out
 
 def scan_pending() -> list[dict]:
-    """Read pending/<pid>/info entries — runs queued waiting for the GPU lock."""
+    """Read pending/<pid>/info entries - runs queued waiting for the GPU lock."""
     out = []
     if not PENDING.exists(): return out
     now = time.time()
@@ -125,7 +125,7 @@ def scan_pending() -> list[dict]:
                 if "=" in line:
                     k, _, v = line.partition("=")
                     info[k.strip()] = v.strip()
-            # Drop stale entries — owner PID dead
+            # Drop stale entries - owner PID dead
             try:
                 pid = int(info.get("pid", "0"))
                 if pid > 0:
@@ -154,7 +154,7 @@ def main() -> None:
             tmp.write_text(json.dumps(data, indent=2))
             tmp.replace(OUT)
         except Exception as e:
-            # Don't die — just skip this tick
+            # Don't die - just skip this tick
             print(f"[inflight-watcher] tick failed: {e!r}", flush=True)
         time.sleep(INTERVAL)
 

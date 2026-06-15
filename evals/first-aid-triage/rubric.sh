@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# first-aid-triage — START protocol on 5 patients.
+# first-aid-triage - START protocol on 5 patients.
 # Expected: P1=GREEN, P2=BLACK, P3=RED, P4=GREEN, P5=RED
 set -u
 WS="${1:?workspace}"
@@ -35,7 +35,7 @@ if [[ -f "$A" ]]; then
     fi
   done
 
-  # Justification quality — looks for keywords linking to START rules
+  # Justification quality - looks for keywords linking to START rules
   if grep -qiE 'walk|walking|ambulat' "$A"; then
     add "uses_walk_rule" 1 5
   else

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""search — query a corpus's FTS5 index and return ranked sections as JSON.
+"""search - query a corpus's FTS5 index and return ranked sections as JSON.
 
 Used both as a CLI and imported by the librarian harness's tool.
 

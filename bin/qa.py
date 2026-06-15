@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""qa — single-turn / RAG-turn harness for non-agentic evals.
+"""qa - single-turn / RAG-turn harness for non-agentic evals.
 
 Reads a prompt with a special structure (see below), sends ONE chat-completion
 to the OpenAI-compatible endpoint, writes the model's text response into the
@@ -7,10 +7,10 @@ workspace as `answer.txt`. The eval rubric scores `answer.txt`.
 
 Optional RAG mode: if the eval workspace contains a `context/` directory with
 files in it, those files are concatenated into a system message before the
-user prompt. This is the "librarian" pattern — the agent has retrieved
+user prompt. This is the "librarian" pattern - the agent has retrieved
 documents and must answer faithfully from them.
 
-Prompt file format (no special syntax — entire file becomes the user message
+Prompt file format (no special syntax - entire file becomes the user message
 unless these fences appear):
 
     <<<system
@@ -20,7 +20,7 @@ unless these fences appear):
     What is the population of Tokyo according to the documents?
 
 If `<<<system ... >>>` appears, those lines become the system message; the
-rest is the user message. (Normal markdown is fine — only that exact marker
+rest is the user message. (Normal markdown is fine - only that exact marker
 is special.)
 """
 from __future__ import annotations
@@ -31,7 +31,7 @@ SYSTEM_RE = re.compile(r"<<<system\n(.*?)\n>>>\n?", re.DOTALL)
 DEFAULT_SYSTEM = (
     "You are a careful research assistant. Answer the user's question. "
     "If retrieved context documents are provided, ONLY use facts present in "
-    "them — never invent. If the answer isn't in the context, say 'I don't "
+    "them - never invent. If the answer isn't in the context, say 'I don't "
     "know' and stop. When you cite a fact, name the source filename."
 )
 

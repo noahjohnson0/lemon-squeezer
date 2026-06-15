@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# lemon — daily-driver CLI on top of the lemon-squeezer infrastructure.
+# lemon - daily-driver CLI on top of the lemon-squeezer infrastructure.
 #
 # Commands:
 #   lemon ask "<question>" [--web]              # one-shot librarian Q&A
@@ -32,7 +32,7 @@ CODE_MODEL="${LEMON_CODE_MODEL:-qwen3-coder:30b-a3b-q4_K_M}"
 LIB_MODEL="${LEMON_LIBRARIAN_MODEL:-gpt-oss:20b}"
 FAST_MODEL="${LEMON_FAST_MODEL:-qwen3:8b}"
 
-# Default corpora — registered if their FTS5 index OR a ZIM conf is present
+# Default corpora - registered if their FTS5 index OR a ZIM conf is present
 default_corpora() {
   local out=""
   for c in lemon-test python-docs node-docs rust-docs dlmf-math wikipedia-en medical; do
@@ -59,7 +59,7 @@ m = dict(c.execute("SELECT key,value FROM meta").fetchall())
 print(f"  {sys.argv[1].split('/')[-2]:20} docs={m.get('n_docs','?'):>5}  sections={m.get('n_sections','?'):>6}  built={m.get('built_at','?')}")
 PY
   done
-  # ZIM-backed corpora (served by kiwix-serve) — no FTS5 index, listed separately
+  # ZIM-backed corpora (served by kiwix-serve) - no FTS5 index, listed separately
   for conf in "$HOME"/refs/*/.lemon-zim.conf; do
     found=1
     local dir; dir="$(dirname "$conf")"
@@ -70,7 +70,7 @@ PY
     printf "  %-20s zim    book=%s  via=%s\n" "$name" "$book" "$base"
   done
   if (( found == 0 )); then
-    echo "  (none — build with: bin/refs/build_index.py ~/refs/<name>)"
+    echo "  (none - build with: bin/refs/build_index.py ~/refs/<name>)"
   fi
 }
 
@@ -101,7 +101,7 @@ route_for() {
      && echo "$q_lc" | grep -qE '\b(how|why|what|use|using|with|in|to)\b'; then
     echo "code:$CODE_MODEL"; return
   fi
-  # Math/scientific reasoning — answer with a strong model, not necessarily RAG
+  # Math/scientific reasoning - answer with a strong model, not necessarily RAG
   if echo "$q_lc" | grep -qE '\b(derivative|integral|matrix|eigen|fourier|theorem|prove|equation|tflops|simulate|differential|partial|gradient)\b'; then
     echo "librarian:$LIB_MODEL:default"; return
   fi
@@ -133,7 +133,7 @@ cmd_librarian() {
       *) echo "unknown: $1" >&2; exit 2;;
     esac
   done
-  [[ -z "$corpora" ]] && { echo "no corpora — run: bin/refs/build_index.py ~/refs/lemon-test" >&2; exit 3; }
+  [[ -z "$corpora" ]] && { echo "no corpora - run: bin/refs/build_index.py ~/refs/lemon-test" >&2; exit 3; }
 
   local ws; ws="$(mktemp -d)/ws"; mkdir -p "$ws/run"
   echo "$q" > "$ws/prompt.md"

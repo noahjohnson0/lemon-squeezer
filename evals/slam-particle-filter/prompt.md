@@ -23,7 +23,7 @@ class ParticleFilter:
 
 Implementation notes:
 - Use numpy if available; pure-python lists are also fine
-- Particles can move outside [0, corridor_length] during prediction — that's OK; they'll get low weight on update
+- Particles can move outside [0, corridor_length] during prediction - that's OK; they'll get low weight on update
 - Weights must be normalized before resampling
 - Use deterministic randomness: seed numpy/random at module load with seed=42 OR provide a way for the test to seed it
 

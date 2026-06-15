@@ -15,7 +15,7 @@ if [[ -f "$T" ]]; then
   python3 -m py_compile "$T" 2>/dev/null && add "compiles" 1 5 || add "compiles" 0 5
 
   # Spin up a known-listening socket on a random high port, plus a known-closed port nearby.
-  # Then ask scanner to classify them along with a "filtered" port (firewall-style timeout — we use a non-routable IP).
+  # Then ask scanner to classify them along with a "filtered" port (firewall-style timeout - we use a non-routable IP).
   RES=$(cd "$WS" && gtimeout 20 python3 - <<'PY' 2>&1
 import socket, threading, sys, time
 try:
@@ -48,11 +48,11 @@ result = scan("127.0.0.1", ports, timeout=0.5)
 print("open_state", result.get(open_port))
 print("closed_state", result.get(closed_port))
 
-# 3) filtered: scan a non-routable IP — should hit timeout
+# 3) filtered: scan a non-routable IP - should hit timeout
 result2 = scan("10.255.255.1", [80], timeout=0.5)
 print("filtered_state", result2.get(80))
 
-# 4) bulk test (200 ports against localhost, all closed) — checks no socket leak
+# 4) bulk test (200 ports against localhost, all closed) - checks no socket leak
 many = list(range(40000, 40200))
 result3 = scan("127.0.0.1", many, timeout=0.2)
 print("bulk_count", len(result3))

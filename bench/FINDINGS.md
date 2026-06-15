@@ -1,4 +1,4 @@
-# Grid-down RAG findings — 2026-05-12
+# Grid-down RAG findings - 2026-05-12
 
 A session-long investigation of "can a local LLM on an RTX 4070 act as a
 grid-down expert on practical questions (medical, 3D printing, radio,
@@ -14,7 +14,7 @@ corpora        23 ZIM files served by kiwix-serve on port 8090, ~90 GB total
                Wikipedia (full), iFixit, Appropedia, WikiBooks, WikiMed,
                10 Stack Exchange dumps, LibreTexts (eng/med/workforce),
                Project Gutenberg LCC subsets (T/R/U/S)
-eval           bench/gridown-50.jsonl — 51 practical factoid questions across
+eval           bench/gridown-50.jsonl - 51 practical factoid questions across
                11 domains, substring-scored against gold-answer aliases
 ```
 
@@ -31,14 +31,14 @@ question → search_semantic
 ```
 
 Implemented harnesses (in order of increasing sophistication):
-- `bin/librarian.py` — naive single-query FTS, baseline
-- `bin/librarian-mq.py` — multi-query expansion (`search_multi`)
-- `bin/librarian-sem.py` — FTS + cosine embedding rerank (`search_semantic`)
-- `bin/librarian-rerank.py` — sem + LLM listwise rerank (cross-encoder-style)
+- `bin/librarian.py` - naive single-query FTS, baseline
+- `bin/librarian-mq.py` - multi-query expansion (`search_multi`)
+- `bin/librarian-sem.py` - FTS + cosine embedding rerank (`search_semantic`)
+- `bin/librarian-rerank.py` - sem + LLM listwise rerank (cross-encoder-style)
 
 ## The numbers
 
-### Stage A — gridown-50, single-pass (baseline)
+### Stage A - gridown-50, single-pass (baseline)
 | Model | Score | Wall/Q | Notes |
 |---|---|---|---|
 | qwen3:14b | **35.3%** | 25.8s | Best baseline |
@@ -46,9 +46,9 @@ Implemented harnesses (in order of increasing sophistication):
 | command-r7b | 23.5% | 1.2s | 0 tool calls (Ollama tools broken); answers from training |
 | gpt-oss:20b | 15.7% | 40.0s | Abstain-heavy |
 | mistral-small:24b | 9.8% | 25.5s | Surprisingly weak |
-| phi4:14b | 0.0% | 0.1s | Ollama "phi4 does not support tools" — invalid |
+| phi4:14b | 0.0% | 0.1s | Ollama "phi4 does not support tools" - invalid |
 
-### Stage A-sem — semantic rerank (the +7.8pp lift)
+### Stage A-sem - semantic rerank (the +7.8pp lift)
 | Model | Score | vs baseline | Wall/Q |
 |---|---|---|---|
 | qwen3:14b | **43.1%** | **+7.8pp** | 33.3s |
@@ -71,7 +71,7 @@ NATO Delta cited correctly but regex wanted exact substring, etc.
 
 2 substring-hits were actually wrong (gave homemade ORS values, not WHO).
 
-### 2026-05-13 update — qwen3:8b is the new SOTA, judge re-grading at scale
+### 2026-05-13 update - qwen3:8b is the new SOTA, judge re-grading at scale
 
 After the 24h extended sweep, the cleanest picture:
 
@@ -80,10 +80,10 @@ model                   substring  judge    lift
 ─────────────────────────────────────────────────
 qwen3:8b                  49.0%   68.6%   +19.6pp  ⭐ SOTA
 qwen3:14b                 43.1%   54.9%   +11.8pp
-granite3.3:8b             31.4%   49.0%   +17.6pp  (no tool calls — training-baseline)
+granite3.3:8b             31.4%   49.0%   +17.6pp  (no tool calls - training-baseline)
 gemma4:e4b                35.3%   41.2%    +5.9pp
 qwen2.5:14b               19.6%   25.5%    +5.9pp
-mistral-nemo:12b          41.2%      —     (not yet judged)
+mistral-nemo:12b          41.2%      -     (not yet judged)
 gpt-oss:20b               15.7%   23.5%    +7.8pp
 mistral-small:24b         13.7%   19.6%    +5.9pp
 ```
@@ -101,9 +101,9 @@ Key insights from the extended runs:
 - **The +21pp Claude-judge methodology reproduces locally** with qwen3:14b as the judge
   (qwen3:8b: 49.0%→68.6%, +19.6pp; closely matches our manual Claude grade at 64.7%).
 
-### Stage A-rerank — LLM listwise rerank (ACTUAL RESULT: regression)
+### Stage A-rerank - LLM listwise rerank (ACTUAL RESULT: regression)
 Smoke test on 3 known-failing Qs: 2 of 3 newly correct, predicted
-+15-20pp lift. Full sweep delivered **25.5% — a -17.6pp REGRESSION from
++15-20pp lift. Full sweep delivered **25.5% - a -17.6pp REGRESSION from
 sem and -9.8pp from baseline**. The "use a 4B chat model as a listwise
 reranker via JSON prompt" approximation is fundamentally weaker than
 the literature's "use a dedicated cross-encoder model via reranker
@@ -112,11 +112,11 @@ even when it gets simple cases right.
 
 **Lesson**: smoke tests on cherry-picked failing Qs don't predict
 full-sweep results. A 2/3 fix rate on 3 specific Qs doesn't generalize
-when the other 48 weren't failures to begin with — the rerank can
+when the other 48 weren't failures to begin with - the rerank can
 DOWNGRADE previously-correct retrievals by replacing them with worse
 LLM-selected ones.
 
-### Stage A-sem — extended model field (post-backfill)
+### Stage A-sem - extended model field (post-backfill)
 | Model | substring | vs baseline | wall/Q |
 |---|---|---|---|
 | qwen3:14b | 43.1% | +7.8pp | 33.3s |
@@ -127,11 +127,11 @@ LLM-selected ones.
 
 **Pattern**: sem benefits scale with the model's ability to engage with
 retrieved snippets. qwen3/gemma4 (the strong extractors) get the full
-+7.8pp. mistral-small gets half. gpt-oss gets nothing — it abstains or
++7.8pp. mistral-small gets half. gpt-oss gets nothing - it abstains or
 confabulates regardless of how good retrieval gets. Model selection
 matters as much as retrieval architecture.
 
-### Stage B-sem — qwen3:14b on TriviaQA (ACTUAL: regression / flat)
+### Stage B-sem - qwen3:14b on TriviaQA (ACTUAL: regression / flat)
 - baseline librarian (N=100): 49.0%
 - librarian-sem (N=200): **47.5% (-1.5pp)**
 
@@ -145,7 +145,7 @@ answer use the same vocabulary. Generalizable rule:
   and answer. Grid-down diverges (model says "EPA bleach water" but
   Wikipedia says "household chlorine treatment"). Trivia doesn't.
 
-### Stage C — corpus ablation (CLEAN FINDING)
+### Stage C - corpus ablation (CLEAN FINDING)
 qwen3:14b × gridown × librarian-sem, varying which corpora are exposed:
 
 | Configuration | Score |
@@ -192,7 +192,7 @@ WRONG-FROM-SNIPPET (2): Extracted wrong info from a real snippet
 
 **Key insight**: failures split roughly 50/50 between under-confidence
 (abstain when answer IS there) and over-confidence (fabricate when not).
-A "cite-or-abstain" prompt — require quoting a snippet for any claim —
+A "cite-or-abstain" prompt - require quoting a snippet for any claim -
 could address both failure modes, but adds verbosity.
 
 ## What's documented but we haven't tried
@@ -216,13 +216,13 @@ could address both failure modes, but adds verbosity.
 | Local 4070 + naive RAG, untouched | 25-35% |
 
 100% is not achievable on this stack regardless of engineering. It's
-not achievable on cloud frontier stacks either — the published cap
+not achievable on cloud frontier stacks either - the published cap
 is ~85% on factoid retrieval at best.
 
 ## The Wikipedia infrastructure
 
 Built but not yet committed beyond benchmark scripts:
-- `/Users/noahjohnson0/refs/<corpus>/.lemon-zim.conf` — registers each
+- `/Users/noahjohnson0/refs/<corpus>/.lemon-zim.conf` - registers each
   ZIM as a queryable corpus pointing at kiwix-serve
 - 23 corpora registered including `wikipedia-en` (the full 48GB ZIM)
 - kiwix-serve on the 4070 at `192.168.0.117:8090` serves all 23 books

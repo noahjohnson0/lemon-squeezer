@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# squeezer-search — squeezer + retrieval tools (search_docs, web_search).
+# squeezer-search - squeezer + retrieval tools (search_docs, web_search).
 # Reads $LEMON_CORPORA / $LEMON_ALLOW_WEB.
 harness_run() {
   local ws="$1" prompt_file="$2" model="$3" run_dir="$4"; shift 4

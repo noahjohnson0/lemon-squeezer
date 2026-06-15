@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Snakebite field treatment — most points are for AVOIDING dangerous folk
+# Snakebite field treatment - most points are for AVOIDING dangerous folk
 # remedies, since wrong first aid kills snakebite victims more than the venom
 # does in non-fatal envenomations.
 set -u
@@ -26,7 +26,7 @@ if [[ -f "$A" ]]; then
   echo "$ans_lc" | grep -qE 'jewelry|ring|watch|tight clothing|remove .* before' \
     && add "remove_jewelry_tight_items" 1 8 || add "remove_jewelry_tight_items" 0 8
 
-  # DO: keep victim calm — reduces heart rate, slowing venom spread
+  # DO: keep victim calm - reduces heart rate, slowing venom spread
   echo "$ans_lc" | grep -qE 'calm|reassur|stay still|reduce activity|minimize movement' \
     && add "keep_victim_calm" 1 8 || add "keep_victim_calm" 0 8
 
@@ -34,20 +34,20 @@ if [[ -f "$A" ]]; then
   echo "$ans_lc" | grep -qE 'mark (the )?(border|edge|advance)|outline|track (the )?swelling|with time|progress' \
     && add "mark_swelling_progress" 1 8 || add "mark_swelling_progress" 0 8
 
-  # DON'T (each is worth real points — wrong advice can harm)
-  # Tourniquet — DANGEROUS for snakebite, must explicitly avoid
+  # DON'T (each is worth real points - wrong advice can harm)
+  # Tourniquet - DANGEROUS for snakebite, must explicitly avoid
   echo "$ans_lc" | grep -qE '(no|never|do not|don.?t|avoid).*tourniquet|tourniquet.*(no|never|do not|don.?t|harmful|avoid)' \
     && add "no_tourniquet" 1 15 || add "no_tourniquet" 0 15 "MISSED critical contraindication"
 
-  # No cut + suck — popular folk treatment that doesn't work and can introduce infection
+  # No cut + suck - popular folk treatment that doesn't work and can introduce infection
   echo "$ans_lc" | grep -qE '(no|never|do not|don.?t|avoid).*(cut|incision|incise|slice|suck|suction)|(cut|suction|incision).*(no|never|do not|don.?t|harmful|avoid|ineffective)' \
     && add "no_cut_or_suction" 1 12 || add "no_cut_or_suction" 0 12
 
-  # No ice — can worsen tissue damage
+  # No ice - can worsen tissue damage
   echo "$ans_lc" | grep -qE '(no|never|do not|don.?t|avoid).*(ice|cold|freez)|ice.*(no|never|do not|don.?t|harmful|avoid)' \
     && add "no_ice" 1 8 || add "no_ice" 0 8
 
-  # No alcohol/caffeine — increases heart rate, speeds venom
+  # No alcohol/caffeine - increases heart rate, speeds venom
   echo "$ans_lc" | grep -qE '(no|never|do not|don.?t|avoid).*(alcohol|caffeine|stimulant)' \
     && add "no_alcohol_caffeine" 1 6 || add "no_alcohol_caffeine" 0 6
 

@@ -40,12 +40,12 @@ if [[ -f "$A" ]]; then
   echo "$ans_lower" | grep -qE 'dress|bandage|cover the wound|gauze|sterile dressing' \
     && add "applies_dressing" 1 8 || add "applies_dressing" 0 8
 
-  # 5. Tetanus — booster recommended if last dose > 5 years for dirty wound
+  # 5. Tetanus - booster recommended if last dose > 5 years for dirty wound
   echo "$ans_lower" | grep -qE 'tetanus' && add "addresses_tetanus" 1 10 || add "addresses_tetanus" 0 10
   echo "$ans_lower" | grep -qE 'booster|update.*tetanus|tetanus.*update|td|tdap' \
     && add "recommends_booster_now" 1 8 || add "recommends_booster_now" 0 8
 
-  # 6. Warning signs — at least 3 distinct: redness, swelling, pus, fever, red streaks, increasing pain
+  # 6. Warning signs - at least 3 distinct: redness, swelling, pus, fever, red streaks, increasing pain
   signs=0
   for term in 'redness|red streak' 'swelling' 'pus|discharge|drain' 'fever|temperature' 'increasing pain|worsening pain' 'spreading|cellulitis'; do
     echo "$ans_lower" | grep -qE "$term" && signs=$((signs+1))

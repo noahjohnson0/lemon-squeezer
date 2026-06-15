@@ -127,7 +127,7 @@ export default function SweepsTable({ sweeps, sort, onSortChange, onSelect, sele
                     <span className="chip">{s.qset}</span>
                   </td>
                   <td className="px-3 py-2">
-                    {s.tag ? <span className="chip">{s.tag}</span> : <span className="text-[var(--muted)]">—</span>}
+                    {s.tag ? <span className="chip">{s.tag}</span> : <span className="text-[var(--muted)]">-</span>}
                   </td>
                   <td className="px-3 py-2 text-right">
                     <span className={`score-${cls} px-2 py-1 rounded text-xs font-bold tabular-nums`}>
@@ -139,13 +139,13 @@ export default function SweepsTable({ sweeps, sort, onSortChange, onSelect, sele
                     <span className="text-[var(--muted)]">/{s.n}</span>
                   </td>
                   <td className="px-3 py-2 text-right tabular-nums text-[var(--muted)]">
-                    {s.wall_seconds_mean?.toFixed(1) ?? "–"}s
+                    {s.wall_seconds_mean?.toFixed(1) ?? "-"}s
                   </td>
                   <td className="px-3 py-2 text-right tabular-nums text-[var(--muted)] whitespace-nowrap">
                     {(s.tokens_in_total ?? 0).toLocaleString()}/{(s.tokens_out_total ?? 0).toLocaleString()}
                   </td>
                   <td className="px-3 py-2 text-right tabular-nums text-[var(--muted)]">
-                    {s.tool_calls_total ?? "–"}
+                    {s.tool_calls_total ?? "-"}
                   </td>
                 </tr>
               );

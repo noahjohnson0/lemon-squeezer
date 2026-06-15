@@ -77,7 +77,7 @@ export default function Page() {
   return (
     <main>
       <Hero runCount={runs.length} />
-      {/* The actual answer — what to run on your GPU. */}
+      {/* The actual answer - what to run on your GPU. */}
       <Headline runs={runs} />
       <LiveRuns data={inflight} />
       {/* Action: filter the rest of the page */}
@@ -87,7 +87,7 @@ export default function Page() {
       <HarnessGap runs={filtered} />
       <HeatmapMatrix runs={filtered} onSelectRun={(id) => setSelectedRunId(id)} />
       <EvalDeepDive runs={filtered} onSelectRun={(id) => setSelectedRunId(id)} />
-      {/* Auxiliary — efficiency / hardware / 3D for fun */}
+      {/* Auxiliary - efficiency / hardware / 3D for fun */}
       <HardwarePanel runs={filtered} />
       <Scatter3D runs={filtered} onSelect={(id) => setSelectedRunId(id)} />
       <StatsBar runs={runs} />

@@ -1,7 +1,7 @@
 # Claude operating manual for `lemon-squeezer`
 
 This file is project-local guidance for any AI agent working in this repo. Read it
-before making changes — it captures conventions and gotchas that aren't obvious
+before making changes - it captures conventions and gotchas that aren't obvious
 from the code alone.
 
 ## What this repo is
@@ -15,7 +15,7 @@ combination actually completes real-world coding tasks.
 
 ```
 bin/
-  eval-run                   # canonical entry point — see Run Lifecycle below
+  eval-run                   # canonical entry point - see Run Lifecycle below
   eval-export                # rebuild runs.jsonl/csv/RUNS.md/findings.md from per-run meta.json
   eval-rescore               # re-derive score_pct from each run's score.json (or re-run rubric)
   eval-list / eval-diff      # CLI reporting helpers
@@ -33,8 +33,8 @@ bin/
 evals/<name>/
   prompt.md                  # the natural-language task
   rubric.sh                  # runs the produced code, emits {checks, gained, total, score_pct} JSON
-  setup.sh                   # OPTIONAL — drops starter files into the workspace
-  files/                     # OPTIONAL — starter file dir
+  setup.sh                   # OPTIONAL - drops starter files into the workspace
+  files/                     # OPTIONAL - starter file dir
 configs/                     # system-prompt augments (--read'd by aider, --system'd by squeezer)
 hosts/                       # per-machine env profiles (4070.env, m4max.env)
 runs/<run_id>/               # one dir per run: workspace + meta.json + score.json + metrics.csv + logs
@@ -47,11 +47,11 @@ dashboard-next/              # Next.js static export, deployed to GitHub Pages
 eval-run [--host <name>] <harness> <eval> <model> <tag> [-- harness-flags...]
 ```
 
-1. Source `~/.config/lemon-squeezer.env` if present (local secrets — gitignored).
+1. Source `~/.config/lemon-squeezer.env` if present (local secrets - gitignored).
 2. If `--host <name>` given, source `hosts/<name>.env` (sets `OLLAMA_API_BASE`,
    `SAMPLER_SSH_TARGET`, `LEMON_HOST`).
 3. Register a pending entry in `pending/<pid>/info` (visible to inflight-watcher).
-4. Acquire **GPU lock** (`mkdir .gpu.lock`) — atomic, blocks while held by
+4. Acquire **GPU lock** (`mkdir .gpu.lock`) - atomic, blocks while held by
    another `eval-run`. Stale lock is reclaimed if owner pid is dead. Set
    `LEMON_NO_LOCK=1` to bypass (don't, unless on a different host).
 5. Compute `RUN_ID = <ts>_<eval>_<harness>_<safe-model>_<tag>`, mkdir
@@ -66,11 +66,11 @@ eval-run [--host <name>] <harness> <eval> <model> <tag> [-- harness-flags...]
 12. Append `meta.json` to `runs.jsonl`, run `eval-export` to refresh
     `runs.csv`, `RUNS.md`, and `dashboard-next/public/findings.md`.
 
-## Cloud runs (OpenRouter) — the local lifecycle's twin
+## Cloud runs (OpenRouter) - the local lifecycle's twin
 
 `bin/cloud-run` is the cloud counterpart of `eval-run`: same prompts, same
 rubrics, but it drives an **open-weight model rented on OpenRouter** instead of
-local Ollama. No GPU, no lock, no telemetry — a cloud run is just HTTP + local
+local Ollama. No GPU, no lock, no telemetry - a cloud run is just HTTP + local
 rubric scoring, so it's safe to parallelise and runs fine on the Windows box.
 
 ```
@@ -111,7 +111,7 @@ $EDITOR evals/<name>/rubric.sh   # see ANY existing rubric for the boilerplate
 chmod +x evals/<name>/rubric.sh
 ```
 
-Self-test it before committing — write a known-good reference impl in `/tmp/`
+Self-test it before committing - write a known-good reference impl in `/tmp/`
 and run the rubric against it; aim for 100% on the reference. Pattern:
 
 ```
@@ -126,7 +126,7 @@ d=json.loads(m.group(0));print(f\"{d['score_pct']}% ({d['gained']}/{d['total']})
 ## Adding a new harness
 
 ```
-$EDITOR bin/harnesses/<name>.sh   # define harness_run() — see existing shims
+$EDITOR bin/harnesses/<name>.sh   # define harness_run() - see existing shims
 chmod +x bin/harnesses/<name>.sh
 ```
 
@@ -151,12 +151,12 @@ harness_run() {
    `repr()` produce invalid JSON escapes; notes containing `"` (e.g. from
    `NameError("name 'EOF' is not defined")`) break the JSON entirely.
    The `add()` helper takes a raw string into a printf `%s`; sanitize the
-   note before storing — at minimum strip backslashes and replace `"` with
+   note before storing - at minimum strip backslashes and replace `"` with
    `'`, or just don't pipe `repr()` exception messages straight into notes.
    robot-arm-ik hit this with a gpt-oss:20b run that emitted a literal
    `EOF` line; the import error message contained a quote and the score.json
    wouldn't parse. `eval-rescore` has a stripper fallback but trust nothing.
-3. **`gtimeout`.** macOS doesn't ship `timeout(1)` — we use `gtimeout` from
+3. **`gtimeout`.** macOS doesn't ship `timeout(1)` - we use `gtimeout` from
    `coreutils`. `brew install coreutils` is a hard dep. Linux CI gets the
    `timeout` fallback in `bin/eval-run`.
 4. **Empty/skipped checks.** Always `add` every check even when a precondition
@@ -185,7 +185,7 @@ predate that rule.
 The sampler runs locally on the orchestrator (the Mac). For remote NVIDIA
 hosts (the Windows 4070), it `ssh`s `nvidia-smi --query-gpu=...` once per
 second. SSH multiplexing was tried and broken (the `-fN` daemon refused to
-start in a redirected-fd subshell); now using a fresh handshake per sample —
+start in a redirected-fd subshell); now using a fresh handshake per sample -
 ugly but reliable. Don't waste time re-trying multiplexing without a careful
 end-to-end smoke test.
 
@@ -239,28 +239,28 @@ dashboard-next/public/findings.md  # auto-regenerated by eval-export
   trained on its XML tool-call format. Local 14B models tend to time out
   rather than produce tool calls. If you add cline as a harness, expect lots
   of zeroes for non-frontier-class models and document that.
-- Aider's `--read` has a basePath quirk on Pages — pass relative paths only.
+- Aider's `--read` has a basePath quirk on Pages - pass relative paths only.
 
 ## Offline-local stack (RAG + retrieval tools)
 
 The point of this stack is to make the 4070 actually useful for daily local
-work — coding with cached docs as ground truth, factual Q&A grounded in
+work - coding with cached docs as ground truth, factual Q&A grounded in
 references, no cloud round-trips.
 
 **Corpora live at `~/refs/<name>/`** on the Mac orchestrator (and on the
-Windows box at `D:\refs\<name>\` — there's 931 GB free on D:). Each corpus is
+Windows box at `D:\refs\<name>\` - there's 931 GB free on D:). Each corpus is
 a directory of `.md` / `.txt` / `.rst` plus a `.lemon-index.db` SQLite FTS5
 index built by `bin/refs/build_index.py`. Build once, query many times via
 `bin/refs/search.py` or via the agent tool `search_local`.
 
 **Two new harnesses use this:**
-- `librarian` — single-purpose RAG Q&A agent (`bin/librarian.py`). Tools:
+- `librarian` - single-purpose RAG Q&A agent (`bin/librarian.py`). Tools:
   `search_local`, `read_local`, `web_search` (gated on `$LEMON_ALLOW_WEB=1`),
   `write_answer` (terminates the loop). Pass corpora via `$LEMON_CORPORA` as
   colon-separated `name=path` pairs. If `workspace/context/` exists, an
-  index is built on-the-fly into a corpus named `context` — that's how
+  index is built on-the-fly into a corpus named `context` - that's how
   `wiki-rag-tool` works without external corpora.
-- `squeezer-search` — squeezer's coding tools (`read_file`/`write_file`/
+- `squeezer-search` - squeezer's coding tools (`read_file`/`write_file`/
   `list_files`/`run_bash`) PLUS `search_docs` and (optional) `web_search`.
   Tests whether grounding helps coding evals.
 
@@ -272,12 +272,12 @@ lemon route "question..."            # show which model+harness would be picked
 lemon ask "question..."  [--web]     # one-shot librarian Q&A
 lemon code "task..."     [--web]     # squeezer (or squeezer-search) coding
 ```
-The router is a heuristic — verbs like "refactor"/"debug"/"implement" and
+The router is a heuristic - verbs like "refactor"/"debug"/"implement" and
 language tokens like "python"/"sql" route to `code:$LEMON_CODE_MODEL`;
 everything else routes to `librarian:$LEMON_LIBRARIAN_MODEL`.
 
 **Eval `wiki-rag-tool`** is the librarian counterpart of `wiki-rag`. Same
-questions, same corpus — but instead of pre-loading the articles into the
+questions, same corpus - but instead of pre-loading the articles into the
 system prompt, the agent must `search_local` for them. The rubric scores
 both correctness AND tool usage (≥2 search calls).
 
@@ -290,4 +290,4 @@ fills `runs/`, `runs.jsonl` updates, dashboard auto-refreshes. Use
 batch survives shell exits.
 
 When they say "M4 Max", point eval-run at `--host m4max`. Don't run M4 evals
-without explicit go-ahead — pulls fine, scoring not.
+without explicit go-ahead - pulls fine, scoring not.

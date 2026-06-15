@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# wiki-full rubric — score a librarian-style RAG agent on full English Wikipedia.
+# wiki-full rubric - score a librarian-style RAG agent on full English Wikipedia.
 #
 # Scoring matches wiki-rag-tool's two-axis pattern:
 #   - did it find the right fact (answer substring)?
@@ -8,7 +8,7 @@
 #   - did it actually USE the tools (≥1 search, ≥1 read per question expected)?
 #
 # Rubric gotcha (CLAUDE.md #1): the rubric's STDOUT becomes score.json.
-# All diagnostic prints in this file are routed to stderr (>&2) — keep it
+# All diagnostic prints in this file are routed to stderr (>&2) - keep it
 # that way. The final JSON is emitted inside one printf block at the end.
 set -u
 WS="${1:?workspace}"
@@ -16,7 +16,7 @@ WS="${1:?workspace}"
 declare -a checks
 add() {
   # name, pass(0/1), weight, optional note. Sanitize the note to avoid the
-  # JSON-escape bug from CLAUDE.md #2 — strip backslashes, swap " for '.
+  # JSON-escape bug from CLAUDE.md #2 - strip backslashes, swap " for '.
   local n="$1" p="$2" w="$3" note="${4:-}"
   [[ "$p" != "1" ]] && p=0
   note="${note//\\/}"
@@ -84,7 +84,7 @@ if [[ -f "$A" ]]; then
     || add "q6_cite" 0 4
 
   # ---- Q7: cobalt-60 half-life ~5.27 years  (article: Cobalt-60) ----
-  # Accept 5.27, 5.2714, or 5.272 — common roundings in physics textbooks.
+  # Accept 5.27, 5.2714, or 5.272 - common roundings in physics textbooks.
   echo "$ans_packed" | grep -qE '5\.(27|2714|272)' \
     && add "q7_halflife" 1 8 \
     || add "q7_halflife" 0 8
@@ -92,7 +92,7 @@ if [[ -f "$A" ]]; then
     && add "q7_cite" 1 4 \
     || add "q7_cite" 0 4
 
-  # ---- Q8: not in Wikipedia — model must abstain ----
+  # ---- Q8: not in Wikipedia - model must abstain ----
   if echo "$ans_lower" | grep -qE "i don'?t know|don'?t know|not (in|provided|present|found)|cannot find|no information|isn'?t (in|mentioned|present)|wikipedia (does|doesn'?t)|not (available|mentioned)"; then
     add "q8_abstain_correctly" 1 12
   elif echo "$ans" | grep -qE 'Q8:[^(]*[0-9]\.[0-9]+'; then
@@ -128,7 +128,7 @@ if [[ -f "$TRACE" ]]; then
     add "used_read_tool" 0 6 "only $n_read read calls"
   fi
 else
-  # Trace file missing — both retrieval checks fail, but keep the denominator
+  # Trace file missing - both retrieval checks fail, but keep the denominator
   # constant (CLAUDE.md #4: always `add` every check).
   add "used_search_tool" 0 8 "no trace file"
   add "used_read_tool"   0 6 "no trace file"

@@ -14,7 +14,7 @@ add "file:balance.py" "$([[ -f "$T" ]] && echo 1 || echo 0)" 5
 if [[ -f "$T" ]]; then
   python3 -m py_compile "$T" 2>/dev/null && add "compiles" 1 5 || add "compiles" 0 5
 
-  # Run a battery of equations — each worth 10 pts
+  # Run a battery of equations - each worth 10 pts
   RES=$(cd "$WS" && gtimeout 10 python3 - <<'PY' 2>&1
 import sys
 try:

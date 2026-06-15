@@ -18,7 +18,7 @@ class PID:
 
 Requirements:
 - Classical PID: output = Kp·e + Ki·∫e dt + Kd·(de/dt), where e = setpoint − measurement
-- `update` must handle the FIRST call gracefully (no prior error to derive from — return Kp·e + Ki·e·dt, derivative term 0)
+- `update` must handle the FIRST call gracefully (no prior error to derive from - return Kp·e + Ki·e·dt, derivative term 0)
 - Anti-windup: clamp the integral term to ±100 to prevent runaway
 - `reset()` must zero both the integral accumulator and the last-error memory
 

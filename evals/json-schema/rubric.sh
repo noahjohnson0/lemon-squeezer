@@ -27,7 +27,7 @@ def fails(inst, sch): return len(validate(inst, sch)) > 0
 # string type
 print("type_str_ok",  1 if passes("hi", {"type":"string"}) else 0)
 print("type_str_bad", 1 if fails(123, {"type":"string"}) else 0)
-# integer type — must reject bool (bool is int subclass in python; spec says no)
+# integer type - must reject bool (bool is int subclass in python; spec says no)
 print("type_int_ok",  1 if passes(5, {"type":"integer"}) else 0)
 print("type_int_bool", 1 if fails(True, {"type":"integer"}) else 0)
 # object with required + properties

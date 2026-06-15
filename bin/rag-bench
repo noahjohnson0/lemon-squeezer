@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""rag-bench — run a question set through the librarian harness against a corpus
+"""rag-bench - run a question set through the librarian harness against a corpus
 and score answers against gold aliases.
 
 Designed for benchmark sweeps (TriviaQA, NaturalQuestions style) where each
@@ -131,7 +131,7 @@ def main():
     ap.add_argument("--harness-script", default="librarian.py",
                     help="which harness file under bin/ to invoke per question (default: librarian.py; use 'librarian-mq.py' for multi-query)")
     ap.add_argument("--system", default=None,
-                    help="system prompt — raw text or @path/to/file.md — passed through to the harness")
+                    help="system prompt - raw text or @path/to/file.md - passed through to the harness")
     ap.add_argument("--route-by-domain", action="store_true",
                     help="if the qset has expected_corpora per question, restrict LEMON_CORPORA to that subset per-Q instead of the fixed --corpus list. Tests domain-aware routing.")
     ap.add_argument("--no-lock", action="store_true", help="skip GPU lock (use only if you know nothing else is queued)")

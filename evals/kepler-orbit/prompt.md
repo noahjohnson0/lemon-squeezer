@@ -5,7 +5,7 @@ def simulate(x0: float, y0: float, vx0: float, vy0: float,
              t_end: float, dt: float = 1e-3) -> tuple[float, float, float, float]:
     """Integrate a 2D Kepler problem with a fixed central mass at the origin and GM=1.0.
     Equations of motion: r̈ = -GM·r / |r|³  (vector form, both x and y couple via |r|).
-    Use 4th-order Runge-Kutta (NOT Euler — Euler accumulates >5% energy drift over a single orbit).
+    Use 4th-order Runge-Kutta (NOT Euler - Euler accumulates >5% energy drift over a single orbit).
     Returns final state (x, y, vx, vy) at simulation time t_end."""
 
 def total_energy(x: float, y: float, vx: float, vy: float) -> float:

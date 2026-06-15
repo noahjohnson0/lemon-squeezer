@@ -24,7 +24,7 @@ except Exception as e:
 
 results = {}
 
-# Case 1: 1 L clear, default 5% — should be 2 drops, wait >=30
+# Case 1: 1 L clear, default 5% - should be 2 drops, wait >=30
 try:
     r = mod.bleach_drops(1.0, "clear")
     results["c1_drops"]   = 2 <= int(r["drops"]) <= 3
@@ -32,21 +32,21 @@ try:
 except Exception as e:
     results["c1_err"] = repr(e)[:80]
 
-# Case 2: 1 L cloudy — should DOUBLE → 4 drops
+# Case 2: 1 L cloudy - should DOUBLE → 4 drops
 try:
     r = mod.bleach_drops(1.0, "cloudy")
     results["c2_drops"]   = 4 <= int(r["drops"]) <= 5
 except Exception as e:
     results["c2_err"] = repr(e)[:80]
 
-# Case 3: 1 US gallon = 3.785 L, clear — should be ~8 drops (per CDC)
+# Case 3: 1 US gallon = 3.785 L, clear - should be ~8 drops (per CDC)
 try:
     r = mod.bleach_drops(3.785, "clear")
     results["c3_drops"]   = 7 <= int(r["drops"]) <= 10
 except Exception as e:
     results["c3_err"] = repr(e)[:80]
 
-# Case 4: 10 L cloudy — should be ~40 drops
+# Case 4: 10 L cloudy - should be ~40 drops
 try:
     r = mod.bleach_drops(10.0, "cloudy")
     results["c4_drops"]   = 38 <= int(r["drops"]) <= 45
@@ -71,7 +71,7 @@ try:
 except ValueError: results["safe_high_conc"] = True
 except Exception: results["safe_high_conc"] = False
 
-# Rounding: 0.5 L clear should round UP — never produce 0 drops for any positive volume
+# Rounding: 0.5 L clear should round UP - never produce 0 drops for any positive volume
 try:
     r = mod.bleach_drops(0.5, "clear")
     results["round_up"] = int(r["drops"]) >= 1

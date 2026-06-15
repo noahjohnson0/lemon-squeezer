@@ -28,14 +28,14 @@ def quarter_wave_vertical_m(freq_mhz: float) -> float:
 
 def band_for_frequency(freq_mhz: float) -> str:
     """Return the common ham band label for these frequencies (3-letter):
-       3.5–4.0 MHz   → '80m'
-       7.0–7.3 MHz   → '40m'
-       14.0–14.35    → '20m'
-       21.0–21.45    → '15m'
-       28.0–29.7     → '10m'
-       50–54         → '6m'
-       144–148       → '2m'
-       420–450       → '70cm'
+       3.5-4.0 MHz   → '80m'
+       7.0-7.3 MHz   → '40m'
+       14.0-14.35    → '20m'
+       21.0-21.45    → '15m'
+       28.0-29.7     → '10m'
+       50-54         → '6m'
+       144-148       → '2m'
+       420-450       → '70cm'
        otherwise raise ValueError."""
     ...
 ```

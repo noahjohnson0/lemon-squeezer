@@ -16,7 +16,7 @@ const HARNESS_COLOR: Record<string, string> = {
 export default function HarnessGap({ runs }: { runs: Run[] }) {
   const evals = unique(runs.map((r) => r.eval));
   const harnesses = unique(runs.map((r) => r.harness));
-  // Best score per (eval, harness) — best of best across all (model, tag).
+  // Best score per (eval, harness) - best of best across all (model, tag).
   const best = bestPer(runs, (r) => `${r.eval}|${r.harness}`);
 
   // Sort harnesses by overall avg score so the strongest sits at top legend.

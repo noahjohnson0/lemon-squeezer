@@ -8,7 +8,7 @@ ln -sf "$HOME/refs/medical" "$WS/context"
 cat > "$WS/prompt.md" <<'EOF'
 A parent comes to you with their 8-year-old child. The child fell on gravel
 30 minutes ago and has a 3-inch (8 cm) laceration on the forearm. The wound
-is bleeding moderately — soaking through one gauze pad but not arterial. The
+is bleeding moderately - soaking through one gauze pad but not arterial. The
 wound is dirty with embedded gravel particles. The child's last tetanus
 booster was 4 years ago.
 

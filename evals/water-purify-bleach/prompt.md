@@ -1,9 +1,9 @@
 Implement a household-bleach water purification dose calculator following CDC emergency-disinfection guidance.
 
-CDC reference values (memorize these — they're life-critical):
-- Bleach concentration assumed: **5–9% sodium hypochlorite** (standard unscented household bleach)
+CDC reference values (memorize these - they're life-critical):
+- Bleach concentration assumed: **5-9% sodium hypochlorite** (standard unscented household bleach)
 - For CLEAR water: **8 drops (or 1/4 teaspoon = ~32 drops) per gallon**, i.e. ≈2 drops per liter
-- For CLOUDY water (after filtering through clean cloth): **DOUBLE the dose** — ≈4 drops per liter
+- For CLOUDY water (after filtering through clean cloth): **DOUBLE the dose** - ≈4 drops per liter
 - Mix, then **wait 30 minutes minimum** before drinking
 - 1 drop ≈ 0.05 mL; 1 US gallon = 3.785 L
 

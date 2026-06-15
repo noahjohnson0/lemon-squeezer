@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""cloud-report — aggregate the OpenRouter (host=openrouter) rows in runs.jsonl
+"""cloud-report - aggregate the OpenRouter (host=openrouter) rows in runs.jsonl
 into a leaderboard: per-arm mean score, total/mean cost, mean latency, and the
 score-per-dollar "value" that's the whole point of the Fable-destroyer hunt.
 
     python bin/cloud-report [--tag fable-hunt] [--json out.json] [--by-eval]
 
-An "arm" is (model, harness) — a single open model OR a multi-model mix. With no
+An "arm" is (model, harness) - a single open model OR a multi-model mix. With no
 --tag, every openrouter row counts.
 """
 from __future__ import annotations

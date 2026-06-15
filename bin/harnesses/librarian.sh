@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# librarian — RAG agent harness. See bin/librarian.py.
+# librarian - RAG agent harness. See bin/librarian.py.
 #
 # Honors $LEMON_CORPORA (colon-separated name=path) and $LEMON_ALLOW_WEB.
 harness_run() {

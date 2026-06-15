@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * build-bench-data.js — aggregate bench/results into a committed bench-data.json
+ * build-bench-data.js - aggregate bench/results into a committed bench-data.json
  * at the repo root, then mirror it into dashboard-next/public/ for the static
  * export. This mirrors the runs.jsonl pattern:
  *   - Locally we have bench/results/*; run this to refresh the aggregate.
@@ -180,7 +180,7 @@ function main() {
   };
   fs.writeFileSync(OUT, JSON.stringify(payload));
   const bytes = fs.statSync(OUT).size;
-  console.log(`[bench] wrote ${OUT} — ${sweeps.length} sweeps, ${Object.keys(qsets).length} qsets, ${(bytes / 1024).toFixed(1)} KB`);
+  console.log(`[bench] wrote ${OUT} - ${sweeps.length} sweeps, ${Object.keys(qsets).length} qsets, ${(bytes / 1024).toFixed(1)} KB`);
 }
 
 main();

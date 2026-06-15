@@ -24,7 +24,7 @@ for x in items: b.add(x)
 miss = sum(1 for x in items if x not in b)
 print("no_false_neg", 1 if miss == 0 else 0, f"missed={miss}")
 
-# Test 2: not-added items mostly absent (allow up to 5x configured rate as upper bound — bloom is tight, don't be punitive)
+# Test 2: not-added items mostly absent (allow up to 5x configured rate as upper bound - bloom is tight, don't be punitive)
 absent = [f"other_{i}" for i in range(2000)]
 present = sum(1 for x in absent if x in b)
 fpr = present / len(absent)
@@ -42,7 +42,7 @@ b3.add(42); b3.add("hello"); b3.add(b"\x00\x01")
 ok = (42 in b3) and ("hello" in b3) and (b"\x00\x01" in b3)
 print("multi_type", 1 if ok else 0)
 
-# Test 5: empty bloom — nothing reports present (with overwhelming probability)
+# Test 5: empty bloom - nothing reports present (with overwhelming probability)
 b4 = BloomFilter(100, 0.01)
 empty_present = sum(1 for x in [f"x_{i}" for i in range(100)] if x in b4)
 print("empty_clean", 1 if empty_present == 0 else 0, f"got={empty_present}")

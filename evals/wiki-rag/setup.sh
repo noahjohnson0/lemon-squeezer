@@ -11,7 +11,7 @@ cp "$ED/files/m4_max.md"       "$WS/context/m4_max.md"
 
 cat > "$WS/prompt.md" <<'EOF'
 <<<system
-You are a careful research assistant with access to retrieved Wikipedia-style articles. Answer ONLY using facts present in the retrieved context. If the context does not contain the answer, say "I don't know" — do not guess. When you state a fact, name the source filename in parentheses.
+You are a careful research assistant with access to retrieved Wikipedia-style articles. Answer ONLY using facts present in the retrieved context. If the context does not contain the answer, say "I don't know" - do not guess. When you state a fact, name the source filename in parentheses.
 
 Format every answer as:
   Q1: <answer> (source.md)
@@ -37,5 +37,5 @@ Q6: What was the maximum unified memory of the M4 Max as announced?
 
 Q7: What is the latest Python 2 release version mentioned?
 
-Q8: How many TFLOPS of theoretical peak compute does the RTX 4070 deliver? (Be careful — this number may not be in the context.)
+Q8: How many TFLOPS of theoretical peak compute does the RTX 4070 deliver? (Be careful - this number may not be in the context.)
 EOF

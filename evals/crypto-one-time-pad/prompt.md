@@ -12,7 +12,7 @@ def xor_encrypt(plaintext: bytes, key: bytes) -> bytes:
     ...
 
 def xor_decrypt(ciphertext: bytes, key: bytes) -> bytes:
-    """Decrypt. Symmetric — same as xor_encrypt."""
+    """Decrypt. Symmetric - same as xor_encrypt."""
     ...
 
 def generate_key(length: int) -> bytes:

@@ -18,7 +18,7 @@ except Exception as e: print("IMPORT_ERR", e); sys.exit(1)
 # NOAA-validated test cases (allow ±2° tolerance)
 CASES = [
     # (desc, lat, lon, y, m, d, hour, exp_alt_min, exp_alt_max, exp_az_min, exp_az_max)
-    # 16:00 UTC at NYC = 12:00 EDT — past solar noon, sun south-southeast
+    # 16:00 UTC at NYC = 12:00 EDT - past solar noon, sun south-southeast
     ("ny_summer_solstice",     40.71, -74.01, 2024, 6, 21, 16.0, 65, 72, 130, 150),
     ("london_winter_solstice", 51.50,   0.00, 2024,12, 21, 12.0, 13, 17, 175, 188),
     ("equator_equinox",         0.00,   0.00, 2024, 3, 20, 12.0, 85, 92,   0, 360),  # near-zenith

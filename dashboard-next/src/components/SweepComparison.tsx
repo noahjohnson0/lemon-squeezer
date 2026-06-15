@@ -18,7 +18,7 @@ export default function SweepComparison({
         <span className="chip">{groups.size} ablation{groups.size === 1 ? "" : "s"}</span>
       </div>
       <p className="text-[var(--muted)] text-sm max-w-3xl mb-4">
-        Same (qset × model) with different tags — these are direct ablations. The classic case is
+        Same (qset × model) with different tags - these are direct ablations. The classic case is
         wikipedia-only vs all-corpora on <code>gridown-50</code>.
       </p>
 
@@ -57,7 +57,7 @@ export default function SweepComparison({
                         className="border-t border-[var(--border)] cursor-pointer hover:bg-[var(--panel-2)]"
                       >
                         <td className="py-1.5">
-                          <span className="chip">{s.tag ?? "—"}</span>
+                          <span className="chip">{s.tag ?? "-"}</span>
                           {best && <span className="ml-1 text-[10px] text-[var(--good)]">★</span>}
                         </td>
                         <td className="py-1.5 text-right">

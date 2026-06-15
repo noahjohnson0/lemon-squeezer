@@ -11,4 +11,4 @@ Refactor `orders.py` in this directory. Requirements:
    grand total 33.0
    ```
 
-Modify `orders.py` in place. Don't run it — just refactor it.
+Modify `orders.py` in place. Don't run it - just refactor it.

@@ -34,7 +34,7 @@ CASES = [
     ([[1, 2, 3], [-1, -2], [-2, -3], [-1, -3]], True),
     # 3-SAT, 5 vars, 8 clauses
     ([[1,2,3],[-1,2,3],[1,-2,3],[1,2,-3],[-1,-2,3],[-1,2,-3],[1,-2,-3],[-1,-2,-3]], False),  # all 8 disjunctions of 3 vars → UNSAT
-    ([[1,-2],[2,-3],[3,-4],[4,-1]], True),            # implies chain — sat
+    ([[1,-2],[2,-3],[3,-4],[4,-1]], True),            # implies chain - sat
 ]
 for i,(cl, expected_sat) in enumerate(CASES,1):
     try:

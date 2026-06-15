@@ -57,7 +57,7 @@ export type BenchData = {
 
 export async function loadBenchData(): Promise<BenchData> {
   // The page is served at /bench/ (with trailingSlash). A bare "./bench-data.json" would
-  // resolve to /bench/bench-data.json — but the file lives at the site root (next to
+  // resolve to /bench/bench-data.json - but the file lives at the site root (next to
   // runs.jsonl). Use "../bench-data.json" so it works under both dev and the
   // /lemon-squeezer basePath on Pages.
   const r = await fetch(`../bench-data.json?t=${Date.now()}`, { cache: "no-store" });
@@ -67,7 +67,7 @@ export async function loadBenchData(): Promise<BenchData> {
 
 /** Pretty-print accuracy: "27.5%" given 0.2745. */
 export function pctAcc(a: number | undefined | null): string {
-  if (a === null || a === undefined || !Number.isFinite(a)) return "–";
+  if (a === null || a === undefined || !Number.isFinite(a)) return "-";
   return `${(100 * a).toFixed(1)}%`;
 }
 

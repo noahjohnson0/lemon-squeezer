@@ -12,7 +12,7 @@ import sys, random, hashlib, textwrap
 ws, needle = sys.argv[1], sys.argv[2]
 random.seed(42)
 
-# Filler paragraphs — generic-sounding research-paper boilerplate
+# Filler paragraphs - generic-sounding research-paper boilerplate
 TOPICS = [
     "the history of cartography in 17th century Holland",
     "industrial steam engine maintenance practices in the 1890s",

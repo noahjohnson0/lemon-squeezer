@@ -1,4 +1,4 @@
-Write `projectile.py` — a CLI tool that simulates projectile motion with quadratic air drag, using RK4 numerical integration.
+Write `projectile.py` - a CLI tool that simulates projectile motion with quadratic air drag, using RK4 numerical integration.
 
 Equations of motion (2D, y up, gravity g=9.81 m/s²):
 ```
@@ -14,7 +14,7 @@ projectile.py <v0> <angle_deg> <Cd> <area_m2> <mass_kg> [--rho RHO] [--dt DT]
 Defaults: `--rho 1.225` (air at sea level), `--dt 0.001`.
 
 Behaviour:
-1. Use RK4 (4th-order Runge–Kutta) — NOT Euler. (Euler accumulates large errors quickly.)
+1. Use RK4 (4th-order Runge-Kutta) - NOT Euler. (Euler accumulates large errors quickly.)
 2. Run until `y` returns to 0 (after launch). Use linear interpolation between the last two steps to find the impact time precisely.
 3. Print exactly three lines:
    ```

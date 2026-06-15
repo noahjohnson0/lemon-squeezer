@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Score a wifi-stats workspace. Usage: rubric.sh <workspace-dir>
-# Always evaluates ALL checks — missing files mark dependent checks as fail (0)
+# Always evaluates ALL checks - missing files mark dependent checks as fail (0)
 # so denominators are constant across runs and scores are comparable.
 set -u
 WS="${1:?workspace dir required}"

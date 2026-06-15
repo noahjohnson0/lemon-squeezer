@@ -167,7 +167,7 @@ export function colorForModel(model: string, models: string[]): string {
 }
 
 export function fmtElapsed(s: number | undefined | null): string {
-  if (s === null || s === undefined || !Number.isFinite(s)) return "–";
+  if (s === null || s === undefined || !Number.isFinite(s)) return "-";
   if (s < 60) return `${Math.round(s)}s`;
   const m = Math.floor(s / 60);
   const r = Math.round(s % 60);

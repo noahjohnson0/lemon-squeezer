@@ -63,7 +63,7 @@ export default function Hero({ runCount }: Props) {
           transition={{ duration: 0.6, delay: 0.15 }}
           className="text-[var(--muted)] text-base md:text-lg mt-4 max-w-3xl leading-relaxed"
         >
-          A reproducible study of what actually makes an LLM <em className="text-[var(--text)] not-italic font-medium">finish real coding work</em> —
+          A reproducible study of what actually makes an LLM <em className="text-[var(--text)] not-italic font-medium">finish real coding work</em> -
           holding the prompts and rubrics fixed while varying the four things you control:
           <span className="text-[var(--text)]"> model</span>,
           <span className="text-[var(--text)]"> harness</span>,

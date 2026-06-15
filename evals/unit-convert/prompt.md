@@ -6,7 +6,7 @@ Support these units (case-insensitive):
 - Length: `mm`, `cm`, `m`, `km`, `in`, `ft`, `yd`, `mi` (or `mile`/`miles`)
 - Mass: `mg`, `g`, `kg`, `oz`, `lb` (or `lbs`)
 - Volume: `ml`, `l`, `gal` (US gallon = 3.785411784 L)
-- Temperature: `c`, `f`, `k` (single value only — no addition)
+- Temperature: `c`, `f`, `k` (single value only - no addition)
 - Speed: `mph`, `kph`, `m/s`
 
 Multi-term inputs (like `"5 ft 7 in"`) are summed within a compatible unit class.

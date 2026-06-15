@@ -8,7 +8,7 @@ The eval harness defaults to `http://localhost:11434`. To point at a remote Olla
 export OLLAMA_API_BASE=http://YOUR_OLLAMA_HOST:11434
 ```
 
-For the per-run hardware telemetry sampler (optional — capture GPU temp / VRAM / power / fan during each eval), point at an SSH-reachable host that has `nvidia-smi`:
+For the per-run hardware telemetry sampler (optional - capture GPU temp / VRAM / power / fan during each eval), point at an SSH-reachable host that has `nvidia-smi`:
 
 ```bash
 export SAMPLER_SSH_TARGET=user@YOUR_GPU_HOST

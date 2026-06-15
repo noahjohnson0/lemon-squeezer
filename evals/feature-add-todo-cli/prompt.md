@@ -2,18 +2,18 @@
 
 You are given a small todo-list command-line app under `app/`:
 
-- `app/storage.py` — JSON persistence. **Complete and working; do not break it.**
+- `app/storage.py` - JSON persistence. **Complete and working; do not break it.**
   Read it to learn the data model. Each task is a dict
   `{"id": <int>, "text": <str>, "done": <bool>}`, stored as a JSON list in the
   file returned by `storage.db_path()`.
-- `app/cli.py` — the command dispatcher. `add` and plain `list` already work.
+- `app/cli.py` - the command dispatcher. `add` and plain `list` already work.
   Three things are stubbed out with `NotImplementedError` and must be finished.
 
 The CLI is invoked as `python app/cli.py <command> ...`. Implement the missing
 behavior so that **all** of the following work. Match the exact stdout strings
-and exit codes described — they are checked literally.
+and exit codes described - they are checked literally.
 
-## 1. `done <id>` — mark a task complete
+## 1. `done <id>` - mark a task complete
 
 - `python app/cli.py done 2` sets the `done` flag of task #2 to `true`,
   persists the change, and prints exactly:
@@ -30,7 +30,7 @@ and exit codes described — they are checked literally.
 - Marking an already-done task done again is allowed (still prints `done #<id>`,
   exits 0).
 
-## 2. `rm <id>` — delete a task
+## 2. `rm <id>` - delete a task
 
 - `python app/cli.py rm 1` removes task #1 from the store, persists, and prints
   exactly:
@@ -45,7 +45,7 @@ and exit codes described — they are checked literally.
 - If the id argument is missing or not an integer, print an error to stderr and
   exit non-zero.
 
-## 3. `list --pending` — show only unfinished tasks
+## 3. `list --pending` - show only unfinished tasks
 
 - `python app/cli.py list --pending` prints only the tasks whose `done` flag is
   `false`, in id order, using the **same line format** as plain `list`:

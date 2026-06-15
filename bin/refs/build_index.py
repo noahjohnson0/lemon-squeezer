@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""build_index — turn a directory of text/markdown into a SQLite FTS5 index.
+"""build_index - turn a directory of text/markdown into a SQLite FTS5 index.
 
 Each top-level file under <corpus_dir>/ becomes a "document". Markdown headings
 become section breaks (so retrieval can return a relevant section, not the whole
@@ -19,7 +19,7 @@ from __future__ import annotations
 import argparse, re, sqlite3, sys, time
 from pathlib import Path
 
-# Heading detection — supports two formats:
+# Heading detection - supports two formats:
 #   Markdown:   # / ## / ### at start of line
 #   Sphinx-text: a line of text immediately followed by a line of  =====, *****,
 #                -----, ^^^^^ or """""  whose length is >= the text length-3.
@@ -39,7 +39,7 @@ def split_sections(text: str) -> list[tuple[str, str]]:
         underline = m.group(2)
         # Heuristic: underline length should be >= len(title)-3 (allow some slack)
         if len(underline) + 3 < len(title): continue
-        # Skip "decorations" — purely punctuation / empty title
+        # Skip "decorations" - purely punctuation / empty title
         if not title or all(c in "=*-^\"~+ \t" for c in title): continue
         cuts.append((m.start(), m.end(), title))
     cuts.sort()

@@ -16,7 +16,7 @@ if [[ -f "$A" ]]; then
   ans="$(cat "$A")"
   ans_lc="$(tr '[:upper:]' '[:lower:]' < "$A")"
 
-  # 1. Fever threshold — 100.4°F or 38°C is the canonical pediatric fever cutoff
+  # 1. Fever threshold - 100.4°F or 38°C is the canonical pediatric fever cutoff
   echo "$ans" | grep -qE '100\.4|38(\.0)? ?°?C' && add "fever_threshold" 1 8 || add "fever_threshold" 0 8
 
   # 2. Paracetamol / acetaminophen mentioned
@@ -43,7 +43,7 @@ if [[ -f "$A" ]]; then
   echo "$ans_lc" | grep -qE 'max(imum)? (daily|24[- ]hour|per day)|do not exceed|no more than .* per day|max.*g/day|max.*mg/day' \
     && add "states_max_daily_dose" 1 10 || add "states_max_daily_dose" 0 10
 
-  # 5. Red flags — at least 3 of: lethargy, stiff neck, rash, breathing, dehydration, fever >40C / 104F, seizure
+  # 5. Red flags - at least 3 of: lethargy, stiff neck, rash, breathing, dehydration, fever >40C / 104F, seizure
   rf=0
   for term in 'lethargy|lethargic|unresponsive|hard to wake' 'stiff neck|nuchal' 'rash|petechia|purpura' 'breathing|respirat' 'dehydrat|not drinking|no wet diap' '104|40 ?°c|40c' 'seizure|convulsion'; do
     echo "$ans_lc" | grep -qE "$term" && rf=$((rf+1))

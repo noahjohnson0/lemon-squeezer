@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""bench-judge — re-score a rag-bench per_question.jsonl using an LLM judge.
+"""bench-judge - re-score a rag-bench per_question.jsonl using an LLM judge.
 
 Substring scoring is unfair to correct-but-paraphrased answers (e.g.
 '60 Ω' missing the regex for '60 ohms', '11.2 km/s' missing '11.186').
@@ -15,8 +15,8 @@ Usage:
         [--only-misses]   # only re-judge substring=False records (faster)
 
 Outputs:
-    <sweep_dir>/per_question_judged.jsonl    — original + judge_hit field
-    <sweep_dir>/summary_judged.json          — substring + judge accuracy
+    <sweep_dir>/per_question_judged.jsonl    - original + judge_hit field
+    <sweep_dir>/summary_judged.json          - substring + judge accuracy
 """
 from __future__ import annotations
 import argparse, json, os, sys, time
@@ -24,7 +24,7 @@ import urllib.request, urllib.error
 from pathlib import Path
 
 
-JUDGE_PROMPT = """You are a strict factoid-quiz grader. Output ONLY the single word CORRECT or INCORRECT — no reasoning, no <think> tags, no preamble, no punctuation.
+JUDGE_PROMPT = """You are a strict factoid-quiz grader. Output ONLY the single word CORRECT or INCORRECT - no reasoning, no <think> tags, no preamble, no punctuation.
 
 QUESTION: {question}
 GOLD: {gold}

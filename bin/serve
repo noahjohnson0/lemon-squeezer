@@ -2,7 +2,7 @@
 # Serve the dashboard locally + start the inflight watcher so "running right now" is live.
 # Usage: serve [port]
 #
-# When deployed to a static host (e.g. GitHub Pages), this script isn't used —
+# When deployed to a static host (e.g. GitHub Pages), this script isn't used -
 # the dashboard fetches inflight.json directly and gracefully hides the panel
 # when it's stale or absent.
 set -u

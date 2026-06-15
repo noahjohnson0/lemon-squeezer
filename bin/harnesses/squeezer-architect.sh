@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # squeezer-architect: 2-model planner→executor pipeline.
 # The "model" arg passed to eval-run is the EXECUTOR.
-# The ARCHITECT (planner) defaults to gpt-oss:20b — strongest faultfinder/planner in our matrix.
+# The ARCHITECT (planner) defaults to gpt-oss:20b - strongest faultfinder/planner in our matrix.
 # Override via $SQ_ARCHITECT_MODEL.
 harness_run() {
   local ws="$1" prompt_file="$2" model="$3" run_dir="$4"; shift 4

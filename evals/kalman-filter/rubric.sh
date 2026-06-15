@@ -27,7 +27,7 @@ try:
 except Exception as e:
     print("init", 0, repr(e)); print("cov_2x2", 0, repr(e))
 
-# Test 2: convergence — true velocity 1.0 m/s, noise ~N(0, 0.5)
+# Test 2: convergence - true velocity 1.0 m/s, noise ~N(0, 0.5)
 try:
     k = Kalman1D(0.0, 0.0, 0.01, 0.5, 1.0)
     true_v = 1.0
@@ -42,7 +42,7 @@ try:
 except Exception as e:
     print("converge_pos", 0, repr(e)); print("converge_vel", 0, repr(e))
 
-# Test 3: no measurements → predict only — covariance should grow
+# Test 3: no measurements → predict only - covariance should grow
 try:
     k = Kalman1D(0.0, 1.0, 0.01, 0.5, 1.0)
     p0, v0 = k.state()

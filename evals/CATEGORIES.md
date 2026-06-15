@@ -1,4 +1,4 @@
-# Eval categories — the grid-down skills framework
+# Eval categories - the grid-down skills framework
 
 When the cloud is unreachable, what can a local LLM running on a 4070 (or M4
 Max, or any future hardware) actually *do for you*? This file is the master
@@ -14,7 +14,7 @@ answer`).
 | **Coding** | aider / squeezer / squeezer-tdd / squeezer-critique / squeezer-architect / squeezer-verify / squeezer-search | running the produced code, checking outputs against known references |
 | **Librarian** | qa / librarian / librarian-cascade | grep / regex over `answer.txt` for required facts, correct citations, abstention when not in corpus |
 
-The same skill can have BOTH shapes — e.g. epidemiology has a coding eval
+The same skill can have BOTH shapes - e.g. epidemiology has a coding eval
 (implement an SIR solver) and a librarian eval ("what's the reproduction
 number for measles" given a public-health corpus).
 
@@ -68,7 +68,7 @@ See `RUNS.md` / `findings.md` for live data. Broadly:
 | recovery-protocol | librarian | post-injury PT progression by injury type |
 | BJJ-position-flow | librarian | given starting position, list common transitions/submissions |
 
-(Note: martial arts is mostly librarian-shaped — there's no "execute this
+(Note: martial arts is mostly librarian-shaped - there's no "execute this
 roundhouse and verify" reductive test. The value is reliable retrieval from
 curriculum/technique docs.)
 
@@ -82,7 +82,7 @@ curriculum/technique docs.)
 | canning-times | librarian | safe pressure-canning time by food + altitude |
 | edible-id | librarian | from feature description, identify plant (with abstain if unsure) |
 | brewing-mash | coding | water-to-grain ratio + strike-temp calc |
-| food-preservation | librarian | salt-cure, smoke, dry, ferment — when to use which |
+| food-preservation | librarian | salt-cure, smoke, dry, ferment - when to use which |
 
 ### ⚡ Energy, power, off-grid systems
 
@@ -166,7 +166,7 @@ curriculum/technique docs.)
 | voting-irv | coding | instant-runoff tabulation |
 | voting-condorcet | coding | Condorcet winner from ballots |
 | districting-compactness | coding | Polsby-Popper score for a polygon |
-| constitution-cite | librarian | "where does the X amendment say Y?" — must cite article/section |
+| constitution-cite | librarian | "where does the X amendment say Y?" - must cite article/section |
 | historical-event | librarian | grounded date + brief from a history corpus |
 
 ### 🐾 Animal care, vet basics
@@ -191,7 +191,7 @@ curriculum/technique docs.)
 1. `mkdir evals/<name>` and inside it: `prompt.md`, `rubric.sh`, optionally
    `setup.sh` + `files/`.
 2. Coding evals: write the prompt as a single self-contained task description.
-   Specify the file name(s) the model should produce. Avoid ambiguity — small
+   Specify the file name(s) the model should produce. Avoid ambiguity - small
    local models are sensitive to vague specs.
 3. Rubric MUST: only emit JSON on stdout, every echo of debug → stderr (we
    lost score data once to this). Include a `used_search_tool` or `used_X`
@@ -207,14 +207,14 @@ Some evals span domains and would benefit from a "skill panel" view in the
 dashboard:
 
 - **Math everywhere**: ODE solvers (SIR, drone PID, Kepler, RK4) are the
-  same skill in different costumes — a single failure pattern reveals it
+  same skill in different costumes - a single failure pattern reveals it
 - **Citation discipline**: librarian evals across domains should be scored
   by the same `cite_real_file` + `abstain_when_absent` cross-cutters
 - **Numerical safety**: doses (medicine, vet, water purification) all need
-  hard upper/lower bounds — a rubric module could check "did the model
+  hard upper/lower bounds - a rubric module could check "did the model
   refuse out-of-range inputs"
 
-The goal of this framework is not just to test — it's to **discover** which
+The goal of this framework is not just to test - it's to **discover** which
 combinations of (hardware, model, harness, RAG corpus) actually make a local
 machine *useful* for a grid-down lifestyle. Right now we have evidence that
 gpt-oss:20b @ librarian harness is the gold standard for factual lookup, and

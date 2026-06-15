@@ -191,7 +191,7 @@ export default function Headline({ runs }: { runs: Run[] }) {
                   {botH.h}: {botH.avg.toFixed(0)}% avg ({botH.n} cells)
                 </div>
                 <div className="text-xs text-[var(--muted)] mt-2">
-                  Same models, same evals — just changing how the harness shapes
+                  Same models, same evals - just changing how the harness shapes
                   the loop is worth more than swapping which 14B you run.
                 </div>
               </>
@@ -241,7 +241,7 @@ export default function Headline({ runs }: { runs: Run[] }) {
                     <span
                       className={`score-${cls} px-1.5 rounded text-[10px] font-bold tabular-nums w-10 text-center`}
                     >
-                      {run ? run.score_pct : "–"}
+                      {run ? run.score_pct : "-"}
                     </span>
                     <span className="font-mono text-[10px] text-[var(--muted)] truncate">
                       {e}

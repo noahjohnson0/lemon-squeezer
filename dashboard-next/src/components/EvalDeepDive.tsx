@@ -59,7 +59,7 @@ export default function EvalDeepDive({
                 </motion.span>
                 <strong className="font-mono">{e}</strong>
                 <span className="text-[var(--muted)] text-xs">
-                  {evalRuns.length} runs · best {sorted[0]?.score_pct ?? "–"}%
+                  {evalRuns.length} runs · best {sorted[0]?.score_pct ?? "-"}%
                 </span>
                 <span className="ml-auto text-[var(--muted)] text-xs hidden md:block">
                   {blurb.summary}

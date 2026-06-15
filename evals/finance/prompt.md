@@ -14,7 +14,7 @@ def npv(rate: float, cashflows: list[float]) -> float:
     Discounted by (1+rate)^i."""
 
 def irr(cashflows: list[float], guess: float = 0.1) -> float:
-    """Internal Rate of Return — the rate r such that NPV(r, cashflows) == 0.
+    """Internal Rate of Return - the rate r such that NPV(r, cashflows) == 0.
     Use Newton-Raphson or bisection. Must converge to within 1e-6 for typical inputs."""
 ```
 

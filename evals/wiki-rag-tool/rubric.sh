@@ -31,7 +31,7 @@ if [[ -f "$A" ]]; then
   echo "$ans" | grep -qiE '\b128 ?GB|128 ?gigabyte' && add "q6_mem" 1 8 || add "q6_mem" 0 8
   echo "$ans" | grep -qE '\b2\.7\.18\b' && add "q7_py2_ver" 1 8 || add "q7_py2_ver" 0 8
 
-  # Q8: TFLOPS isn't in context — model should abstain
+  # Q8: TFLOPS isn't in context - model should abstain
   if echo "$ans_lower" | grep -qE "i don'?t know|don'?t know|not (in|provided|present)|cannot find|no information|isn'?t (in|mentioned|present)|context (does|doesn'?t)|not (present|available|mentioned)|references don'?t|corpus does"; then
     add "q8_abstain_correctly" 1 12
   elif echo "$ans" | grep -qE '\b[0-9]+(\.[0-9]+)? *(?:TFLOP|TFLOPS|teraflop|teraflops)\b'; then

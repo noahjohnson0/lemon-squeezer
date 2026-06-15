@@ -3,7 +3,7 @@
 The `ledger/` package in this directory is a small double-entry book-keeping
 library. It has bugs that produce **wrong balances and wrong reports**. Fix the
 implementation (edit the files under `ledger/`) so that **all** of the behaviors
-below hold. Do not change the public API or the function/method names — only fix
+below hold. Do not change the public API or the function/method names - only fix
 the logic. Do not add new dependencies (standard library only).
 
 ## The package
@@ -15,14 +15,14 @@ ledger/posting.py    # Ledger class: open_account, post, transfer, balance
 ledger/report.py     # trial_balance, net_worth, top_accounts
 ```
 
-## Accounting model (this part is correct — match it)
+## Accounting model (this part is correct - match it)
 
 Every account has a *type* that fixes its **normal balance**:
 
 - `asset`, `expense` are **debit-normal**: debits increase the balance, credits decrease it.
 - `liability`, `equity`, `revenue` are **credit-normal**: credits increase the balance, debits decrease it.
 
-`Account.balance()` must return the balance in the account's **natural sign** —
+`Account.balance()` must return the balance in the account's **natural sign** -
 a positive number means "more of what this account normally holds".
 
 ## Required behaviors
@@ -72,5 +72,5 @@ Use these exactly; they are the acceptance criteria.
     accounts returns exactly **3** tuples; asking for more accounts than exist
     returns them all.
 
-Fix the files in place. Don't worry about running anything — just make the
+Fix the files in place. Don't worry about running anything - just make the
 behaviors above true.

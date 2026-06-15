@@ -12,7 +12,7 @@ def solve(board: list[list[int]]) -> list[list[int]]:
 
 Implementation notes:
 - A constraint-propagation + backtracking solver is plenty fast for 9x9.
-- Do NOT mutate the input — return a new board.
+- Do NOT mutate the input - return a new board.
 - Must handle hard puzzles (i.e. ones where naive constraint propagation alone won't fill all cells).
 
 Create only `sudoku.py`. Don't run it.

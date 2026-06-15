@@ -1,4 +1,4 @@
-# 🍋 Lemon-Squeezer — Findings
+# 🍋 Lemon-Squeezer - Findings
 
 Auto-generated from `runs.jsonl`. 207 runs, 26 evals, 7 harnesses, 9 models. Last updated by the build.
 
@@ -40,7 +40,7 @@ Average best score across all (eval × harness) cells the model has played:
 
 ## Multi-step pipelines vs single-pass
 
-Does running a draft → critique → refine pipeline beat just letting the model take one swing at it? Sometimes — on hard evals. Almost never on easy ones (those are already at 100%, no upside) and occasionally hurts (the critique step can over-polish a wrong answer instead of catching the root cause).
+Does running a draft → critique → refine pipeline beat just letting the model take one swing at it? Sometimes - on hard evals. Almost never on easy ones (those are already at 100%, no upside) and occasionally hurts (the critique step can over-polish a wrong answer instead of catching the root cause).
 
 | eval | model | single-pass | multi-step | Δ |
 |---|---|---:|---:|---:|

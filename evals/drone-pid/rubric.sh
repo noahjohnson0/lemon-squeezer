@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# drone-pid — validate a PID controller against a first-order plant step response.
+# drone-pid - validate a PID controller against a first-order plant step response.
 set -u
 WS="${1:?workspace}"
 declare -a checks
@@ -54,7 +54,7 @@ out_after_reset = pid.update(0.0, 0.05)
 expected = 2.0*10.0 + 0.5*10.0*0.05
 ok_reset = abs(out_after_reset - expected) < 0.5
 
-# Setpoint change works — must produce a measurably different output than at
+# Setpoint change works - must produce a measurably different output than at
 # the old setpoint. Compare against a fresh PID at the new setpoint.
 pid.set_setpoint(5.0)
 out_new = pid.update(0.0, 0.05)

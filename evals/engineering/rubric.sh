@@ -25,7 +25,7 @@ def near(a, b, tol):
     try: return abs(float(a) - float(b)) / max(abs(float(b)), 1e-12) < tol
     except: return False
 
-# Reynolds — water at 20°C: rho=998, mu=1.002e-3, water in 25mm pipe at 1 m/s
+# Reynolds - water at 20°C: rho=998, mu=1.002e-3, water in 25mm pipe at 1 m/s
 print("re_water_pipe",   1 if near(reynolds(998, 1.0, 0.025, 1.002e-3), 24900, 0.01) else 0,
       "got", reynolds(998, 1.0, 0.025, 1.002e-3))
 # Air over a wing: rho=1.225, mu=1.81e-5, v=50, L=2 -> ~6.77e6
@@ -35,7 +35,7 @@ print("re_air_wing",     1 if near(reynolds(1.225, 50, 2.0, 1.81e-5), 6767955, 0
 print("re_unit",         1 if near(reynolds(1000, 0.001, 0.001, 1e-3), 1.0, 0.001) else 0,
       "got", reynolds(1000, 0.001, 0.001, 1e-3))
 
-# Beam deflection — steel I-beam, P=10kN, L=4m, E=200e9, I=8.33e-6
+# Beam deflection - steel I-beam, P=10kN, L=4m, E=200e9, I=8.33e-6
 # delta = 10000 * 4^3 / (48 * 200e9 * 8.33e-6) = 640000 / 79968000 ≈ 0.008003
 print("beam_steel",      1 if near(beam_deflection_max(10000, 4, 200e9, 8.33e-6), 0.008003, 0.01) else 0,
       "got", beam_deflection_max(10000, 4, 200e9, 8.33e-6))
@@ -49,7 +49,7 @@ print("rc_tau_1uF",      1 if near(rc_time_constant(1000, 1e-6), 0.001, 0.001) e
 print("rc_tau_big",      1 if near(rc_time_constant(1e6, 470e-6), 470, 0.001) else 0,
       "got", rc_time_constant(1e6, 470e-6))
 
-# Voltage divider — 9V across two equal Rs -> 4.5V midpoint
+# Voltage divider - 9V across two equal Rs -> 4.5V midpoint
 print("vd_equal",        1 if near(voltage_divider(9.0, 1000, 1000), 4.5, 0.001) else 0,
       "got", voltage_divider(9.0, 1000, 1000))
 # 12V, R1=10k, R2=1k -> 12 * 1k/11k = 1.0909
@@ -77,7 +77,7 @@ PY
     add "$name" "$pass" "$(weight_for "$name")" "$note"
   done < <(echo "$RES")
 
-  # Static check — no third-party imports
+  # Static check - no third-party imports
   if grep -qE "^\s*import\s+(numpy|scipy|sympy)" "$T"; then
     add "no_third_party" 0 5 "uses numpy/scipy/sympy where pure-python suffices"
   else

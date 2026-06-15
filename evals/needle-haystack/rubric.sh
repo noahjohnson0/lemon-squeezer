@@ -16,7 +16,7 @@ if [[ -f "$A" ]]; then
   # Did the model find the access code?
   echo "$ans" | grep -q "RAINBOW-7942-OMEGA" && add "found_access_code" 1 60 || \
     add "found_access_code" 0 60 "expected RAINBOW-7942-OMEGA"
-  # Did it find the coordinates? (distractor — should also have been mentioned)
+  # Did it find the coordinates? (distractor - should also have been mentioned)
   echo "$ans" | grep -q "47.6062" && add "found_coordinates" 1 10 || \
     add "found_coordinates" 0 10
   # Brevity: shorter is better for a needle-extraction task

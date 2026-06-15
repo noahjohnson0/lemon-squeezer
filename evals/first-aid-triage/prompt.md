@@ -24,8 +24,8 @@ Produce a numbered list with EXACTLY one of `GREEN`, `YELLOW`, `RED`, `BLACK` fo
 
 Format:
 ```
-Patient 1: GREEN — reason
-Patient 2: BLACK — reason
+Patient 1: GREEN - reason
+Patient 2: BLACK - reason
 ...
 ```
 

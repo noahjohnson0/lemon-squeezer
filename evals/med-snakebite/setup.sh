@@ -15,7 +15,7 @@ with a numbered field-treatment plan. Your plan MUST address each of these
 explicitly:
 
 1. What to do immediately (positioning, calming, jewelry/tight clothing)
-2. What NOT to do — at least 3 specific actions to AVOID (with reasoning)
+2. What NOT to do - at least 3 specific actions to AVOID (with reasoning)
 3. Marking the bite progression
 4. Transport priority
 5. What to tell the hospital before arrival

@@ -86,7 +86,7 @@ export default function SweepDrawer({
                   <span>·</span>
                   <span>{sweep.tokens_out_total?.toLocaleString()} tokens out</span>
                   <span>·</span>
-                  <span>{sweep.tool_calls_total ?? "–"} tool calls</span>
+                  <span>{sweep.tool_calls_total ?? "-"} tool calls</span>
                 </div>
                 {sweep.corpora?.length > 0 && (
                   <div className="mt-3">

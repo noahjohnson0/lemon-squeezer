@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""librarian — single-purpose RAG agent harness.
+"""librarian - single-purpose RAG agent harness.
 
 Modeled on squeezer.py but with a different toolset: instead of read/write/bash,
 the agent gets retrieval tools over one or more local corpora (FTS5) plus an
 optional web search. The point is to test how well a local model behaves as a
-"librarian" — pull facts from references, ground answers, abstain when the
+"librarian" - pull facts from references, ground answers, abstain when the
 corpus doesn't contain the answer.
 
 Tools exposed:
@@ -13,7 +13,7 @@ Tools exposed:
   - web_search(query, top_k=5)            # only if --allow-web
   - write_answer(text)                    # writes workspace/answer.txt and ENDS the loop
 
-Corpora are passed in via $LEMON_CORPORA — colon-separated "name=path" pairs:
+Corpora are passed in via $LEMON_CORPORA - colon-separated "name=path" pairs:
   LEMON_CORPORA="wiki=/Users/noahjohnson0/refs/lemon-test:py=/Users/noahjohnson0/refs/python-docs"
 
 If --workspace/context/ exists, those files are added as an implicit corpus
@@ -130,7 +130,7 @@ def make_tools(workspace: Path, corpora: dict[str, Path], allow_web: bool):
     def web_search(query: str, top_k: int = 5) -> str:
         if not allow_web:
             return "ERROR: web access disabled (this is offline mode)"
-        # DuckDuckGo HTML — no API key, no JS. Best effort.
+        # DuckDuckGo HTML - no API key, no JS. Best effort.
         url = "https://duckduckgo.com/html/?" + urllib.parse.urlencode({"q": query})
         req = urllib.request.Request(url, headers={"User-Agent": "lemon-librarian/0.1"})
         try:
@@ -138,7 +138,7 @@ def make_tools(workspace: Path, corpora: dict[str, Path], allow_web: bool):
                 html = r.read().decode("utf-8", "replace")
         except Exception as e:
             return f"ERROR: {e!r}"
-        # Rough scrape — DDG result anchors
+        # Rough scrape - DDG result anchors
         import re
         hits = re.findall(r'class="result__a"[^>]*href="([^"]+)"[^>]*>([^<]+)</a>', html)
         if not hits:
@@ -152,7 +152,7 @@ def make_tools(workspace: Path, corpora: dict[str, Path], allow_web: bool):
     def write_answer(text: str) -> str:
         (workspace / "answer.txt").write_text(text)
         state["answer_written"] = True
-        return f"OK: answer.txt ({len(text)} bytes). End of session — no further tool calls needed."
+        return f"OK: answer.txt ({len(text)} bytes). End of session - no further tool calls needed."
 
     return (
         {"search_local": search_local, "read_local": read_local, "web_search": web_search, "write_answer": write_answer},
@@ -182,14 +182,14 @@ def make_schema(corpora: dict[str, Path], allow_web: bool) -> list[dict]:
         }},
         {"type": "function", "function": {
             "name": "write_answer",
-            "description": "Write the FINAL answer to the user's question. Calling this ends the session — only call it once you have everything you need.",
+            "description": "Write the FINAL answer to the user's question. Calling this ends the session - only call it once you have everything you need.",
             "parameters": {"type": "object", "required": ["text"], "properties": {"text": {"type": "string"}}},
         }},
     ]
     if allow_web:
         s.append({"type": "function", "function": {
             "name": "web_search",
-            "description": "Search the public web (DuckDuckGo). Returns title + URL only — read_local cannot fetch URLs. Use sparingly; prefer search_local first.",
+            "description": "Search the public web (DuckDuckGo). Returns title + URL only - read_local cannot fetch URLs. Use sparingly; prefer search_local first.",
             "parameters": {"type": "object", "required": ["query"], "properties": {
                 "query": {"type": "string"},
                 "top_k": {"type": "integer", "default": 5},
@@ -203,7 +203,7 @@ SYSTEM_PROMPT = """You are a careful research librarian. You answer the user's q
 Workflow:
 1. Use search_local to find candidate sections. Try multiple queries if the first is unhelpful.
 2. Use read_local to see a full document if a snippet was insufficient.
-3. When a question's answer is not present in any corpus, say "I don't know — the available references don't contain this." Do NOT guess.
+3. When a question's answer is not present in any corpus, say "I don't know - the available references don't contain this." Do NOT guess.
 4. When you cite a fact, name the source filename in parentheses, e.g. "(rtx_4070.md)".
 5. When you have a complete answer, call write_answer ONCE with the full final text. Do not call any tools after write_answer.
 
@@ -240,7 +240,7 @@ def main():
 
     corpora = parse_corpora(os.environ.get("LEMON_CORPORA"), workspace)
     if not corpora:
-        print("[librarian] WARN: no corpora available — search_local will always error", file=sys.stderr)
+        print("[librarian] WARN: no corpora available - search_local will always error", file=sys.stderr)
 
     tool_impls, state = make_tools(workspace, corpora, args.allow_web)
     schema = make_schema(corpora, args.allow_web)

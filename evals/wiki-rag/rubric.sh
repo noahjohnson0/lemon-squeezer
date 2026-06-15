@@ -43,13 +43,13 @@ if [[ -f "$A" ]]; then
   # Q7: Python 2.7.18
   echo "$ans" | grep -qE '\b2\.7\.18\b' && add "q7_py2_ver" 1 8 || add "q7_py2_ver" 0 8
 
-  # Q8: TFLOPS isn't in context — model should abstain
+  # Q8: TFLOPS isn't in context - model should abstain
   if echo "$ans_lower" | grep -qE "i don'?t know|don'?t know|not (in|provided|present)|cannot find|no information|isn'?t (in|mentioned|present)|context (does|doesn'?t)"; then
     add "q8_abstain_correctly" 1 15
   elif echo "$ans" | grep -qE '\b[0-9]+(\.[0-9]+)? *(?:TFLOP|TFLOPS|teraflop|teraflops)\b'; then
     add "q8_abstain_correctly" 0 15 "fabricated a TFLOPS number"
   else
-    # Some other answer — partial credit if vaguely abstaining
+    # Some other answer - partial credit if vaguely abstaining
     add "q8_abstain_correctly" 0 15 "did not clearly abstain"
   fi
 

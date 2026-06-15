@@ -6,9 +6,9 @@ def sun_position(lat: float, lon: float, year: int, month: int, day: int,
     """Approximate sun altitude & azimuth (in degrees) for a UTC instant at (lat, lon).
 
     Inputs:
-      lat, lon  — observer geographic coordinates, decimal degrees (lat positive N, lon positive E)
-      year/month/day  — UTC date
-      hour  — UTC hour as a float (e.g. 12.5 for 12:30 UTC)
+      lat, lon  - observer geographic coordinates, decimal degrees (lat positive N, lon positive E)
+      year/month/day  - UTC date
+      hour  - UTC hour as a float (e.g. 12.5 for 12:30 UTC)
 
     Returns (altitude_deg, azimuth_deg) where:
       altitude is the angle of the sun above the horizon (negative below)

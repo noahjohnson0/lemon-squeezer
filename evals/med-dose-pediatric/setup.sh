@@ -23,5 +23,5 @@ Patient C: 8 years old, weight 28 kg, headache + low-grade fever 100.2°F.
 For Patient B, note the relevant age cutoff for ibuprofen.
 
 When done, call write_answer once with the full structured response. If the
-corpus doesn't contain a specific number, say so — DO NOT invent doses.
+corpus doesn't contain a specific number, say so - DO NOT invent doses.
 EOF

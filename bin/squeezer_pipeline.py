@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""squeezer-pipeline — multi-model orchestration on top of the squeezer agent loop.
+"""squeezer-pipeline - multi-model orchestration on top of the squeezer agent loop.
 
-Wires multiple agents in sequence — each step runs as its own model with its own
+Wires multiple agents in sequence - each step runs as its own model with its own
 system prompt, but they share a single workspace. The classic recipe is
 draft → critique → refine. We can also do propose → propose → propose → judge
 (ensemble) by running multiple drafts and a final picker.
@@ -56,7 +56,7 @@ PROCEDURE:
      - missing scaffolding / config / dep file
 
 DO NOT WRITE OR MODIFY FILES. You have read/list/bash but not write.
-DO NOT add preamble or apology — just the numbered list. If everything looks good,
+DO NOT add preamble or apology - just the numbered list. If everything looks good,
 say literally: "OK: nothing to fix" and stop.
 """
 
@@ -83,7 +83,7 @@ Read the user's task carefully. Emit a numbered plan, in plain text, that an exe
 agent will follow line by line. Be specific:
 
   1. Name the file(s) to create and their exact purpose
-  2. List the function/class signatures the executor must implement (signatures only — not bodies)
+  2. List the function/class signatures the executor must implement (signatures only - not bodies)
   3. For each function, state the algorithmic approach in 1-2 sentences (e.g. "use heapq with (cost, node) tuples", "Gauss-Jordan with partial pivoting")
   4. Call out edge cases the executor must handle
   5. Note any reference values to test against
@@ -189,7 +189,7 @@ def run_step(name: str, model: str, system_prompt: str, user_prompt: str,
         for m in messages: f.write(json.dumps(m, default=str) + "\n")
 
     elapsed = time.time() - started
-    print(f"[{name}] done — {tot_calls} tools, {tot_in}/{tot_out} tok, ${tot_cost:.5f}, {elapsed:.1f}s", flush=True)
+    print(f"[{name}] done - {tot_calls} tools, {tot_in}/{tot_out} tok, ${tot_cost:.5f}, {elapsed:.1f}s", flush=True)
     return {"name": name, "model": model, "tokens_in": tot_in, "tokens_out": tot_out,
             "tool_calls": tot_calls, "cost": round(tot_cost, 6), "wall_s": round(elapsed, 1), "final": final_text}
 
@@ -198,7 +198,7 @@ def pipeline_architect(args, user_prompt: str, ws: Path, run_dir: Path) -> list[
     architect = args.architect_model or args.primary_model.split(",")[0]
     executor  = args.primary_model.split(",")[0]
     steps = []
-    # Step 1: architect emits a plan as text (no tools — empty schema)
+    # Step 1: architect emits a plan as text (no tools - empty schema)
     plan_step = run_step("architect", architect, ARCHITECT_PROMPT, user_prompt, ws, run_dir,
                          args.base_url, allow_write=False, max_iter=2)
     steps.append(plan_step)
@@ -314,7 +314,7 @@ def main() -> None:
         "cost": round(tot_cost, 6),
     }, indent=2))
 
-    print(f"\n══════ PIPELINE DONE — {len(steps)} steps, {tot_in}/{tot_out} tok, ${tot_cost:.5f} total ══════")
+    print(f"\n══════ PIPELINE DONE - {len(steps)} steps, {tot_in}/{tot_out} tok, ${tot_cost:.5f} total ══════")
 
 
 if __name__ == "__main__":

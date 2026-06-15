@@ -73,7 +73,7 @@ export default function HardwarePanel({ runs }: { runs: Run[] }) {
       </div>
       <p className="text-[var(--muted)] text-sm max-w-3xl mb-4">
         Sampled every 1s during each run via <code>nvidia-smi</code> on the GPU host.
-        Per-model averages — peak GPU temperature, peak VRAM, average power draw,
+        Per-model averages - peak GPU temperature, peak VRAM, average power draw,
         and total energy used. Models that consistently push the GPU harder cost
         more electricity per token.
       </p>

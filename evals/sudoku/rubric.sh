@@ -29,7 +29,7 @@ PUZZLES = {
     "med":  "100920000524010000000000070050008102000000000402700090060000000000030945000071006",
     # Hard (requires backtracking)
     "hard": "000000907000420180000705026100904000050000040000507009920108000034059000507000000",
-    # Expert (the "World's hardest sudoku" by Arto Inkala — slow w/o good heuristics, allow 30s timeout)
+    # Expert (the "World's hardest sudoku" by Arto Inkala - slow w/o good heuristics, allow 30s timeout)
     "expert":"800000000003600000070090200050007000000045700000100030001000068008500010090000400",
     # Empty cell pattern test
     "min":  "000000000000003085001020000000507000004000100090000000500000073002010000000040009",
@@ -87,7 +87,7 @@ PY
     [[ "$pass" == "1" ]] && add "puzzle:$puzzle" 1 "$w" || add "puzzle:$puzzle" 0 "$w" "$line"
   done
 
-  # Bonus: must not import third-party (z3, etc) — pure python expected
+  # Bonus: must not import third-party (z3, etc) - pure python expected
   if grep -qE "^\s*import\s+(z3|constraint)" "$T"; then
     add "no_third_party_solver" 0 5 "third-party solver used"
   else

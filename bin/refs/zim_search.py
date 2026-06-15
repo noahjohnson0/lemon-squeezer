@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""zim_search — query a kiwix-serve instance as if it were a lemon corpus.
+"""zim_search - query a kiwix-serve instance as if it were a lemon corpus.
 
 kiwix-serve (from kiwix-tools) exposes a ZIM file as HTTP. We hit:
   /search?books.name=<book>&pattern=<q>&pageLength=<n>   → JSON results
@@ -7,7 +7,7 @@ kiwix-serve (from kiwix-tools) exposes a ZIM file as HTTP. We hit:
 
 We use the JSON search endpoint (?search-format=json on newer builds, else
 parse the HTML result page as a fallback). Article HTML is reduced to plain
-text via a tiny heuristic stripper — no BeautifulSoup dependency.
+text via a tiny heuristic stripper - no BeautifulSoup dependency.
 
 Used by:
   - bin/refs/search.py (when corpus is registered as type=zim)
@@ -21,7 +21,7 @@ A 'zim corpus' is configured by a single-line text file at
     book=wikipedia_en_all_nopic_2026-03
 
 (The 'book' is the URL-safe slug; kiwix-serve auto-derives it from the .zim
-filename — usually the filename without the .zim extension.)
+filename - usually the filename without the .zim extension.)
 
 Usage as CLI:
     bin/refs/zim_search.py ~/refs/wikipedia-en "haversine distance" --top 5
@@ -49,7 +49,7 @@ def _http_get(url: str, timeout: int = 20) -> bytes:
 def read_conf(corpus_dir: Path) -> dict:
     conf = corpus_dir / ".lemon-zim.conf"
     if not conf.exists():
-        raise FileNotFoundError(f"no zim conf at {conf} — create one with base_url=... and book=...")
+        raise FileNotFoundError(f"no zim conf at {conf} - create one with base_url=... and book=...")
     out = {}
     for line in conf.read_text().splitlines():
         line = line.strip()

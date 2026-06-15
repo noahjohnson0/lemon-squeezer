@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""bench-analyze — produce a human-readable report from bench/results/.
+"""bench-analyze - produce a human-readable report from bench/results/.
 
 Usage:
     bin/bench-analyze                       # full report on all sweeps

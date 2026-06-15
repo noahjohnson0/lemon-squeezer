@@ -18,7 +18,7 @@ def voltage_divider(vin: float, r1: float, r2: float) -> float:
     Vout = Vin * R2 / (R1 + R2). Volts; ohms; ohms."""
 ```
 
-All four are pure formulas — no numerical methods, no I/O. Just import the right symbols
+All four are pure formulas - no numerical methods, no I/O. Just import the right symbols
 and write them clearly. Do not import third-party packages; pure Python only.
 
 Create only `engineering.py`. Don't run it.

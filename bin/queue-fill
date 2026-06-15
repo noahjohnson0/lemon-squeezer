@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
-"""queue-fill — produce a prioritised eval-run script for a target host.
+"""queue-fill - produce a prioritised eval-run script for a target host.
 
 Reads runs.jsonl, computes the gap between what's been tested and what we'd
 ideally have, and emits a bash script that fills that gap in a smart order:
 
-  1. Top-tier (harness × model) rows that are CLOSE TO COMPLETE — finishing
+  1. Top-tier (harness × model) rows that are CLOSE TO COMPLETE - finishing
      these gives us full per-eval avgs for our best performers.
   2. Mid-tier rows that are sparse but the model is competitive elsewhere.
-  3. Pipeline harnesses on top models — high info per run since pipeline
+  3. Pipeline harnesses on top models - high info per run since pipeline
      wins/losses are the alchemy story.
 
 Skips:
   - Cells already tested non-zero. (Re-running a 0% to confirm it's still 0%
     is low-info; only re-run if exit was non-zero AND we have time budget.)
-  - Combos with avg < 20% across 5+ tested evals (e.g. phi4 / granite — proven
+  - Combos with avg < 20% across 5+ tested evals (e.g. phi4 / granite - proven
     incapable on this hardware; running them on more evals just costs GPU.)
   - Eval slots already at 100% for the (harness, model). No point re-running.
 
@@ -29,11 +29,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 RUNS = ROOT / "runs.jsonl"
 
-# Combos that are known dead ends — keep them in the data but don't expand.
+# Combos that are known dead ends - keep them in the data but don't expand.
 DROPOUT_AVG = 20  # if avg < this AND tested ≥ 5 evals, stop expanding
 TOP_HARNESSES = ["aider", "squeezer", "squeezer-tdd", "squeezer-verify",
                  "squeezer-critique", "squeezer-architect", "pi"]
-# Pipelines slow down the queue — only run them on the biggest models.
+# Pipelines slow down the queue - only run them on the biggest models.
 PIPELINE_HARNESSES = {"squeezer-tdd", "squeezer-verify", "squeezer-critique",
                       "squeezer-architect", "squeezer-ensemble"}
 PIPELINE_MODEL_WHITELIST = {
@@ -139,7 +139,7 @@ def main():
         print(f'echo "═══ $(date +%T) | {h} {e} {m} @ {args.host}"')
         print(f'~/repos/lemon-squeezer/bin/eval-run --host {args.host} '
               f'{h} {e} {m} fill 2>&1 | tail -2')
-    print(f'echo "═══ queue-fill done $(date +%T) — {len(candidates)} runs attempted"')
+    print(f'echo "═══ queue-fill done $(date +%T) - {len(candidates)} runs attempted"')
     print(f"# {len(candidates)} runs queued for host={args.host}", file=sys.stderr)
 
 

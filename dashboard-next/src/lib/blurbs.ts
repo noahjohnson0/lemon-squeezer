@@ -24,7 +24,7 @@ export const EVAL_BLURBS: Record<string, Blurb> = {
   },
   "chem-balance": {
     summary: "Implement chemical-equation balancing via element-count matrix null vector. 7 equations including KMnO4 redox.",
-    discriminates: "Numerical stability. Naive numpy SVD blows up on KMnO4 — sympy or rational elimination required.",
+    discriminates: "Numerical stability. Naive numpy SVD blows up on KMnO4 - sympy or rational elimination required.",
   },
   "projectile-sim": {
     summary: "2D projectile motion with quadratic drag, RK4 integrator. Print range, max height, flight time.",
@@ -44,15 +44,15 @@ export const EVAL_BLURBS: Record<string, Blurb> = {
   },
   "sql-injection-fix": {
     summary: "Fix a vulnerable `lookup(con, name)` route that interpolates user input into SQL. Use parameterised queries.",
-    discriminates: "Defensive security awareness — must use ? placeholders, not string escaping.",
+    discriminates: "Defensive security awareness - must use ? placeholders, not string escaping.",
   },
   finance: {
-    summary: "mortgage_payment, amortization_table, npv, irr — fixed-income / project finance arithmetic.",
+    summary: "mortgage_payment, amortization_table, npv, irr - fixed-income / project finance arithmetic.",
     discriminates: "IRR convergence (Newton/bisection) and amortization-table final balance == 0.",
   },
   engineering: {
-    summary: "Reynolds number, beam deflection, RC tau, voltage divider — pure-formula physics/EE primitives.",
-    discriminates: "Easy bar — measures whether the model knows the formulas without third-party libs.",
+    summary: "Reynolds number, beam deflection, RC tau, voltage divider - pure-formula physics/EE primitives.",
+    discriminates: "Easy bar - measures whether the model knows the formulas without third-party libs.",
   },
   sudoku: {
     summary: "9×9 sudoku solver. 5 puzzles including Arto Inkala's 'world's hardest' (60s timeout).",
@@ -84,7 +84,7 @@ export const EVAL_BLURBS: Record<string, Blurb> = {
   },
   knapsack: {
     summary: "0/1 knapsack DP with index reconstruction (7 cases inc. empty/zero-cap).",
-    discriminates: "Index reconstruction from the DP table — easy to miscount.",
+    discriminates: "Index reconstruction from the DP table - easy to miscount.",
   },
   "unit-convert": {
     summary: "CLI: parse 'X unit Y unit ... to target_unit'. Length/mass/volume/temp/speed.",
@@ -123,7 +123,7 @@ export const EVAL_BLURBS: Record<string, Blurb> = {
     discriminates: "bool-vs-int (Python bool is int subclass), error path formatting.",
   },
   "regex-engine": {
-    summary: "Tiny regex matcher: . * + ? [...] [^...] [a-z] \\d \\w \\s — without `re`.",
+    summary: "Tiny regex matcher: . * + ? [...] [^...] [a-z] \\d \\w \\s - without `re`.",
     discriminates: "Greedy-with-backoff for *, anchor handling.",
   },
   "boolean-sat": {

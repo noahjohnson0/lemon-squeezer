@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""librarian-cascade — two-model RAG pipeline.
+"""librarian-cascade - two-model RAG pipeline.
 
 Phase 1 (RETRIEVER): a small/fast model loops with `search_local` and
-`read_local`, gathering relevant passages. It cannot answer — its job is to
+`read_local`, gathering relevant passages. It cannot answer - its job is to
 collect evidence. Stops when it produces a turn with no tool calls or when
 $CASCADE_RETRIEVER_BUDGET searches are exhausted (default 8).
 
 Phase 2 (ANSWERER): a big/strong model receives:
   - the original user prompt
   - the concatenated retrieved sections (from phase 1)
-…and is asked to write the final answer. It does NOT have search tools — it
+…and is asked to write the final answer. It does NOT have search tools - it
 must reason from what was retrieved. This forces the big model to be a faithful
 synthesizer rather than re-running the search itself.
 
@@ -40,19 +40,19 @@ from librarian import parse_corpora, make_tools as make_lib_tools, make_schema a
 RETRIEVER_SYSTEM = """You are the RETRIEVAL phase of a two-stage librarian pipeline.
 
 Your ONE job: find passages that will help answer the user's question. You do
-NOT write the final answer — that's a different model's job.
+NOT write the final answer - that's a different model's job.
 
 Tools: search_local, read_local. Try multiple queries with different keywords
 (synonyms, narrower/broader terms). Aim for breadth.
 
-Stop when you've gathered enough — emit a single short summary message with
+Stop when you've gathered enough - emit a single short summary message with
 no tool calls. Do not call write_answer (it's not available here)."""
 
-ANSWERER_SYSTEM = """You are the SYNTHESIS phase of a two-stage librarian pipeline. A retriever has already gathered relevant passages — they are appended to the user's question below.
+ANSWERER_SYSTEM = """You are the SYNTHESIS phase of a two-stage librarian pipeline. A retriever has already gathered relevant passages - they are appended to the user's question below.
 
-Use ONLY the retrieved passages. If they don't contain a fact, say "I don't know — the retrieved references don't contain this." Cite the source filename in parentheses.
+Use ONLY the retrieved passages. If they don't contain a fact, say "I don't know - the retrieved references don't contain this." Cite the source filename in parentheses.
 
-Be concise. Do not call any tools — just write the final answer text."""
+Be concise. Do not call any tools - just write the final answer text."""
 
 
 def main():
@@ -72,7 +72,7 @@ def main():
 
     corpora = parse_corpora(os.environ.get("LEMON_CORPORA"), workspace)
 
-    # Phase 1 tools — ONLY search/read, no write_answer (we're harvesting evidence)
+    # Phase 1 tools - ONLY search/read, no write_answer (we're harvesting evidence)
     tool_impls, _state = make_lib_tools(workspace, corpora, allow_web=False)
     # Drop write_answer / web_search from the schema for the retriever phase
     schema = [t for t in make_lib_schema(corpora, allow_web=False)
@@ -85,7 +85,7 @@ def main():
     ]
     transcript = []
     tot_in_r = tot_out_r = tot_calls = 0
-    retrieved: list[str] = []  # accumulated tool results — this is what gets passed to phase 2
+    retrieved: list[str] = []  # accumulated tool results - this is what gets passed to phase 2
 
     started = time.time()
     for it in range(args.max_iter):
@@ -157,7 +157,7 @@ def main():
     if final_text.strip():
         (workspace / "answer.txt").write_text(final_text)
 
-    # Persist totals — eval-run picks these up
+    # Persist totals - eval-run picks these up
     (run_dir / "tokens_in").write_text(str(tot_in_r + tot_in_a))
     (run_dir / "tokens_out").write_text(str(tot_out_r + tot_out_a))
     (run_dir / "tool_calls").write_text(str(tot_calls))

@@ -70,7 +70,7 @@ PY
   [[ "$bob_count"     == "1" ]] && add "bob_returns_1_row"   1 10 || add "bob_returns_1_row"   0 10 "got $bob_count"
   [[ "$missing_count" == "0" ]] && add "missing_returns_0"   1 5  || add "missing_returns_0"   0 5  "got $missing_count"
   [[ "$inj1_count"    == "0" ]] && add "blocks_or_quote_eq_quote" 1 20 || add "blocks_or_quote_eq_quote" 0 20 "got $inj1_count (should be 0; if all 3 rows: still vulnerable)"
-  # inj2: drop-table payload should either return 0 rows OR raise — both fine; what matters is data still there
+  # inj2: drop-table payload should either return 0 rows OR raise - both fine; what matters is data still there
   if [[ "$inj2_count" == "0" || "$inj2_count" == "-2" ]]; then add "blocks_drop_table_payload" 1 10
   else add "blocks_drop_table_payload" 0 10 "got $inj2_count"; fi
   [[ "$post_drop"     == "1" ]] && add "data_intact_after_attack" 1 10 || add "data_intact_after_attack" 0 10 "alice gone after injection: $post_drop"

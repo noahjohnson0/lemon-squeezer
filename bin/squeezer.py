@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""squeezer — a minimal raw-tool-calling harness.
+"""squeezer - a minimal raw-tool-calling harness.
 
 Talks straight to an OpenAI-compatible Chat Completions endpoint (Ollama's /v1) with
 the standard `tools` parameter. Implements four file/system tools:
@@ -111,7 +111,7 @@ A successful tool result is NOT a stopping condition. After every tool result, d
 
 # ─────────────── text tool-call fallback (for local models) ───────────────
 def parse_text_tool_calls(content: str):
-    """Some models (esp. local ones via Ollama — qwen2.5-coder, etc.) emit tool
+    """Some models (esp. local ones via Ollama - qwen2.5-coder, etc.) emit tool
     calls as JSON *text* in the content instead of the native `tool_calls` field.
     Best-effort recover them so those models can still act as agents. Returns a
     list shaped like OpenAI tool_calls, or [] if none found. Native tool_calls

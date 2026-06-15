@@ -59,7 +59,7 @@
 
     {"label": "crit:30b<-pro-r2",   "harness": "cloud-critique",  "pipeline": "critique",
      "primary_model": "qwen/qwen3-coder-30b-a3b-instruct", "critic_model": "deepseek/deepseek-v4-pro", "rounds": 2,
-     "_note": "two critique->refine rounds — does a second pass keep helping?"},
+     "_note": "two critique->refine rounds - does a second pass keep helping?"},
 
     {"label": "arch:flash<-pro",    "harness": "cloud-architect", "pipeline": "architect",
      "primary_model": "deepseek/deepseek-v4-flash", "architect_model": "deepseek/deepseek-v4-pro",
