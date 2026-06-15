@@ -114,3 +114,22 @@ a { color: inherit; }
 @media (prefers-reduced-motion: reduce) {
   .ls-rise { animation: none; }
 }
+
+/* header live/idle status dot */
+.dot-live, .dot-idle {
+  width: 8px; height: 8px; border-radius: 999px; display: inline-block;
+}
+.dot-live {
+  background: var(--good);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--good) 70%, transparent);
+  animation: ls-pulse 1.4s ease-out infinite;
+}
+.dot-idle { background: var(--faint); }
+@keyframes ls-pulse {
+  0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--good) 65%, transparent); opacity: 1; }
+  70%  { box-shadow: 0 0 0 7px color-mix(in srgb, var(--good) 0%, transparent); opacity: 0.85; }
+  100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--good) 0%, transparent); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dot-live { animation: none; }
+}

@@ -6,6 +6,23 @@ import { Run, scoreClass } from "@/lib/data";
 type ScoreCheck = { name: string; pass: 0 | 1 | number; weight: number; note?: string };
 type Score = { checks: ScoreCheck[]; gained: number; total: number; score_pct: number };
 
+// All breakdowns are bundled into one deployed file (runs/ itself is not shipped).
+// Fetch once, cached; try root-relative then parent (for sub-routes like /cloud).
+let _scoresPromise: Promise<Record<string, Score>> | null = null;
+function loadScores(): Promise<Record<string, Score>> {
+  if (_scoresPromise) return _scoresPromise;
+  _scoresPromise = (async () => {
+    for (const rel of ["./scores.json", "../scores.json"]) {
+      try {
+        const r = await fetch(rel, { cache: "force-cache" });
+        if (r.ok) return (await r.json()) as Record<string, Score>;
+      } catch { /* try next */ }
+    }
+    return {};
+  })();
+  return _scoresPromise;
+}
+
 export default function RunDrawer({
   run,
   onClose,
@@ -13,14 +30,14 @@ export default function RunDrawer({
   run: Run | null;
   onClose: () => void;
 }) {
-  const [score, setScore] = useState<Score | null>(null);
+  // undefined = loading, null = not found, Score = loaded
+  const [score, setScore] = useState<Score | null | undefined>(undefined);
   useEffect(() => {
-    setScore(null);
+    setScore(undefined);
     if (!run) return;
-    fetch(`./runs/${run.run_id}/score.json?t=${Date.now()}`)
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => setScore(d))
-      .catch(() => setScore(null));
+    let live = true;
+    loadScores().then((m) => { if (live) setScore(m[run.run_id] ?? null); });
+    return () => { live = false; };
   }, [run]);
 
   return (
@@ -104,8 +121,13 @@ export default function RunDrawer({
                     ))}
                   </tbody>
                 </table>
-              ) : (
+              ) : score === undefined ? (
                 <p className="text-[var(--muted)] text-sm">loading…</p>
+              ) : (
+                <p className="text-[var(--muted)] text-sm">
+                  Per-check breakdown not bundled for this run (older run, or rerun{" "}
+                  <code className="text-[11px]">bin/build-scores</code>).
+                </p>
               )}
 
               {run.telemetry && (

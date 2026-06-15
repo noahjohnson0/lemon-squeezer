@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const LINKS = [
   { href: "/", label: "Overview" },
@@ -12,6 +13,18 @@ export default function SiteNav() {
   const path = usePathname();
   const isActive = (href: string) =>
     href === "/" ? path === "/" : path.startsWith(href);
+
+  // "live" = newest run is within 15 min of now (loadRuns stamps it globally).
+  const [live, setLive] = useState(false);
+  useEffect(() => {
+    const tick = () => {
+      const ms = (globalThis as Record<string, unknown>).__lemonLastRunMs as number | undefined;
+      setLive(!!ms && Date.now() - ms < 15 * 60 * 1000);
+    };
+    tick();
+    const id = setInterval(tick, 5000);
+    return () => clearInterval(id);
+  }, []);
 
   return (
     <header className="sticky top-0 z-40 backdrop-blur-md bg-[color-mix(in_srgb,var(--bg)_72%,transparent)] border-b border-[var(--border)]">
@@ -35,12 +48,18 @@ export default function SiteNav() {
             </Link>
           ))}
         </div>
-        <a
-          href="https://github.com/noahjohnson0/lemon-squeezer"
-          className="ml-auto text-xs text-[var(--muted)] hover:text-[var(--accent)] transition-colors"
-        >
-          GitHub ↗
-        </a>
+        <div className="ml-auto flex items-center gap-3">
+          <span className="flex items-center gap-1.5 text-xs" title={live ? "a run finished in the last 15 min" : "no recent runs"}>
+            <span className={live ? "dot-live" : "dot-idle"} />
+            <span className={live ? "text-[var(--good)]" : "text-[var(--faint)]"}>{live ? "live" : "idle"}</span>
+          </span>
+          <a
+            href="https://github.com/noahjohnson0/lemon-squeezer"
+            className="text-xs text-[var(--muted)] hover:text-[var(--accent)] transition-colors"
+          >
+            GitHub ↗
+          </a>
+        </div>
       </nav>
     </header>
   );

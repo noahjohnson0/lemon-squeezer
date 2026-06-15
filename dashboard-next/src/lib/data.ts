@@ -103,6 +103,14 @@ export async function loadRuns(rel = "./runs.jsonl"): Promise<Run[]> {
     }
   }
   runs.sort((a, b) => a.ts.localeCompare(b.ts));
+  // Stamp the newest run's epoch ms globally so the header "live" dot can read it
+  // without re-fetching. ts is colon-free (e.g. 2026-06-15T08-31-19Z).
+  const newest = runs[runs.length - 1]?.ts;
+  if (newest) {
+    const iso = newest.replace(/T(\d\d)-(\d\d)-(\d\d)Z$/, "T$1:$2:$3Z");
+    const ms = Date.parse(iso);
+    if (!Number.isNaN(ms)) (globalThis as Record<string, unknown>).__lemonLastRunMs = ms;
+  }
   return runs;
 }
 
