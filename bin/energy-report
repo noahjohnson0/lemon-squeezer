@@ -1,0 +1,88 @@
+#!/usr/bin/env python3
+"""energy-report - estimate the electricity used (and its cost) by LOCAL runs.
+
+Cloud runs cost dollars (tracked in cost_usd); local runs cost electricity. This
+estimates kWh and cost for every host!=openrouter run in runs.jsonl.
+
+Energy model (honest about its assumptions):
+  per_run_kWh = wall_seconds * watts / 3_600_000
+where `watts` is the WHOLE-SYSTEM average draw under load. We use telemetry's
+measured GPU power when present; otherwise the --watts estimate. The 4070 here
+drew ~90 W on an offloaded MoE and more on models that fit, so the default is a
+whole-rig figure (GPU + CPU + board), not GPU-only. Tune --watts to your kill-a-watt
+reading and --price to your utility's $/kWh for a real number.
+
+    python bin/energy-report [--watts 250] [--price 0.15] [--by-model]
+
+Historical usage = every local run ever recorded (they are all local).
+"""
+from __future__ import annotations
+import argparse, json
+from collections import defaultdict
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--watts", type=float, default=250.0,
+                    help="whole-system average draw under load (W); tune to your meter")
+    ap.add_argument("--price", type=float, default=0.15, help="electricity price ($/kWh)")
+    ap.add_argument("--by-model", action="store_true")
+    a = ap.parse_args()
+
+    rows = []
+    for line in (ROOT / "runs.jsonl").read_text(encoding="utf-8", errors="replace").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            rows.append(json.loads(line))
+        except Exception:
+            pass
+
+    local = [r for r in rows if r.get("host") != "openrouter"]
+    cloud = [r for r in rows if r.get("host") == "openrouter"]
+
+    def wall(r):
+        return r.get("wall_seconds", 0) or 0
+
+    def run_kwh(r):
+        # measured GPU power if telemetry has it, else the whole-system estimate
+        tw = (r.get("telemetry") or {}).get("gpu_power_avg_w")
+        w = float(tw) if tw else a.watts
+        return wall(r) * w / 3_600_000.0
+
+    tot_wall = sum(wall(r) for r in local)
+    tot_kwh = sum(run_kwh(r) for r in local)
+    measured = sum(1 for r in local if (r.get("telemetry") or {}).get("gpu_power_avg_w"))
+
+    print(f"# LOCAL electricity (assumes {a.watts:.0f} W system avg where unmeasured, "
+          f"${a.price:.3f}/kWh)\n")
+    print(f"  local runs:      {len(local):,}  ({measured} with measured power, rest estimated)")
+    print(f"  total wall time: {tot_wall/3600:.1f} h")
+    print(f"  energy:          {tot_kwh:.2f} kWh")
+    print(f"  electricity:     ${tot_kwh * a.price:.2f}")
+
+    if a.by_model:
+        agg = defaultdict(lambda: [0.0, 0.0, 0])  # kwh, wall, n
+        for r in local:
+            k = f"{r.get('model')} / {r.get('harness')}"
+            agg[k][0] += run_kwh(r); agg[k][1] += wall(r); agg[k][2] += 1
+        print(f"\n  {'model / harness':40} {'runs':>5} {'wall(h)':>8} {'kWh':>7} {'$':>7}")
+        for k, (kwh, w, n) in sorted(agg.items(), key=lambda x: -x[1][0]):
+            print(f"  {k[:40]:40} {n:>5} {w/3600:>8.2f} {kwh:>7.3f} {kwh*a.price:>7.3f}")
+
+    # local-vs-cloud economics, for the same kind of work
+    cloud_cost = sum(r.get("cost_usd", 0) or 0 for r in cloud)
+    print(f"\n# for comparison: {len(cloud):,} cloud runs cost ${cloud_cost:.2f} in API fees")
+    if tot_kwh > 0:
+        print(f"  local energy/run:  {tot_kwh/len(local)*1000:.2f} Wh  (${tot_kwh/len(local)*a.price:.5f})")
+    if cloud:
+        print(f"  cloud $/run:       ${cloud_cost/len(cloud):.5f}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
