@@ -85,15 +85,38 @@ def solution_sloc(eval_name, run_id):
     return total if counted else None
 
 
+def arm_bundle(rows, threshold):
+    """Per-arm (model|harness) median solution SLOC over PASSING runs - bundled for
+    the dashboard so it can show code size next to cost/latency as a tie-breaker."""
+    g = defaultdict(list)
+    for r in rows:
+        s = r.get("score_pct")
+        if isinstance(s, (int, float)) and s >= threshold:
+            sl = solution_sloc(r.get("eval"), r["run_id"])
+            if sl:
+                g[(r.get("model"), r.get("harness"))].append(sl)
+    return {f"{m}|{h}": {"sloc": int(statistics.median(v)), "n": len(v)} for (m, h), v in g.items()}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--pass-threshold", type=int, default=80)
     ap.add_argument("--by", choices=["harness", "model"], default="harness")
     ap.add_argument("--tag", default=None)
     ap.add_argument("--host", default=None, help="filter to a host (e.g. openrouter)")
+    ap.add_argument("--bundle", default=None, help="write per-arm median SLOC JSON to this path (for the dashboard)")
     a = ap.parse_args()
 
     rows = [json.loads(l) for l in (ROOT / "runs.jsonl").read_text(encoding="utf-8", errors="replace").splitlines() if l.strip()]
+
+    if a.bundle:
+        src = [r for r in rows if (not a.host or r.get("host") == a.host) and (not a.tag or r.get("tag") == a.tag)]
+        b = arm_bundle(src, a.pass_threshold)
+        import json as _j
+        Path(a.bundle).write_text(_j.dumps(b), encoding="utf-8")
+        print(f"wrote {a.bundle}: {len(b)} arms")
+        return 0
+
     groups = defaultdict(lambda: {"sloc_pass": [], "scores": [], "n": 0, "n_sized": 0})
     for r in rows:
         if a.tag and r.get("tag") != a.tag:
