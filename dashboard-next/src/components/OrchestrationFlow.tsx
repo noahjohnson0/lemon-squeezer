@@ -13,12 +13,17 @@ export type Pattern = {
 
 type Role = FlowNode["role"];
 type PositionedNode = FlowNode & { x: number; y: number; level: number };
+type FlowLayout = { height: number; nodes: PositionedNode[] };
 
 const WIDTH = 640;
-const HEIGHT = 260;
-const NODE_W = 132;
-const NODE_H = 52;
-const PAD_X = 92;
+const NODE_W = 150;
+const NODE_H = 58;
+const NODE_GAP_Y = 12;
+const WORKSPACE_X = 26;
+const WORKSPACE_Y = 24;
+const WORKSPACE_W = 588;
+const WORKSPACE_MARGIN = 18;
+const MIN_HEIGHT = 196;
 
 const ROLE_ORDER: Role[] = ["planner", "implementer", "critic", "judge", "tester"];
 const ROLE_META: Record<Role, { label: string; color: string }> = {
@@ -31,15 +36,36 @@ function safeId(value: string): string {
   return value.replace(/[^a-zA-Z0-9_-]/g, "-");
 }
 
-function layoutNodes(pattern: Pattern): PositionedNode[] {
+function edgeKey(from: string, to: string): string {
+  return `${from}\u0000${to}`;
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
+}
+
+function isLevelingBackEdge(edge: FlowEdge, levels: Map<string, number>, originalOrder: Map<string, number>, reciprocalEdges: Set<string>): boolean {
+  const fromOrder = originalOrder.get(edge.from) ?? 0;
+  const toOrder = originalOrder.get(edge.to) ?? 0;
+  const hasReciprocal = reciprocalEdges.has(edgeKey(edge.to, edge.from));
+
+  if (hasReciprocal) return toOrder < fromOrder;
+
+  return toOrder <= fromOrder && (levels.get(edge.to) ?? 0) <= (levels.get(edge.from) ?? 0);
+}
+
+function layoutNodes(pattern: Pattern): FlowLayout {
   const originalOrder = new Map(pattern.nodes.map((node, index) => [node.id, index]));
   const levels = new Map(pattern.nodes.map((node) => [node.id, 0]));
+  const edgeKeys = new Set(pattern.edges.map((edge) => edgeKey(edge.from, edge.to)));
 
-  // Repeatedly relax edge levels so downstream nodes move right, with a cap for cycles.
+  // Repeatedly relax only forward edges so reciprocal return edges cannot collapse cycles into one level.
   for (let pass = 0; pass < pattern.nodes.length + pattern.edges.length; pass += 1) {
     let changed = false;
     for (const edge of pattern.edges) {
       if (!levels.has(edge.from) || !levels.has(edge.to)) continue;
+      if (isLevelingBackEdge(edge, levels, originalOrder, edgeKeys)) continue;
+
       const next = Math.min((levels.get(edge.from) ?? 0) + 1, pattern.nodes.length - 1);
       if (next > (levels.get(edge.to) ?? 0)) {
         levels.set(edge.to, next);
@@ -50,42 +76,67 @@ function layoutNodes(pattern: Pattern): PositionedNode[] {
   }
 
   const maxLevel = Math.max(1, ...Array.from(levels.values()));
+  const minNodeX = WORKSPACE_X + WORKSPACE_MARGIN + NODE_W / 2;
+  const maxNodeX = WORKSPACE_X + WORKSPACE_W - WORKSPACE_MARGIN - NODE_W / 2;
   const groups = new Map<number, FlowNode[]>();
   for (const node of pattern.nodes) {
     const level = levels.get(node.id) ?? 0;
     groups.set(level, [...(groups.get(level) ?? []), node]);
   }
 
-  return Array.from(groups.entries()).flatMap(([level, nodes]) => {
+  const rowCount = Math.max(1, ...Array.from(groups.values()).map((nodes) => nodes.length));
+  const rowStackHeight = rowCount * NODE_H + Math.max(0, rowCount - 1) * NODE_GAP_Y;
+  const height = Math.max(MIN_HEIGHT, rowStackHeight + 62);
+  const nodes = Array.from(groups.entries()).flatMap(([level, nodes]) => {
     const sorted = [...nodes].sort((a, b) => (originalOrder.get(a.id) ?? 0) - (originalOrder.get(b.id) ?? 0));
+    const stackHeight = sorted.length * NODE_H + Math.max(0, sorted.length - 1) * NODE_GAP_Y;
+    const firstY = (height - stackHeight) / 2 + NODE_H / 2;
+
     return sorted.map((node, index) => {
-      const top = 64;
-      const usable = HEIGHT - 112;
       return {
         ...node,
         level,
-        x: PAD_X + (level / maxLevel) * (WIDTH - PAD_X * 2),
-        y: top + ((index + 1) * usable) / (sorted.length + 1),
+        x: clamp(minNodeX + (level / maxLevel) * (maxNodeX - minNodeX), minNodeX, maxNodeX),
+        y: firstY + index * (NODE_H + NODE_GAP_Y),
       };
     });
   });
+
+  return { height, nodes };
 }
 
-function edgePath(from: PositionedNode, to: PositionedNode): string {
-  const x1 = from.x + NODE_W / 2;
+function forwardEdgePath(from: PositionedNode, to: PositionedNode): string {
+  const direction = to.x >= from.x ? 1 : -1;
+  const x1 = from.x + (direction * NODE_W) / 2;
   const y1 = from.y;
-  const x2 = to.x - NODE_W / 2;
+  const x2 = to.x - (direction * NODE_W) / 2;
   const y2 = to.y;
   const bend = Math.max(52, Math.abs(x2 - x1) * 0.45);
-  return `M ${x1} ${y1} C ${x1 + bend} ${y1}, ${x2 - bend} ${y2}, ${x2} ${y2}`;
+  return `M ${x1} ${y1} C ${x1 + direction * bend} ${y1}, ${x2 - direction * bend} ${y2}, ${x2} ${y2}`;
+}
+
+function returnEdgePath(from: PositionedNode, to: PositionedNode, height: number): string {
+  const direction = to.x >= from.x ? 1 : -1;
+  const x1 = from.x + (direction * NODE_W) / 2;
+  const y1 = from.y + 8;
+  const x2 = to.x - (direction * NODE_W) / 2;
+  const y2 = to.y + 8;
+  const bowY = clamp(Math.max(from.y, to.y) + 58, WORKSPACE_Y + NODE_H, height - 28);
+  return `M ${x1} ${y1} C ${x1 + direction * 38} ${bowY}, ${x2 - direction * 38} ${bowY}, ${x2} ${y2}`;
+}
+
+function isRenderedBackEdge(from: PositionedNode, to: PositionedNode): boolean {
+  return to.level <= from.level;
 }
 
 function PatternCard({ pattern, index }: { pattern: Pattern; index: number }): JSX.Element {
   const shouldReduceMotion = useReducedMotion();
-  const nodes = useMemo(() => layoutNodes(pattern), [pattern]);
+  const layout = useMemo(() => layoutNodes(pattern), [pattern]);
+  const { height, nodes } = layout;
   const nodeById = useMemo(() => new Map(nodes.map((node) => [node.id, node])), [nodes]);
   const markerId = `orchestration-arrow-${safeId(pattern.key)}`;
   const flowClass = shouldReduceMotion ? "" : "orchestration-flow-line";
+  const workspaceHeight = height - WORKSPACE_Y * 2;
   const scoreTone =
     pattern.result && pattern.result.score >= 95
       ? "bg-[var(--good,#56d364)] text-[#06120a]"
@@ -109,7 +160,7 @@ function PatternCard({ pattern, index }: { pattern: Pattern; index: number }): J
       </div>
 
       <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[radial-gradient(circle_at_20%_25%,rgba(121,192,255,0.13),transparent_32%),radial-gradient(circle_at_80%_70%,rgba(126,224,184,0.12),transparent_34%),var(--panel-2)]">
-        <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} role="img" aria-labelledby={`${markerId}-title ${markerId}-desc`} className="h-auto w-full">
+        <svg viewBox={`0 0 ${WIDTH} ${height}`} role="img" aria-labelledby={`${markerId}-title ${markerId}-desc`} className="h-auto w-full">
           <title id={`${markerId}-title`}>{pattern.title} orchestration flow</title>
           <desc id={`${markerId}-desc`}>{pattern.tagline}</desc>
           <defs>
@@ -122,9 +173,9 @@ function PatternCard({ pattern, index }: { pattern: Pattern; index: number }): J
             </filter>
           </defs>
 
-          <rect x="26" y="34" width="588" height="188" rx="22" fill="rgba(255,255,255,0.025)" />
-          <path d="M 56 130 H 584" stroke="var(--border)" strokeDasharray="4 10" opacity="0.75" />
-          <text x="42" y="54" fill="var(--muted)" fontSize="11" fontFamily="monospace">
+          <rect x={WORKSPACE_X} y={WORKSPACE_Y} width={WORKSPACE_W} height={workspaceHeight} rx="22" fill="rgba(255,255,255,0.025)" stroke="var(--border)" strokeDasharray="7 9" opacity="0.9" />
+          <path d={`M 56 ${height / 2} H 584`} stroke="var(--border)" strokeDasharray="4 10" opacity="0.7" />
+          <text x="42" y={WORKSPACE_Y + 20} fill="var(--muted)" fontSize="11" fontFamily="monospace">
             workspace
           </text>
 
@@ -132,9 +183,12 @@ function PatternCard({ pattern, index }: { pattern: Pattern; index: number }): J
             const from = nodeById.get(edge.from);
             const to = nodeById.get(edge.to);
             if (!from || !to) return null;
-            const path = edgePath(from, to);
+            const isBackEdge = isRenderedBackEdge(from, to);
+            const path = isBackEdge ? returnEdgePath(from, to, height) : forwardEdgePath(from, to);
             const midX = (from.x + to.x) / 2;
-            const midY = (from.y + to.y) / 2 - 10 - (edgeIndex % 2) * 8;
+            const midY = isBackEdge
+              ? clamp(Math.max(from.y, to.y) + 50, WORKSPACE_Y + 34, height - 18)
+              : (from.y + to.y) / 2 - 12 - (edgeIndex % 2) * 8;
             return (
               <g key={`${edge.from}-${edge.to}-${edgeIndex}`}>
                 <path d={path} fill="none" markerEnd={`url(#${markerId})`} stroke="var(--muted)" strokeLinecap="round" strokeWidth="2.4" opacity="0.55" />
@@ -149,6 +203,11 @@ function PatternCard({ pattern, index }: { pattern: Pattern; index: number }): J
                   strokeDasharray="12 14"
                   filter={`url(#${markerId}-glow)`}
                 />
+                {!shouldReduceMotion ? (
+                  <circle r="4" fill="var(--accent,#d8e84a)" opacity="0.78" filter={`url(#${markerId}-glow)`}>
+                    <animateMotion dur={`${1.9 + edgeIndex * 0.18}s`} path={path} repeatCount="indefinite" />
+                  </circle>
+                ) : null}
                 {edge.label ? (
                   <text x={midX} y={midY} fill="var(--muted)" fontSize="11" textAnchor="middle" paintOrder="stroke" stroke="var(--panel-2)" strokeWidth="5">
                     {edge.label}

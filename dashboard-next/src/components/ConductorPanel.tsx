@@ -23,7 +23,7 @@ export default function ConductorPanel() {
       {/* Conductor */}
       <div className="relative flex items-start gap-4 p-4" style={{ background: "var(--accent)", color: "#0b0e14", borderRadius: "0.9rem" }}>
         <span className="relative flex h-3.5 w-3.5 mt-1">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60" style={{ background: "#0b0e14" }} />
+          <span className="motion-safe:animate-ping absolute inline-flex h-full w-full rounded-full opacity-60" style={{ background: "#0b0e14" }} />
           <span className="relative inline-flex rounded-full h-3.5 w-3.5" style={{ background: "#0b0e14" }} />
         </span>
         <div className="min-w-0">
@@ -44,7 +44,8 @@ export default function ConductorPanel() {
         ))}
       </div>
       <p className="text-[11px] text-[var(--faint)]">
-        Three agents in parallel, ~1.1c of API total, integration compiled on the first try. Wall-clock was the slowest single agent, not the sum.
+        Three agents in parallel: ~1.1c of metered API for the two paid legs (kimi + aider); codex ran on a ChatGPT
+        subscription and Claude was the conductor. Run concurrently, so wall-clock was the slowest single leg, not the sum.
       </p>
     </div>
   );

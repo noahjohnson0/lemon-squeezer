@@ -19,6 +19,9 @@ export default function ModelBadge({
   const card = modelCardUrl(model);
   const vram = vramLabel(model);
   const meta = MODEL_META[model];
+  // mix labels (e.g. "verify:pro", "arch:flash<-pro") aren't single models - tag
+  // them so the badge reads intentional instead of looking like a broken link.
+  const isMix = !meta && /[:<]/.test(model);
   return (
     <span className={`inline-flex items-center gap-1.5 flex-wrap ${className}`} title={meta?.blurb || model}>
       {card ? (
@@ -28,6 +31,7 @@ export default function ModelBadge({
       ) : (
         <span className="font-mono text-[var(--text)]">{model}</span>
       )}
+      {isMix && <span className="chip" title="multi-model mix, not a single model">mix</span>}
       {vram && <span className="chip" title="VRAM to run locally at q4, or 'cloud' if too big for a consumer GPU">{vram}</span>}
       {cost != null && cost > 0 && <span className="chip" title="cost per task">{fmtCost(cost)}/task</span>}
     </span>
