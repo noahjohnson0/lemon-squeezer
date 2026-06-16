@@ -6,20 +6,76 @@ set -euo pipefail
 # where the repo lives at $HOME/lemon-squeezer - eval-export silently no-op'd there.)
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-# Always rebuild runs.jsonl from per-run meta.json (source of truth)
-: > "$ROOT/runs.jsonl"
-for d in "$ROOT"/runs/*/; do
-  [[ -f "$d/meta.json" ]] || continue
-  python3 -c "import json,sys; print(json.dumps(json.load(open('$d/meta.json'))))" >> "$ROOT/runs.jsonl"
-done
+# Reconcile runs.jsonl with per-run meta.json - SAFELY.
+#
+# Footgun history: this used to `: > runs.jsonl` then rebuild from EVERY
+# runs/*/meta.json. Two ways that bit us hard:
+#   (a) it truncated runs.jsonl up front, so a crash mid-rebuild (one bad dir)
+#       left it 0 bytes with no backup;
+#   (b) it RESURRECTED rows that clean-runs had curated out - their dirs still
+#       sit in runs/, so a from-scratch rebuild silently re-added ~330 dead rows
+#       and skewed every aggregate.
+#
+# Membership now lives in runs.jsonl (clean-runs owns removal; eval-run and
+# cloud-matrix own appends). eval-export only REFRESHES each existing row's
+# fields from its meta.json - to pick up eval-rescore's corrected scores - and
+# writes atomically with a .bak. It never adds rows (resurrection) or drops them.
+python3 - "$ROOT" <<'RECON'
+import json, os, sys, shutil
+root = sys.argv[1]
+runs_path = os.path.join(root, "runs.jsonl")
+rows = []
+if os.path.exists(runs_path):
+    for line in open(runs_path, encoding="utf-8"):
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            rows.append(json.loads(line))
+        except Exception:
+            pass  # drop only genuinely unparseable lines
+refreshed = 0
+out = []
+for r in rows:
+    rid = r.get("run_id")
+    meta = os.path.join(root, "runs", rid, "meta.json") if rid else ""
+    if meta and os.path.isfile(meta):
+        try:
+            m = json.load(open(meta, encoding="utf-8"))
+            if m.get("run_id") == rid and m != r:
+                r = m
+                refreshed += 1
+        except Exception:
+            pass  # keep the existing row if meta.json is missing/unreadable
+    out.append(r)
+tmp = runs_path + ".tmp"
+with open(tmp, "w", encoding="utf-8") as f:
+    for r in out:
+        f.write(json.dumps(r) + "\n")
+if os.path.exists(runs_path):
+    shutil.copy2(runs_path, runs_path + ".bak")  # never lose the prior state
+os.replace(tmp, runs_path)
+sys.stderr.write(
+    f"eval-export: reconciled {len(out)} rows "
+    f"({refreshed} refreshed from meta.json); backup at runs.jsonl.bak\n"
+)
+RECON
 
 python3 - "$ROOT" <<'PY'
 import csv, json, os, sys
 from collections import defaultdict
 
+# Windows console + file writes default to cp1252, which can't encode the emoji /
+# arrows in the generated markdown (this is what crashed eval-export on the 4070
+# box). Force UTF-8 for stdout and every file write below.
+try:
+    sys.stdout.reconfigure(encoding="utf-8")
+except Exception:
+    pass
+
 root = sys.argv[1]
 runs = []
-with open(f"{root}/runs.jsonl") as f:
+with open(f"{root}/runs.jsonl", encoding="utf-8") as f:
     for line in f:
         line = line.strip()
         if line:
@@ -27,7 +83,7 @@ with open(f"{root}/runs.jsonl") as f:
 runs.sort(key=lambda r: r.get('ts',''))
 
 # CSV
-with open(f"{root}/runs.csv", "w", newline="") as f:
+with open(f"{root}/runs.csv", "w", newline="", encoding="utf-8") as f:
     w = csv.writer(f)
     w.writerow(["run_id","ts","eval","harness","model","tag","wall_s","tok_in","tok_out","tools","exit","score_pct"])
     for r in runs:
@@ -78,7 +134,7 @@ for r in runs:
         tc=r.get('tool_calls',''), sc=r.get('score_pct',''),
     ))
 
-with open(f"{root}/RUNS.md", "w") as f:
+with open(f"{root}/RUNS.md", "w", encoding="utf-8") as f:
     f.write("\n".join(md) + "\n")
 
 # Regenerate dashboard-next/public/findings.md so the live site has fresh insights.
@@ -138,7 +194,7 @@ try:
     findings_path = os.path.join(os.path.dirname(root), os.path.basename(root), "dashboard-next/public/findings.md")
     findings_path = f"{root}/dashboard-next/public/findings.md"
     if os.path.isdir(os.path.dirname(findings_path)):
-        with open(findings_path, "w") as f:
+        with open(findings_path, "w", encoding="utf-8") as f:
             f.write("\n".join(findings) + "\n")
 except Exception as e:
     pass  # non-fatal
