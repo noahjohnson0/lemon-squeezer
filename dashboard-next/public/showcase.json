@@ -4,18 +4,24 @@
       {
         "model": "qwen3-coder-30b",
         "score": 100,
+        "cost": 0.000854,
+        "wall": 21,
         "bytes": 8928,
         "file": "showcase/web-snake/qwen3-coder-30b.html"
       },
       {
         "model": "deepseek-v4-pro",
         "score": 100,
+        "cost": 0.016414,
+        "wall": 73,
         "bytes": 14358,
         "file": "showcase/web-snake/deepseek-v4-pro.html"
       },
       {
         "model": "claude-opus-4.8",
         "score": 100,
+        "cost": 0.118815,
+        "wall": 38,
         "bytes": 6807,
         "file": "showcase/web-snake/claude-opus-4.8.html"
       }
@@ -24,30 +30,40 @@
       {
         "model": "llama-3.1-8b",
         "score": 100,
+        "cost": 0.000267,
+        "wall": 28,
         "bytes": 1847,
         "file": "showcase/web-3d-scene/llama-3.1-8b.html"
       },
       {
         "model": "qwen3-coder-30b",
         "score": 100,
+        "cost": 0.000486,
+        "wall": 12,
         "bytes": 2932,
         "file": "showcase/web-3d-scene/qwen3-coder-30b.html"
       },
       {
         "model": "gpt-oss-120b",
         "score": 100,
+        "cost": 0.00026,
+        "wall": 26,
         "bytes": 2679,
         "file": "showcase/web-3d-scene/gpt-oss-120b.html"
       },
       {
         "model": "deepseek-v4-pro",
         "score": 100,
+        "cost": 0.019239,
+        "wall": 91,
         "bytes": 14404,
         "file": "showcase/web-3d-scene/deepseek-v4-pro.html"
       },
       {
         "model": "claude-opus-4.8",
         "score": 100,
+        "cost": 0.171535,
+        "wall": 46,
         "bytes": 6375,
         "file": "showcase/web-3d-scene/claude-opus-4.8.html"
       }
@@ -56,24 +72,32 @@
       {
         "model": "qwen3-coder-30b",
         "score": 100,
+        "cost": 0.000703,
+        "wall": 18,
         "bytes": 6318,
         "file": "showcase/web-particles/qwen3-coder-30b.html"
       },
       {
         "model": "gpt-oss-120b",
         "score": 100,
+        "cost": 0.000271,
+        "wall": 17,
         "bytes": 3227,
         "file": "showcase/web-particles/gpt-oss-120b.html"
       },
       {
         "model": "deepseek-v4-pro",
         "score": 100,
+        "cost": 0.017097,
+        "wall": 83,
         "bytes": 11399,
         "file": "showcase/web-particles/deepseek-v4-pro.html"
       },
       {
         "model": "claude-opus-4.8",
         "score": 100,
+        "cost": 0.272495,
+        "wall": 66,
         "bytes": 9409,
         "file": "showcase/web-particles/claude-opus-4.8.html"
       }
@@ -82,30 +106,40 @@
       {
         "model": "llama-3.1-8b",
         "score": 71,
+        "cost": 0.000117,
+        "wall": 13,
         "bytes": 1075,
         "file": "showcase/web-landing/llama-3.1-8b.html"
       },
       {
         "model": "qwen3-coder-30b",
         "score": 100,
+        "cost": 0.00091,
+        "wall": 23,
         "bytes": 8121,
         "file": "showcase/web-landing/qwen3-coder-30b.html"
       },
       {
         "model": "gpt-oss-120b",
         "score": 100,
+        "cost": 0.000598,
+        "wall": 31,
         "bytes": 5566,
         "file": "showcase/web-landing/gpt-oss-120b.html"
       },
       {
         "model": "deepseek-v4-pro",
         "score": 100,
+        "cost": 0.011803,
+        "wall": 57,
         "bytes": 8566,
         "file": "showcase/web-landing/deepseek-v4-pro.html"
       },
       {
         "model": "claude-opus-4.8",
         "score": 100,
+        "cost": 0.14759,
+        "wall": 51,
         "bytes": 9552,
         "file": "showcase/web-landing/claude-opus-4.8.html"
       }
@@ -114,27 +148,50 @@
       {
         "model": "llama-3.1-8b",
         "score": 90,
+        "cost": 0.000148,
+        "wall": 33,
         "bytes": 1236,
         "file": "showcase/web-calculator/llama-3.1-8b.html"
       },
       {
         "model": "qwen3-coder-30b",
         "score": 100,
+        "cost": 0.001357,
+        "wall": 34,
         "bytes": 12471,
         "file": "showcase/web-calculator/qwen3-coder-30b.html"
       },
       {
         "model": "gpt-oss-120b",
         "score": 100,
+        "cost": 0.00042,
+        "wall": 27,
         "bytes": 5813,
         "file": "showcase/web-calculator/gpt-oss-120b.html"
       },
       {
+        "model": "deepseek-v4-pro",
+        "score": 100,
+        "cost": 0.085976,
+        "wall": 349,
+        "bytes": 13578,
+        "file": "showcase/web-calculator/deepseek-v4-pro.html"
+      },
+      {
         "model": "claude-opus-4.8",
         "score": 100,
+        "cost": 0.778685,
+        "wall": 140,
         "bytes": 10976,
         "file": "showcase/web-calculator/claude-opus-4.8.html"
       }
     ]
+  },
+  "prompts": {
+    "web-snake": "Build a fully playable **Snake** game as ONE self-contained `index.html`.\n\nRequirements:\n\n- The whole game lives in a single file named `index.html` at the workspace root.\n- All CSS and JavaScript are **inline** (in `<style>` and `<script>` tags). No\n  external scripts, no stylesheets, no images, no CDN, no build step, no\n  dependencies whatsoever.\n- Render the game on an HTML5 `<canvas>` using its 2D context (`getContext`).\n- Drive the game loop with `requestAnimationFrame` (you may throttle the snake's\n  step rate, but the animation loop itself should use `requestAnimationFrame`).\n- Control the snake with the **arrow keys AND WASD** via a `keydown` listener\n  (`addEventListener('keydown', ...)`). The snake cannot reverse directly back on\n  itself.\n- The snake **grows** by one segment each time it eats a piece of **food**. Food\n  spawns at a new random cell after being eaten.\n- Show the current **score** somewhere on the page and increment it as the snake\n  eats.\n- **Game over** when the snake hits a wall or runs into its own body. On game\n  over, display a message and allow the player to **restart** (a key press or a\n  button) without reloading the page.\n\nWrite only the file `index.html`. Do not run it.",
+    "web-3d-scene": "Build an interactive 3D scene as a SINGLE self-contained `index.html` file using three.js.\n\nRequirements:\n\n- Write the file as `index.html` in the workspace root. Everything (markup, CSS, JavaScript) lives in that one file.\n- The ONLY allowed external dependency is three.js, loaded from a CDN via a `<script>` tag (for example `https://unpkg.com/three@0.160.0/build/three.min.js` or a similar CDN URL). Do not use a bundler, npm, imports of other libraries, or any build step.\n- Render a lit, rotating 3D object - e.g. a colored or textured cube, sphere, or torus-knot - inside a `WebGLRenderer` canvas that fills the page.\n- Add at least one light (e.g. a `DirectionalLight` or `PointLight`, plus optional ambient) so the object is actually shaded, not flat.\n- Implement an animation loop with `requestAnimationFrame` that continuously rotates/animates the object.\n- Implement mouse-drag orbit: dragging the mouse should rotate the camera or the object around it. You may hand-roll this with `mousedown` / `mousemove` / `mouseup` listeners, or use three.js `OrbitControls` if you load it from the same CDN. Either way, dragging the mouse must visibly change the view.\n- Inline all CSS in a `<style>` block and all JS in a `<script>` block (other than the three.js CDN script). No external `.css` or `.js` files.\n\nKeep it to one file, no build step, runnable by just opening `index.html` in a browser.",
+    "web-particles": "Build an interactive particle / physics toy as a single `index.html` rendered on an HTML `<canvas>`.\n\nRequirements:\n- ONE self-contained file named `index.html` in the workspace root. All HTML, CSS and JS inline. No external dependencies, no CDN, no build step, no frameworks.\n- Render to a `<canvas>` element using its 2D context (`getContext('2d')`).\n- Many particles animate continuously in a smooth loop driven by `requestAnimationFrame`. Each frame: clear/fade the canvas, update particle positions/velocities, redraw.\n- The simulation reacts to the mouse: particles attract toward or repel from the cursor, and/or new particles spawn on click. Wire this up with `addEventListener` for `mousemove` and `click` (or `mousedown`).\n- The canvas fills the browser window and resizes when the window resizes (`addEventListener('resize', ...)` updating `canvas.width`/`canvas.height`).\n- It should look good on its own with no instructions - the toy starts animating immediately on load.\n\nWrite the file as `index.html` in the workspace root. Do not run it.",
+    "web-landing": "Build a polished product landing page as a SINGLE self-contained `index.html` file.\n\nRequirements:\n\n- **Sticky navigation bar** at the top (stays visible on scroll) with the product name and a few nav links.\n- **Hero section** with a large headline, a short supporting subheadline, and a prominent call-to-action (CTA) button.\n- **Features section** with exactly three feature cards (icon/title/description each), laid out in a row on desktop and stacked on mobile.\n- **Footer** with copyright and a couple of links.\n\nConstraints:\n\n- Everything in ONE file: `index.html` in the workspace root.\n- All CSS goes inline in a `<style>` block in the `<head>`. No external stylesheets, no CSS/JS frameworks (no Bootstrap/Tailwind/etc.), no build step, no CDN.\n- **Responsive**: must look good on both mobile and desktop. Use a `@media` query and a modern layout (CSS `flex` or `grid`).\n- **Tasteful, modern CSS**: use gradients, generous spacing, rounded corners, and hover states (e.g. on the CTA button and the feature cards).\n- **Semantic HTML5**: use `<nav>`, `<header>`/hero, `<section>`, and `<footer>` elements with real headings.\n\nWrite the file as `index.html` in the workspace root. Do not create any other files. Do not run it.",
+    "web-calculator": "Build a working calculator web app in ONE file named `index.html`, written to the workspace root.\n\nRequirements:\n- A button grid plus a display area.\n- The four arithmetic operators: `+`, `-`, `*`, `/`.\n- Decimal point support.\n- A clear button.\n- Keyboard input (digits, operators, Enter/`=`, Escape/clear, Backspace).\n- CORRECT arithmetic and operator precedence for chained input (e.g. `2 + 3 * 4` must evaluate to `14`, not `20`).\n- Styled and visually presentable.\n- Responsive to both mouse clicks and key presses.\n\nEverything must be inline in the single `index.html`: HTML, CSS in a `<style>` block, and JavaScript in a `<script>` block. No external dependencies, no CDN links, no build step. The file must run by simply opening it in a browser.\n\nWrite the file as `index.html` in the workspace root."
   }
 }

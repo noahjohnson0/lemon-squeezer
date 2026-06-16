@@ -43,6 +43,10 @@ export const MODEL_META: Record<string, ModelMeta> = {
   "glm-5.1":           { vramQ4GB: null, slug: "z-ai/glm-5.1", blurb: "Z.ai GLM-5.1, the latest flagship - a major leap in coding and long-horizon tasks; top-cluster here." },
   "minimax-m2.7":      { vramQ4GB: null, slug: "minimax/minimax-m2.7", blurb: "MiniMax M2.7, an agentic generalist built for long-horizon, real-world productivity tasks." },
   "minimax-m3":        { vramQ4GB: null, note: "multimodal, 1M ctx", slug: "minimax/minimax-m3", blurb: "MiniMax M3, a multimodal foundation model (text/image/video in, 1M context); used here as a coding agent." },
+
+  // closed frontier baselines (not open weights - shown for comparison)
+  "gpt-5.5":           { vramQ4GB: null, note: "closed frontier", slug: "openai/gpt-5.5", blurb: "OpenAI GPT-5.5, a frontier closed flagship - here as a baseline, and the model behind codex in the orchestration build." },
+  "claude-opus-4.8":   { vramQ4GB: null, note: "closed frontier", slug: "anthropic/claude-opus-4.8", blurb: "Anthropic Claude Opus 4.8, a frontier closed flagship - here as a baseline, and the conductor model that drove the orchestration." },
 };
 
 // Model-card URL for an arm label (OpenRouter page), or null if unknown / a mix.

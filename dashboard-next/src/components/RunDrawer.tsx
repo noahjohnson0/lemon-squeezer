@@ -2,7 +2,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Run, scoreClass } from "@/lib/data";
-import { modelCardUrl } from "@/lib/modelMeta";
+import ModelBadge from "@/components/ModelBadge";
 
 type ScoreCheck = { name: string; pass: 0 | 1 | number; weight: number; note?: string };
 type Score = { checks: ScoreCheck[]; gained: number; total: number; score_pct: number };
@@ -70,26 +70,22 @@ export default function RunDrawer({
                 <span className="font-mono">{run.eval}</span>
                 <span className="text-sm text-[var(--muted)] font-normal">{run.model}</span>
               </h2>
-              <div className="text-xs text-[var(--muted)] font-mono mb-1 break-all">{run.run_id}</div>
-              {modelCardUrl(run.model) && (
-                <a href={modelCardUrl(run.model)!} target="_blank" rel="noopener noreferrer"
-                   className="text-xs text-[var(--accent)] hover:underline mb-4 inline-block">
-                  {run.model} model card ↗
-                </a>
-              )}
+              <div className="text-xs text-[var(--muted)] font-mono mb-2 break-all">{run.run_id}</div>
+              <ModelBadge model={run.model} cost={run.cost_usd} className="mb-4 text-sm" />
 
               <div className="bg-[var(--panel)] border border-[var(--border)] rounded-lg p-3 mb-4">
                 <div className="flex items-center gap-2 flex-wrap mb-2">
                   <span className={`chip ${run.harness}`}>{run.harness}</span>
                   <span className="chip">{run.tag}</span>
                   {run.host && <span className="chip" title="hardware host">{run.host}</span>}
+                  {run.mix && <span className="chip" title="multi-model mix">mix: {run.mix.pipeline}</span>}
                   <span
                     className={`score-${scoreClass(run.score_pct)} px-3 py-1 rounded font-bold tabular-nums`}
                   >
                     {run.score_pct}%
                   </span>
                 </div>
-                <div className="text-xs text-[var(--muted)] flex flex-wrap gap-x-3">
+                <div className="text-xs text-[var(--muted)] flex flex-wrap gap-x-3 gap-y-1">
                   <span>{run.wall_seconds}s</span>
                   <span>·</span>
                   <span>{run.tokens_in.toLocaleString()} in</span>
@@ -99,7 +95,17 @@ export default function RunDrawer({
                   <span>{run.tool_calls} tools</span>
                   <span>·</span>
                   <span>exit {run.exit_code}</span>
+                  {run.cost_usd != null && run.cost_usd > 0 && <><span>·</span><span>${run.cost_usd < 0.01 ? run.cost_usd.toFixed(5) : run.cost_usd.toFixed(4)}</span></>}
                 </div>
+                {run.mix && (
+                  <div className="text-[11px] text-[var(--faint)] mt-2 leading-relaxed">
+                    {run.mix.architect && <>architect <span className="font-mono">{run.mix.architect}</span> · </>}
+                    primary <span className="font-mono">{run.mix.primary}</span>
+                    {run.mix.critic && <> · critic <span className="font-mono">{run.mix.critic}</span></>}
+                    {run.mix.judge && <> · judge <span className="font-mono">{run.mix.judge}</span></>}
+                    {run.mix.rounds ? <> · {run.mix.rounds} round(s)</> : null}
+                  </div>
+                )}
               </div>
 
               <h3 className="text-sm font-semibold text-[var(--accent)] mb-2">

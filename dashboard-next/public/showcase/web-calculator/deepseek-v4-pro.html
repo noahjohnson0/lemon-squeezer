@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculator</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    padding: 1rem;
+  }
+
+  .calculator {
+    width: 100%;
+    max-width: 360px;
+    background: #1e1e32;
+    border-radius: 24px;
+    padding: 1.5rem;
+    box-shadow:
+      0 24px 72px rgba(0,0,0,0.55),
+      0 0 0 1px rgba(255,255,255,0.06);
+  }
+
+  .display {
+    background: #0b0b18;
+    border-radius: 16px;
+    padding: 1.25rem 1.4rem;
+    margin-bottom: 1.25rem;
+    text-align: right;
+    min-height: 5.25rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    overflow: hidden;
+    box-shadow: inset 0 3px 10px rgba(0,0,0,0.7);
+    border: 1px solid rgba(255,255,255,0.03);
+  }
+
+  .display .expression {
+    font-size: 0.95rem;
+    color: #7e7e9a;
+    min-height: 1.35em;
+    letter-spacing: 0.4px;
+    word-break: break-all;
+    line-height: 1.3;
+  }
+
+  .display .result {
+    font-size: 2.6rem;
+    color: #f4f4ff;
+    font-weight: 300;
+    letter-spacing: 1px;
+    line-height: 1.2;
+    word-break: break-all;
+  }
+
+  .buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.65rem;
+  }
+
+  button {
+    font-size: 1.3rem;
+    font-weight: 500;
+    padding-block: 1rem;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.08s;
+    font-family: inherit;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    outline: none;
+  }
+
+  button:active { transform: scale(0.93); }
+
+  .btn-digit  { background: #2b2b44; color: #e2e2f0; }
+  .btn-digit:hover  { background: #353555; }
+  .btn-digit:active { background: #1f1f34; }
+
+  .btn-operator  { background: #3a2e58; color: #c9b8ff; font-weight: 600; }
+  .btn-operator:hover  { background: #4a3c6c; }
+  .btn-operator:active { background: #2d2248; }
+
+  .btn-equals { background: #7c3aed; color: #fff; font-weight: 700; font-size: 1.5rem; }
+  .btn-equals:hover  { background: #8f56f5; }
+  .btn-equals:active { background: #6d28d9; }
+
+  .btn-clear { background: #4a2030; color: #f5a0a0; font-weight: 600; }
+  .btn-clear:hover  { background: #5e2c3e; }
+  .btn-clear:active { background: #391820; }
+
+  .btn-utility { background: #2b2b44; color: #9d9db8; }
+  .btn-utility:hover  { background: #353555; }
+  .btn-utility:active { background: #1f1f34; }
+
+  button:focus-visible {
+    outline: 3px solid #a78bfa;
+    outline-offset: 3px;
+    border-radius: 12px;
+  }
+
+  @media (max-width: 400px) {
+    .calculator { padding: 1rem; border-radius: 18px; }
+    .display { padding: 1rem 1.1rem; min-height: 4.5rem; border-radius: 12px; }
+    .display .result { font-size: 2rem; }
+    .display .expression { font-size: 0.85rem; }
+    button { font-size: 1.1rem; padding-block: 0.85rem; border-radius: 10px; }
+    .buttons { gap: 0.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="calculator">
+  <div class="display">
+    <div class="expression" id="expression" aria-live="polite"></div>
+    <div class="result" id="result" aria-live="polite">0</div>
+  </div>
+  <div class="buttons">
+    <button class="btn-clear"   data-key="clear">C</button>
+    <button class="btn-utility" data-key="Backspace">⌫</button>
+    <button class="btn-utility" data-key="placeholder" style="visibility:hidden;pointer-events:none;"></button>
+    <button class="btn-operator" data-key="/">÷</button>
+
+    <button class="btn-digit" data-key="7">7</button>
+    <button class="btn-digit" data-key="8">8</button>
+    <button class="btn-digit" data-key="9">9</button>
+    <button class="btn-operator" data-key="*">×</button>
+
+    <button class="btn-digit" data-key="4">4</button>
+    <button class="btn-digit" data-key="5">5</button>
+    <button class="btn-digit" data-key="6">6</button>
+    <button class="btn-operator" data-key="-">−</button>
+
+    <button class="btn-digit" data-key="1">1</button>
+    <button class="btn-digit" data-key="2">2</button>
+    <button class="btn-digit" data-key="3">3</button>
+    <button class="btn-operator" data-key="+">+</button>
+
+    <button class="btn-digit" data-key="0" style="grid-column: span 2;">0</button>
+    <button class="btn-digit" data-key=".">.</button>
+    <button class="btn-equals" data-key="=">=</button>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  const exprEl   = document.getElementById('expression');
+  const resultEl = document.getElementById('result');
+
+  // ── State ─────────────────────────────────────────────────
+  let expression = '';       // raw infix string, e.g. "2+3*4"
+  let justEvaluated = false;
+  let lastResult = null;
+
+  // ── Rendering ─────────────────────────────────────────────
+  function updateDisplay() {
+    exprEl.textContent = expression || '';
+
+    if (!expression) {
+      resultEl.textContent = '0';
+      return;
+    }
+
+    const val = evaluate(expression);
+    if (val !== null && isFinite(val)) {
+      resultEl.textContent = format(val);
+    } else {
+      resultEl.textContent = expression;
+    }
+  }
+
+  function format(n) {
+    if (!isFinite(n)) return 'Error';
+    // Round to avoid 0.30000000000000004 etc.
+    let s = parseFloat(n.toPrecision(12)).toString();
+    if (s.length > 16) s = n.toPrecision(10);
+    if (Math.abs(n) >= 1e15 || (Math.abs(n) < 1e-10 && n !== 0)) {
+      s = n.toExponential(8);
+    }
+    return s;
+  }
+
+  // ── Tokenizer (handles unary minus) ───────────────────────
+  function tokenize(expr) {
+    const tokens = [];
+    let numBuf = '';
+    let expectBinary = false; // true when we expect binary operator (after number)
+
+    for (let i = 0; i < expr.length; i++) {
+      const ch = expr[i];
+
+      if ('0123456789.'.includes(ch)) {
+        numBuf += ch;
+        expectBinary = true;
+      } else if (ch === '-') {
+        if (expectBinary) {
+          // Binary minus — flush number, push '-'
+          flushNum();
+          tokens.push('-');
+          expectBinary = false;
+        } else {
+          // Unary minus — start negative number
+          if (numBuf === '' || numBuf === '-') {
+            numBuf = '-';
+          } else {
+            // numBuf has digits already; this shouldn't happen in valid input
+            // but handle gracefully: flush, then start new negative number
+            flushNum();
+            numBuf = '-';
+          }
+          expectBinary = false;
+        }
+      } else if ('+*/'.includes(ch)) {
+        // Binary operator only
+        flushNum();
+        tokens.push(ch);
+        expectBinary = false;
+      }
+      // ignore other characters
+    }
+    flushNum();
+
+    // Remove trailing operator (incomplete expression)
+    while (tokens.length && typeof tokens[tokens.length - 1] === 'string' &&
+           '+-*/'.includes(tokens[tokens.length - 1])) {
+      tokens.pop();
+    }
+
+    return tokens;
+
+    function flushNum() {
+      if (numBuf === '' || numBuf === '-') return; // nothing to flush
+      const val = parseFloat(numBuf);
+      if (!isNaN(val)) tokens.push(val);
+      numBuf = '';
+    }
+  }
+
+  // ── Evaluator: *,/ first, then +,- ────────────────────────
+  function evaluate(expr) {
+    const tokens = tokenize(expr);
+    if (!tokens.length) return 0;
+    if (tokens.length === 1) {
+      return typeof tokens[0] === 'number' ? tokens[0] : 0;
+    }
+
+    // First pass: *, /
+    const afterMulDiv = [tokens[0]];
+    for (let i = 1; i < tokens.length; i += 2) {
+      const op  = tokens[i];
+      const rhs = tokens[i + 1];
+      if (op === '*') {
+        afterMulDiv[afterMulDiv.length - 1] *= rhs;
+      } else if (op === '/') {
+        afterMulDiv[afterMulDiv.length - 1] = rhs === 0 ? Infinity : afterMulDiv[afterMulDiv.length - 1] / rhs;
+      } else {
+        afterMulDiv.push(op, rhs);
+      }
+    }
+
+    // Second pass: +, -
+    let result = afterMulDiv[0];
+    for (let i = 1; i < afterMulDiv.length; i += 2) {
+      const op  = afterMulDiv[i];
+      const rhs = afterMulDiv[i + 1];
+      if (op === '+') result += rhs;
+      else if (op === '-') result -= rhs;
+    }
+
+    return result;
+  }
+
+  // ── Input helpers ─────────────────────────────────────────
+  function endsWithOperator() {
+    return expression.length && '+-*/'.includes(expression[expression.length - 1]);
+  }
+
+  function getLastNumberStr() {
+    let i = expression.length - 1;
+    // skip trailing digits/dot
+    while (i >= 0 && '0123456789.'.includes(expression[i])) i--;
+    if (i >= 0 && expression[i] === '-') {
+      // check if it's a unary minus (preceded by operator or start)
+      if (i === 0 || '+-*/'.includes(expression[i - 1])) {
+        i--;
+      }
+    }
+    return expression.slice(i + 1);
+  }
+
+  // ── Input handlers ────────────────────────────────────────
+  function inputDigit(d) {
+    if (justEvaluated) { expression = ''; justEvaluated = false; lastResult = null; }
+    expression += d;
+    updateDisplay();
+  }
+
+  function inputDecimal() {
+    if (justEvaluated) { expression = '0'; justEvaluated = false; lastResult = null; }
+    const lastNum = getLastNumberStr();
+    if (lastNum.includes('.')) return; // already has decimal
+
+    if (!expression || endsWithOperator()) expression += '0';
+    expression += '.';
+    updateDisplay();
+  }
+
+  function inputOperator(op) {
+    if (justEvaluated && lastResult !== null) {
+      expression = format(lastResult);
+      justEvaluated = false;
+    }
+    if (!expression) {
+      if (op === '-') { expression = '-'; updateDisplay(); }
+      return;
+    }
+    if (endsWithOperator()) {
+      // Replace last operator (but preserve unary minus if present)
+      const last = expression[expression.length - 1];
+      if (last === '-' && expression.length >= 2 && '+-*/'.includes(expression[expression.length - 2])) {
+        // "-" is a unary minus after another operator — replace the preceding binary op
+        expression = expression.slice(0, -2) + op + '-';
+      } else {
+        expression = expression.slice(0, -1) + op;
+      }
+    } else {
+      expression += op;
+    }
+    updateDisplay();
+  }
+
+  function inputEquals() {
+    if (!expression) return;
+    const result = evaluate(expression);
+    lastResult = result;
+    justEvaluated = true;
+    expression = format(result);
+    updateDisplay();
+  }
+
+  function inputClear() {
+    expression = '';
+    justEvaluated = false;
+    lastResult = null;
+    updateDisplay();
+  }
+
+  function inputBackspace() {
+    if (justEvaluated) { inputClear(); return; }
+    expression = expression.slice(0, -1);
+    updateDisplay();
+  }
+
+  // ── Flash animation on key press ──────────────────────────
+  function flash(key) {
+    const btn = document.querySelector(`[data-key="${CSS.escape(key)}"]`);
+    if (!btn || btn.style.visibility === 'hidden') return;
+    btn.style.transform = 'scale(0.9)';
+    setTimeout(() => { btn.style.transform = ''; }, 100);
+  }
+
+  // ── Event routing ─────────────────────────────────────────
+  function handle(key) {
+    if (key >= '0' && key <= '9') { inputDigit(key); flash(key); }
+    else if (key === '.')         { inputDecimal(); flash('.'); }
+    else if ('+-*/'.includes(key)){ inputOperator(key); flash(key); }
+    else if (key === '=')         { inputEquals(); flash('='); }
+    else if (key === 'clear')     { inputClear(); flash('clear'); }
+    else if (key === 'Backspace') { inputBackspace(); flash('Backspace'); }
+  }
+
+  // ── Mouse clicks ──────────────────────────────────────────
+  document.querySelector('.buttons').addEventListener('click', (e) => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    const key = btn.dataset.key;
+    if (key && key !== 'placeholder') handle(key);
+  });
+
+  // ── Keyboard ──────────────────────────────────────────────
+  document.addEventListener('keydown', (e) => {
+    const map = {
+      'Enter': '=',
+      'Escape': 'clear',
+      'Delete': 'clear',
+    };
+    const mapped = map[e.key] || e.key;
+
+    const handled = '0123456789.+-*/=clearBackspace'.split('').includes(e.key) || e.key in map;
+    if (handled) e.preventDefault();
+
+    handle(mapped);
+  });
+
+  updateDisplay();
+})();
+</script>
+
+</body>
+</html>

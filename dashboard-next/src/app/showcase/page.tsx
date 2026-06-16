@@ -1,10 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
+import ModelBadge from "@/components/ModelBadge";
 
-type Item = { model: string; score: number | string; bytes: number; file: string };
-type Manifest = { evals: Record<string, Item[]> };
+type Item = { model: string; score: number | string; cost?: number; wall?: number; bytes: number; file: string };
+type Manifest = { evals: Record<string, Item[]>; prompts?: Record<string, string> };
 
-// Friendly title + one-liner per showcase task.
 const TASKS: Record<string, { title: string; blurb: string }> = {
   "web-snake": { title: "Snake game", blurb: "A playable Snake game in one self-contained HTML file - canvas, keyboard, score, game over." },
   "web-3d-scene": { title: "3D scene", blurb: "An interactive lit, rotating 3D scene using three.js with mouse-drag orbit." },
@@ -21,9 +21,16 @@ const LADDER_NOTE: Record<string, string> = {
   "claude-opus-4.8": "closed flagship",
 };
 
+// Live thumbnail: render each artifact at a large logical viewport, then scale it
+// down to fit the card so the WHOLE thing is visible with no scrollbar.
+const LOGICAL_W = 1080, LOGICAL_H = 860, DISPLAY_W = 360;
+const SCALE = DISPLAY_W / LOGICAL_W;
+const DISPLAY_H = Math.round(LOGICAL_H * SCALE);
+
 export default function ShowcasePage() {
   const [m, setM] = useState<Manifest | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const [openPrompt, setOpenPrompt] = useState<Record<string, boolean>>({});
   useEffect(() => {
     fetch("../showcase.json")
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`showcase.json ${r.status}`))))
@@ -44,9 +51,9 @@ export default function ShowcasePage() {
           We asked models across the capability ladder - from a tiny 8B you can run on a laptop to a closed frontier
           flagship - for a single self-contained <code className="text-xs text-[var(--text)]">index.html</code>: a game,
           a 3D scene, a toy, a page, a calculator. Below is <b className="text-[var(--text)]">exactly what each one
-          produced</b>, running live in a sandbox. Click in and use them. Same prompt, same agent - the difference is the model.
+          produced</b>, the whole thing scaled to fit. Same prompt, same agent - the difference is the model.
         </p>
-        <p className="text-xs text-[var(--faint)] mt-2">Artifacts are model-generated code, run in sandboxed iframes. Click an iframe first, then use the keyboard (games).</p>
+        <p className="text-xs text-[var(--faint)] mt-2">Thumbnails are live, sandboxed, scaled to fit (no scrolling). Hit <b>open</b> to play one full size.</p>
       </section>
 
       {err && <div className="max-w-7xl mx-auto px-6 text-[var(--bad)] text-sm">Couldn&apos;t load showcase: {err}</div>}
@@ -55,32 +62,48 @@ export default function ShowcasePage() {
       {evals.map((ev) => {
         const meta = TASKS[ev] ?? { title: ev, blurb: "" };
         const items = m!.evals[ev];
+        const prompt = m!.prompts?.[ev];
+        const showP = !!openPrompt[ev];
         return (
           <section key={ev} className="max-w-7xl mx-auto px-6 mt-10">
             <div className="flex items-baseline gap-3 mb-1 flex-wrap">
               <h2 className="text-xl font-semibold">{meta.title}</h2>
               <span className="chip">{items.length} models</span>
+              {prompt && (
+                <button onClick={() => setOpenPrompt((s) => ({ ...s, [ev]: !s[ev] }))}
+                        className="text-xs text-[var(--accent)] hover:underline">
+                  {showP ? "hide prompt" : "view prompt ↓"}
+                </button>
+              )}
             </div>
-            <p className="text-[var(--muted)] text-sm max-w-3xl mb-4">{meta.blurb}</p>
+            <p className="text-[var(--muted)] text-sm max-w-3xl mb-3">{meta.blurb}</p>
+            {prompt && showP && (
+              <pre className="text-[11px] leading-relaxed bg-[var(--panel)] border border-[var(--border)] rounded-lg p-4 mb-4 whitespace-pre-wrap max-w-3xl text-[var(--muted)] overflow-x-auto">
+                {prompt}
+              </pre>
+            )}
             <div className="flex gap-4 overflow-x-auto pb-3">
               {items.map((it) => (
-                <div key={it.model} className="flex-none w-[300px]">
-                  <div className="flex items-baseline justify-between gap-2 mb-1">
-                    <span className="font-mono text-xs text-[var(--accent)] truncate">{it.model}</span>
+                <div key={it.model} className="flex-none" style={{ width: DISPLAY_W }}>
+                  <div className="flex items-center justify-between gap-2 mb-1">
+                    <ModelBadge model={it.model} cost={it.cost} className="text-xs min-w-0" />
                     <a href={`../${it.file}`} target="_blank" rel="noopener noreferrer"
                        className="text-[10px] text-[var(--muted)] hover:text-[var(--accent)] whitespace-nowrap">open ↗</a>
                   </div>
                   <div className="text-[10px] text-[var(--faint)] mb-1.5 flex justify-between">
                     <span>{LADDER_NOTE[it.model] ?? ""}</span>
-                    <span>structural {typeof it.score === "number" ? `${it.score}%` : it.score}</span>
+                    <span>built {typeof it.score === "number" ? `${it.score}%` : it.score} · {Math.round(it.bytes / 1024)} KB</span>
                   </div>
-                  <div className="rounded-lg overflow-hidden border border-[var(--border)] bg-white">
+                  {/* scaled live thumbnail - whole artifact, no scroll */}
+                  <div className="rounded-lg overflow-hidden border border-[var(--border)] bg-white"
+                       style={{ width: DISPLAY_W, height: DISPLAY_H }}>
                     <iframe
                       src={`../${it.file}`}
                       title={`${it.model} - ${meta.title}`}
                       sandbox="allow-scripts allow-pointer-lock"
                       loading="lazy"
-                      className="w-[300px] h-[300px] block"
+                      scrolling="no"
+                      style={{ width: LOGICAL_W, height: LOGICAL_H, border: 0, transform: `scale(${SCALE})`, transformOrigin: "top left" }}
                     />
                   </div>
                 </div>

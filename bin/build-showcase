@@ -61,6 +61,8 @@ def main():
         manifest.setdefault(ev, []).append({
             "model": model,
             "score": r.get("score_pct"),
+            "cost": r.get("cost_usd"),
+            "wall": r.get("wall_seconds"),
             "bytes": html.stat().st_size,
             "file": f"showcase/{safe(ev)}/{fname}",
         })
@@ -71,8 +73,16 @@ def main():
     for ev in manifest:
         manifest[ev].sort(key=lambda e: rank(e["model"]))
 
+    # capture each task's prompt (same for every model on that eval) so the gallery
+    # can show people exactly what was asked.
+    prompts = {}
+    for ev in manifest:
+        pm = ROOT / "evals" / ev / "prompt.md"
+        if pm.is_file():
+            prompts[ev] = pm.read_text(encoding="utf-8", errors="replace").strip()
+
     (ROOT / "dashboard-next" / "public" / "showcase.json").write_text(
-        json.dumps({"evals": manifest}, indent=2), encoding="utf-8")
+        json.dumps({"evals": manifest, "prompts": prompts}, indent=2), encoding="utf-8")
     print(f"copied {copied} artifacts across {len(manifest)} showcase evals -> dashboard-next/public/showcase/")
     for ev, items in manifest.items():
         print(f"  {ev}: {', '.join(i['model'] for i in items)}")
