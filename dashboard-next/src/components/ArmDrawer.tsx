@@ -2,7 +2,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useMemo } from "react";
 import { Run, scoreClass } from "@/lib/data";
-import { MODEL_META, modelCardUrl } from "@/lib/modelMeta";
+import { MODEL_META, modelCardUrl, vramLabel } from "@/lib/modelMeta";
 
 const short = (s?: string | null) => (s ? s.split("/").pop() : "");
 
@@ -115,6 +115,9 @@ export default function ArmDrawer({
                 <div><span className="text-[var(--muted)] text-xs">95% CI (over evals)</span><div className="text-lg tabular-nums">{data.ciLo !== null ? `${data.ciLo.toFixed(0)}-${data.ciHi!.toFixed(0)}` : "insufficient"}</div></div>
                 <div><span className="text-[var(--muted)] text-xs">cost / task</span><div className="tabular-nums">{fmtCost(data.meanCost)}</div></div>
                 <div><span className="text-[var(--muted)] text-xs">latency · runs</span><div className="tabular-nums">{data.meanWall.toFixed(0)}s · n={data.n}</div></div>
+                {!mix && vramLabel(arm.model) && (
+                  <div><span className="text-[var(--muted)] text-xs">VRAM to run (q4)</span><div className="tabular-nums">{vramLabel(arm.model) === "cloud" ? "cloud-scale (won't fit a consumer GPU)" : vramLabel(arm.model)}</div></div>
+                )}
               </div>
 
               <h3 className="text-sm font-semibold text-[var(--accent)] mb-1">Per-eval scores</h3>

@@ -51,6 +51,14 @@ export function modelCardUrl(label: string): string | null {
   return m?.slug ? `https://openrouter.ai/${m.slug}` : null;
 }
 
+// Short VRAM-to-run label: "~9 GB" (fits a consumer GPU at q4), "cloud" (too big
+// for any consumer card), or "" for a mix / unknown arm. Approximate q4 estimate.
+export function vramLabel(label: string): string {
+  const m = MODEL_META[label];
+  if (!m) return "";
+  return m.vramQ4GB == null ? "cloud" : `~${m.vramQ4GB} GB`;
+}
+
 // Common GPUs -> VRAM (GB), for autodetect via the WebGL renderer string.
 export const GPU_VRAM: Array<[RegExp, number]> = [
   [/RTX\s*40?90|RTX\s*3090|A6000|RTX\s*6000/i, 24],
