@@ -114,9 +114,9 @@ export async function loadRuns(rel = "./runs.jsonl"): Promise<Run[]> {
   return runs;
 }
 
-export async function loadInflight(): Promise<Inflight | null> {
+export async function loadInflight(rel = "./inflight.json"): Promise<Inflight | null> {
   try {
-    const r = await fetch(`./inflight.json?t=${Date.now()}`, { cache: "no-store" });
+    const r = await fetch(`${rel}?t=${Date.now()}`, { cache: "no-store" });
     if (!r.ok) return null;
     return (await r.json()) as Inflight;
   } catch {
@@ -171,6 +171,24 @@ export function bayesianRank(rows: Array<{ avg: number; count: number }>, allMea
     ...r,
     shrunk: (r.count * r.avg + C * allMean) / (r.count + C),
   }));
+}
+
+// --- One-board suite policy (shared by the homepage Leaderboard and /cloud) ----
+// Evals that measure the scoring ENVIRONMENT rather than the model give every arm
+// the same uninformative score, so they're excluded from rankings. port-scanner
+// needs live sockets / a firewall timeout that don't behave on the Windows scoring
+// box (~every arm lands at 20%).
+export const EXCLUDED_EVALS = new Set(["port-scanner"]);
+// Separate suites that must NOT blend into the main ranking: the deliberately-harder
+// `hard-tier` set (a different, smaller eval list) and one-off `showcase` runs.
+export const SEPARATE_TAGS = new Set(["hard-tier", "showcase"]);
+// A run belongs on the unified leaderboard iff it's in the main suite.
+export const isMainSuite = (r: Run) => !SEPARATE_TAGS.has(r.tag) && !EXCLUDED_EVALS.has(r.eval);
+
+// Format a per-task USD cost compactly (more precision for sub-cent values).
+export function fmtCost(c: number | null | undefined): string {
+  if (c === null || c === undefined || !Number.isFinite(c)) return "-";
+  return c >= 0.01 ? `$${c.toFixed(3)}` : `$${c.toFixed(5)}`;
 }
 
 export function scoreClass(s: number): "good" | "mid" | "bad" | "empty" {
