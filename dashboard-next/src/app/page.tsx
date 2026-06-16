@@ -1,27 +1,14 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import {
-  loadRuns,
-  loadInflight,
-  type Run,
-  type Inflight,
-} from "@/lib/data";
+import { loadRuns, type Run } from "@/lib/data";
 import Hero from "@/components/Hero";
-import Headline from "@/components/Headline";
-import StatsBar from "@/components/StatsBar";
-import LiveRuns from "@/components/LiveRuns";
 import Filters, { type FilterState } from "@/components/Filters";
 import HarnessGap from "@/components/HarnessGap";
 import Leaderboard from "@/components/Leaderboard";
-import Scatter3D from "@/components/Scatter3D";
-import HeatmapMatrix from "@/components/HeatmapMatrix";
-import HardwarePanel from "@/components/HardwarePanel";
-import EvalDeepDive from "@/components/EvalDeepDive";
 import RunDrawer from "@/components/RunDrawer";
 
 export default function Page() {
   const [runs, setRuns] = useState<Run[]>([]);
-  const [inflight, setInflight] = useState<Inflight | null>(null);
   const [selectedRunId, setSelectedRunId] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [filters, setFilters] = useState<FilterState>({ eval: "", harness: "", model: "", host: "" });
@@ -38,20 +25,6 @@ export default function Page() {
     }
     refresh();
     const id = setInterval(refresh, 10000);
-    return () => {
-      cancelled = true;
-      clearInterval(id);
-    };
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    async function refresh() {
-      const data = await loadInflight();
-      if (!cancelled) setInflight(data);
-    }
-    refresh();
-    const id = setInterval(refresh, 2000);
     return () => {
       cancelled = true;
       clearInterval(id);
@@ -77,20 +50,12 @@ export default function Page() {
   return (
     <main>
       <Hero runCount={runs.length} />
-      {/* The actual answer - what to run on your GPU. */}
-      <Headline runs={runs} />
-      <LiveRuns data={inflight} />
-      {/* Action: filter the rest of the page */}
+      {/* Action: filter the board */}
       <Filters runs={runs} state={filters} onChange={setFilters} />
-      {/* The supporting evidence, in order of importance */}
+      {/* The one ranking: every contender, every venue */}
       <Leaderboard runs={filtered} onSelectRun={(id) => setSelectedRunId(id)} />
+      {/* The headline insight: harness matters as much as model */}
       <HarnessGap runs={filtered} />
-      <HeatmapMatrix runs={filtered} onSelectRun={(id) => setSelectedRunId(id)} />
-      <EvalDeepDive runs={filtered} onSelectRun={(id) => setSelectedRunId(id)} />
-      {/* Auxiliary - efficiency / hardware / 3D for fun */}
-      <HardwarePanel runs={filtered} />
-      <Scatter3D runs={filtered} onSelect={(id) => setSelectedRunId(id)} />
-      <StatsBar runs={runs} />
       <RunDrawer run={selectedRun} onClose={() => setSelectedRunId(null)} />
 
       <footer className="max-w-7xl mx-auto px-6 mt-16 mb-8 pt-6 border-t border-[var(--border)] text-xs text-[var(--muted)] flex flex-wrap gap-3 items-center justify-between">

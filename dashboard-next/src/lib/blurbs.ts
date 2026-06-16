@@ -1,6 +1,33 @@
 // Per-eval explainer copy. Keep these short.
 export type Blurb = { summary: string; discriminates: string };
 
+// What each HARNESS is - the agent scaffold wrapped around the model. Surfaced as a
+// tooltip on the leaderboard's harness chip. cloud-* are the OpenRouter twins of the
+// local pipelines; we map both names to the same description.
+export const HARNESS_BLURBS: Record<string, string> = {
+  squeezer: "Baseline: a single-pass tool-calling agent (read / write / list / bash). No planning, no second look.",
+  "squeezer-cloud": "Baseline single-pass tool-calling agent (read / write / list / bash), run against a cloud model.",
+  "squeezer-local": "Baseline single-pass tool-calling agent, run against a local Ollama model.",
+  aider: "Aider in whole-file mode: the model rewrites entire files instead of patching - dodges bad-diff failures.",
+  pi: "Pi CLI agent, whose edit tool needs an exact string match to apply a change.",
+  "cloud-verify": "Self-correction loop: the model writes the code AND property tests, runs them, and fixes until green.",
+  "squeezer-verify": "Self-correction loop: the model writes the code AND property tests, runs them, and fixes until green.",
+  "cloud-architect": "Two-model plan/build: a strong 'architect' model writes the plan, a cheaper model implements it.",
+  "squeezer-architect": "Two-model plan/build: a strong 'architect' model writes the plan, a cheaper model implements it.",
+  "cloud-critique": "Draft → a critic model reviews → the author refines. Repeats for N rounds.",
+  "squeezer-critique": "Draft → a critic model reviews → the author refines. Repeats for N rounds.",
+  "cloud-ensemble": "Several models each draft a solution; a judge model picks the best one.",
+  "squeezer-ensemble": "Several models each draft a solution; a judge model picks the best one.",
+  "squeezer-tdd": "Test-driven: write failing tests first, then write code until they pass.",
+  "squeezer-search": "Squeezer's coding tools plus local-doc / web search, to test whether grounding helps.",
+  librarian: "RAG Q&A agent (search_local + read_local) - a retrieval task, not coding.",
+  qa: "Multiple-choice / short-answer knowledge harness - not a coding task.",
+};
+
+export function harnessBlurb(harness: string): string {
+  return HARNESS_BLURBS[harness] ?? "Agent scaffold wrapped around the model.";
+}
+
 export const EVAL_BLURBS: Record<string, Blurb> = {
   "bug-fix": {
     summary:
