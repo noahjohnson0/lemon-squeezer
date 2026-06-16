@@ -34,3 +34,7 @@ runs/**/workspace/.git/
 .build.log
 .shots/
 .aider.chat.history.md
+
+# eval-export safe-write artifacts
+runs.jsonl.bak
+runs.jsonl.tmp
