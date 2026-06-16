@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculator</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    font-family: 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+    padding: 16px;
+  }
+  .calculator {
+    width: 100%;
+    max-width: 340px;
+    background: #1f2937;
+    border-radius: 18px;
+    padding: 20px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  }
+  .display {
+    background: #0b1220;
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-bottom: 16px;
+    min-height: 96px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: space-between;
+    overflow: hidden;
+  }
+  .expression {
+    color: #94a3b8;
+    font-size: 1.1rem;
+    min-height: 1.4rem;
+    width: 100%;
+    text-align: right;
+    word-break: break-all;
+    white-space: nowrap;
+    overflow-x: auto;
+  }
+  .result {
+    color: #f8fafc;
+    font-size: 2.4rem;
+    font-weight: 600;
+    width: 100%;
+    text-align: right;
+    word-break: break-all;
+    line-height: 1.1;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  button {
+    border: none;
+    outline: none;
+    cursor: pointer;
+    font-size: 1.3rem;
+    padding: 18px 0;
+    border-radius: 12px;
+    background: #374151;
+    color: #f1f5f9;
+    transition: transform 0.05s ease, filter 0.15s ease;
+    user-select: none;
+  }
+  button:hover { filter: brightness(1.15); }
+  button:active { transform: scale(0.95); }
+  button:focus-visible { box-shadow: 0 0 0 3px #38bdf8; }
+  .op { background: #f59e0b; color: #1f2937; font-weight: 700; }
+  .fn { background: #475569; }
+  .equals { background: #10b981; color: #07261b; font-weight: 700; }
+  .span-2 { grid-column: span 2; }
+</style>
+</head>
+<body>
+  <div class="calculator">
+    <div class="display">
+      <div class="expression" id="expression">&nbsp;</div>
+      <div class="result" id="result">0</div>
+    </div>
+    <div class="grid">
+      <button class="fn" data-action="clear">AC</button>
+      <button class="fn" data-action="back">⌫</button>
+      <button class="op" data-value="/">÷</button>
+      <button class="op" data-value="*">×</button>
+
+      <button data-value="7">7</button>
+      <button data-value="8">8</button>
+      <button data-value="9">9</button>
+      <button class="op" data-value="-">−</button>
+
+      <button data-value="4">4</button>
+      <button data-value="5">5</button>
+      <button data-value="6">6</button>
+      <button class="op" data-value="+">+</button>
+
+      <button data-value="1">1</button>
+      <button data-value="2">2</button>
+      <button data-value="3">3</button>
+      <button class="equals" data-action="equals" style="grid-row: span 2;">=</button>
+
+      <button class="span-2" data-value="0">0</button>
+      <button data-value=".">.</button>
+    </div>
+  </div>
+
+<script>
+(function () {
+  "use strict";
+
+  var expr = "";
+  var exprEl = document.getElementById("expression");
+  var resultEl = document.getElementById("result");
+
+  // ---- Tokenizer ----
+  // Produces tokens: {type:"num", value:Number} and {type:"op", value:"+|-|*|/"}
+  function tokenize(s) {
+    var tokens = [];
+    var i = 0;
+    while (i < s.length) {
+      var c = s[i];
+      if (c === " ") { i++; continue; }
+      if ((c >= "0" && c <= "9") || c === ".") {
+        var num = "";
+        while (i < s.length && ((s[i] >= "0" && s[i] <= "9") || s[i] === ".")) {
+          num += s[i];
+          i++;
+        }
+        if ((num.match(/\./g) || []).length > 1) {
+          throw new Error("Invalid number: " + num);
+        }
+        if (num === ".") throw new Error("Invalid number");
+        tokens.push({ type: "num", value: parseFloat(num) });
+        continue;
+      }
+      if (c === "+" || c === "-" || c === "*" || c === "/") {
+        tokens.push({ type: "op", value: c });
+        i++;
+        continue;
+      }
+      throw new Error("Unexpected character: " + c);
+    }
+    return tokens;
+  }
+
+  // Binary operator precedence. Unary negation ("u-") binds tighter than * and /.
+  var PRECEDENCE = { "+": 1, "-": 1, "*": 2, "/": 2, "u-": 3 };
+  var RIGHT_ASSOC = { "u-": true };
+
+  // ---- Shunting-yard: tokens -> RPN, detecting unary +/- ----
+  function toRPN(tokens) {
+    var output = [];
+    var ops = [];
+    var expectOperand = true; // true when the next token should be a number/unary op
+
+    for (var i = 0; i < tokens.length; i++) {
+      var t = tokens[i];
+
+      if (t.type === "num") {
+        output.push(t);
+        expectOperand = false;
+        continue;
+      }
+
+      // operator
+      var opVal = t.value;
+      if (expectOperand) {
+        // unary context: unary minus negates; unary plus is a no-op (skip it)
+        if (opVal === "-") {
+          opVal = "u-";
+        } else if (opVal === "+") {
+          continue; // ignore unary plus, still expecting an operand
+        } else {
+          throw new Error("Operator without operand");
+        }
+      } else {
+        if (opVal !== "+" && opVal !== "-" && opVal !== "*" && opVal !== "/") {
+          throw new Error("Bad operator");
+        }
+      }
+
+      while (ops.length > 0) {
+        var top = ops[ops.length - 1];
+        var higher = PRECEDENCE[top] > PRECEDENCE[opVal];
+        var equalLeft = PRECEDENCE[top] === PRECEDENCE[opVal] && !RIGHT_ASSOC[opVal];
+        if (higher || equalLeft) {
+          output.push({ type: "op", value: ops.pop() });
+        } else {
+          break;
+        }
+      }
+      ops.push(opVal);
+      expectOperand = true; // after any operator we expect an operand again
+    }
+
+    if (expectOperand) {
+      // trailing operator or empty -> incomplete, but allow empty handled by caller
+      throw new Error("Incomplete expression");
+    }
+
+    while (ops.length > 0) {
+      output.push({ type: "op", value: ops.pop() });
+    }
+    return output;
+  }
+
+  function evalRPN(rpn) {
+    var stack = [];
+    for (var i = 0; i < rpn.length; i++) {
+      var t = rpn[i];
+      if (t.type === "num") {
+        stack.push(t.value);
+        continue;
+      }
+      if (t.value === "u-") {
+        var x = stack.pop();
+        if (x === undefined) throw new Error("Malformed expression");
+        stack.push(-x);
+        continue;
+      }
+      var b = stack.pop();
+      var a = stack.pop();
+      if (a === undefined || b === undefined) {
+        throw new Error("Malformed expression");
+      }
+      var r;
+      switch (t.value) {
+        case "+": r = a + b; break;
+        case "-": r = a - b; break;
+        case "*": r = a * b; break;
+        case "/":
+          if (b === 0) throw new Error("Division by zero");
+          r = a / b;
+          break;
+        default: throw new Error("Unknown operator");
+      }
+      stack.push(r);
+    }
+    if (stack.length !== 1) throw new Error("Malformed expression");
+    return stack[0];
+  }
+
+  function evaluate(s) {
+    var tokens = tokenize(s);
+    if (tokens.length === 0) return null;
+    var rpn = toRPN(tokens);
+    var value = evalRPN(rpn);
+    if (!isFinite(value)) throw new Error("Not finite");
+    // Tidy floating-point noise, then drop trailing zeros.
+    value = parseFloat(value.toPrecision(12));
+    return value;
+  }
+
+  // ---- UI helpers ----
+  function isOperator(ch) {
+    return ch === "+" || ch === "-" || ch === "*" || ch === "/";
+  }
+
+  function lastNumberSegment(s) {
+    var m = s.match(/(\d*\.?\d*)$/);
+    return m ? m[1] : "";
+  }
+
+  function render() {
+    exprEl.textContent = expr === "" ? "\u00A0" : prettify(expr);
+    if (expr === "") {
+      resultEl.textContent = "0";
+      return;
+    }
+    var preview;
+    try {
+      var v = evaluate(expr);
+      preview = (v === null) ? "0" : String(v);
+    } catch (e) {
+      preview = "…"; // incomplete expression while typing
+    }
+    resultEl.textContent = preview;
+  }
+
+  // Show the nicer operator glyphs in the expression line.
+  function prettify(s) {
+    return s.replace(/\*/g, "×").replace(/\//g, "÷").replace(/-/g, "−");
+  }
+
+  function inputValue(val) {
+    if (val === ".") {
+      var seg = lastNumberSegment(expr);
+      if (seg.indexOf(".") !== -1) return;       // number already has a decimal
+      if (seg === "") val = "0.";                 // leading dot -> 0.
+    } else if (isOperator(val)) {
+      var last = expr[expr.length - 1];
+      if (expr === "") {
+        // only a leading minus is meaningful (negative number)
+        if (val !== "-") return;
+      } else if (isOperator(last)) {
+        // Allow "minus after *, / or +" to mean a negative operand (e.g. 5*-3).
+        // Otherwise replace the trailing operator.
+        var allowNeg = (val === "-" && last !== "-");
+        if (!allowNeg) {
+          expr = expr.slice(0, -1);
+        }
+      }
+    }
+    expr += val;
+    render();
+  }
+
+  function clearAll() {
+    expr = "";
+    render();
+  }
+
+  function backspace() {
+    expr = expr.slice(0, -1);
+    render();
+  }
+
+  function equals() {
+    try {
+      var v = evaluate(expr);
+      if (v === null) return;
+      expr = String(v);
+      render();
+    } catch (e) {
+      resultEl.textContent = "Error";
+    }
+  }
+
+  // ---- Mouse / touch ----
+  document.querySelector(".grid").addEventListener("click", function (e) {
+    var btn = e.target.closest("button");
+    if (!btn) return;
+    var action = btn.getAttribute("data-action");
+    var value = btn.getAttribute("data-value");
+    if (action === "clear") clearAll();
+    else if (action === "back") backspace();
+    else if (action === "equals") equals();
+    else if (value !== null) inputValue(value);
+  });
+
+  // ---- Keyboard ----
+  document.addEventListener("keydown", function (e) {
+    var k = e.key;
+    if ((k >= "0" && k <= "9") || k === ".") {
+      inputValue(k);
+      e.preventDefault();
+    } else if (k === "+" || k === "-" || k === "*" || k === "/") {
+      inputValue(k);
+      e.preventDefault();
+    } else if (k === "Enter" || k === "=") {
+      equals();
+      e.preventDefault();
+    } else if (k === "Escape") {
+      clearAll();
+      e.preventDefault();
+    } else if (k === "Backspace") {
+      backspace();
+      e.preventDefault();
+    }
+  });
+
+  render();
+
+  // Expose evaluate for optional external testing (harmless in browser).
+  if (typeof module !== "undefined" && module.exports) {
+    module.exports = { evaluate: evaluate };
+  }
+})();
+</script>
+</body>
+</html>

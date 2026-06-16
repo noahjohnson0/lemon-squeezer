@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nimbus — Ship faster, sleep better</title>
+  <style>
+    :root {
+      --bg: #0e1326;
+      --bg-soft: #161d3a;
+      --text: #e8ecf8;
+      --muted: #a6aecb;
+      --brand: #6c8cff;
+      --brand-2: #b56bff;
+      --accent: #38e8c8;
+      --card: rgba(255, 255, 255, 0.04);
+      --border: rgba(255, 255, 255, 0.10);
+      --radius: 18px;
+      --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1100px 600px at 80% -10%, rgba(108, 140, 255, 0.25), transparent 60%),
+        radial-gradient(900px 500px at -10% 10%, rgba(181, 107, 255, 0.20), transparent 55%),
+        var(--bg);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .container {
+      width: min(1120px, 92%);
+      margin-inline: auto;
+    }
+
+    /* ---------- Navigation ---------- */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(14px);
+      background: rgba(14, 19, 38, 0.72);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav__inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1rem 0;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-weight: 800;
+      font-size: 1.25rem;
+      letter-spacing: 0.3px;
+    }
+    .brand__mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      display: grid;
+      place-items: center;
+      font-size: 1.1rem;
+      box-shadow: var(--shadow);
+    }
+    .nav__links {
+      display: flex;
+      gap: 1.8rem;
+      list-style: none;
+      align-items: center;
+    }
+    .nav__links a {
+      color: var(--muted);
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+    .nav__links a:hover { color: var(--text); }
+    .nav__cta {
+      padding: 0.55rem 1.1rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      color: #fff !important;
+      font-weight: 700;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .nav__cta:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+
+    /* ---------- Hero ---------- */
+    .hero {
+      text-align: center;
+      padding: 6rem 0 5rem;
+    }
+    .pill {
+      display: inline-block;
+      padding: 0.4rem 1rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-bottom: 1.5rem;
+    }
+    .hero h1 {
+      font-size: clamp(2.4rem, 6vw, 4rem);
+      line-height: 1.08;
+      letter-spacing: -1.5px;
+      margin-bottom: 1.2rem;
+    }
+    .hero h1 .grad {
+      background: linear-gradient(120deg, var(--brand), var(--accent), var(--brand-2));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .hero p {
+      color: var(--muted);
+      font-size: clamp(1.05rem, 2.4vw, 1.25rem);
+      max-width: 620px;
+      margin: 0 auto 2.4rem;
+    }
+    .cta-row {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-block;
+      padding: 0.95rem 2rem;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 1.02rem;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+    .btn--primary {
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      color: #fff;
+      box-shadow: 0 12px 30px rgba(108, 140, 255, 0.35);
+    }
+    .btn--primary:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 18px 44px rgba(108, 140, 255, 0.5);
+    }
+    .btn--ghost {
+      background: var(--card);
+      border-color: var(--border);
+      color: var(--text);
+    }
+    .btn--ghost:hover { transform: translateY(-3px); border-color: var(--brand); }
+
+    /* ---------- Features ---------- */
+    .features { padding: 4rem 0 5rem; }
+    .section-head {
+      text-align: center;
+      max-width: 600px;
+      margin: 0 auto 3rem;
+    }
+    .section-head h2 {
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      letter-spacing: -0.5px;
+      margin-bottom: 0.8rem;
+    }
+    .section-head p { color: var(--muted); }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.6rem;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem 1.8rem;
+      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    }
+    .card:hover {
+      transform: translateY(-8px);
+      border-color: var(--brand);
+      box-shadow: var(--shadow);
+    }
+    .card__icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      font-size: 1.6rem;
+      margin-bottom: 1.2rem;
+      background: linear-gradient(135deg, rgba(108,140,255,0.25), rgba(181,107,255,0.25));
+      border: 1px solid var(--border);
+    }
+    .card h3 { font-size: 1.25rem; margin-bottom: 0.5rem; }
+    .card p { color: var(--muted); }
+
+    /* ---------- Footer ---------- */
+    .footer {
+      border-top: 1px solid var(--border);
+      background: rgba(0,0,0,0.2);
+      padding: 2.5rem 0;
+    }
+    .footer__inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .footer small { color: var(--muted); }
+    .footer__links { display: flex; gap: 1.6rem; list-style: none; }
+    .footer__links a { color: var(--muted); transition: color 0.2s ease; }
+    .footer__links a:hover { color: var(--text); }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 760px) {
+      .nav__links { gap: 1rem; }
+      .nav__links li:not(.nav__links--cta) { display: none; }
+      .feature-grid { grid-template-columns: 1fr; }
+      .hero { padding: 4rem 0 3rem; }
+      .footer__inner { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sticky Navigation -->
+  <nav class="nav">
+    <div class="container nav__inner">
+      <a class="brand" href="#top">
+        <span class="brand__mark">☁</span>
+        Nimbus
+      </a>
+      <ul class="nav__links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="#docs">Docs</a></li>
+        <li class="nav__links--cta"><a class="nav__cta" href="#cta">Get Started</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <header class="hero" id="top">
+    <div class="container">
+      <span class="pill">✨ New — Realtime collaboration is here</span>
+      <h1>Ship faster with <span class="grad">Nimbus</span><br />the calm developer cloud</h1>
+      <p>Deploy, scale, and monitor your apps from one beautiful dashboard. No YAML headaches, no surprise bills — just clean, predictable infrastructure.</p>
+      <div class="cta-row" id="cta">
+        <a class="btn btn--primary" href="#features">Start building free</a>
+        <a class="btn btn--ghost" href="#docs">View the docs</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Features -->
+  <section class="features" id="features">
+    <div class="container">
+      <div class="section-head">
+        <h2>Everything you need to launch</h2>
+        <p>Thoughtfully designed tools that get out of your way so you can focus on your product.</p>
+      </div>
+      <div class="feature-grid">
+        <article class="card">
+          <div class="card__icon">🚀</div>
+          <h3>One-click deploys</h3>
+          <p>Push to your repo and Nimbus builds, tests, and ships your app to the edge in seconds — zero config required.</p>
+        </article>
+        <article class="card">
+          <div class="card__icon">📊</div>
+          <h3>Realtime insights</h3>
+          <p>Live metrics, logs, and traces in a single pane of glass. Spot regressions before your users ever notice.</p>
+        </article>
+        <article class="card">
+          <div class="card__icon">🔒</div>
+          <h3>Secure by default</h3>
+          <p>Automatic TLS, isolated environments, and built-in secrets management keep your data locked down out of the box.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <small>© 2024 Nimbus, Inc. All rights reserved.</small>
+      <ul class="footer__links">
+        <li><a href="#privacy">Privacy</a></li>
+        <li><a href="#terms">Terms</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Snake</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: #11131a;
+    color: #e6e6e6;
+    font-family: "Segoe UI", system-ui, Arial, sans-serif;
+  }
+  #wrap {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 20px;
+  }
+  h1 {
+    margin: 0;
+    font-size: 28px;
+    letter-spacing: 2px;
+    color: #6ee7a8;
+  }
+  #hud {
+    display: flex;
+    gap: 28px;
+    font-size: 18px;
+  }
+  #hud b { color: #6ee7a8; }
+  #stage {
+    position: relative;
+  }
+  canvas {
+    background: #0a0c11;
+    border: 2px solid #2a2f3a;
+    border-radius: 8px;
+    display: block;
+    touch-action: none;
+  }
+  #overlay {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    background: rgba(8, 10, 14, 0.82);
+    border-radius: 8px;
+    text-align: center;
+  }
+  #overlay.show { display: flex; }
+  #overlay h2 {
+    margin: 0;
+    font-size: 32px;
+    color: #ff6b6b;
+  }
+  #overlay p { margin: 0; font-size: 16px; color: #cfcfcf; }
+  button {
+    cursor: pointer;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 22px;
+    font-size: 16px;
+    font-weight: 600;
+    background: #6ee7a8;
+    color: #0a0c11;
+  }
+  button:hover { background: #57d695; }
+  #hint { font-size: 13px; color: #7c8597; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <h1>SNAKE</h1>
+  <div id="hud">
+    <div>Score: <b id="score">0</b></div>
+    <div>Best: <b id="best">0</b></div>
+  </div>
+  <div id="stage">
+    <canvas id="game" width="400" height="400"></canvas>
+    <div id="overlay">
+      <h2 id="overTitle">Game Over</h2>
+      <p id="overMsg">You crashed!</p>
+      <button id="restartBtn">Restart</button>
+      <p id="hint2">or press Enter / Space</p>
+    </div>
+  </div>
+  <div id="hint">Move with Arrow keys or WASD</div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var canvas = document.getElementById("game");
+  var ctx = canvas.getContext("2d");
+
+  var GRID = 20;                       // cells per row/column
+  var CELL = canvas.width / GRID;      // pixel size of one cell
+  var STEP_MS = 110;                   // snake step rate (ms per move)
+
+  var scoreEl = document.getElementById("score");
+  var bestEl = document.getElementById("best");
+  var overlay = document.getElementById("overlay");
+  var overTitle = document.getElementById("overTitle");
+  var overMsg = document.getElementById("overMsg");
+  var restartBtn = document.getElementById("restartBtn");
+
+  var snake, dir, nextDir, food, score, best, running, lastStep;
+
+  best = 0;
+
+  function randInt(n) { return Math.floor(Math.random() * n); }
+
+  function placeFood() {
+    var cell;
+    do {
+      cell = { x: randInt(GRID), y: randInt(GRID) };
+    } while (snake.some(function (s) { return s.x === cell.x && s.y === cell.y; }));
+    food = cell;
+  }
+
+  function reset() {
+    var cx = Math.floor(GRID / 2);
+    var cy = Math.floor(GRID / 2);
+    snake = [
+      { x: cx, y: cy },
+      { x: cx - 1, y: cy },
+      { x: cx - 2, y: cy }
+    ];
+    dir = { x: 1, y: 0 };
+    nextDir = { x: 1, y: 0 };
+    score = 0;
+    scoreEl.textContent = "0";
+    running = true;
+    lastStep = 0;
+    overlay.classList.remove("show");
+    placeFood();
+  }
+
+  function gameOver() {
+    running = false;
+    if (score > best) {
+      best = score;
+      bestEl.textContent = String(best);
+    }
+    overTitle.textContent = "Game Over";
+    overMsg.textContent = "Score: " + score;
+    overlay.classList.add("show");
+  }
+
+  function step() {
+    // commit the buffered direction (prevents double-turn reversal in one tick)
+    dir = nextDir;
+
+    var head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
+
+    // wall collision
+    if (head.x < 0 || head.y < 0 || head.x >= GRID || head.y >= GRID) {
+      gameOver();
+      return;
+    }
+
+    // self collision
+    for (var i = 0; i < snake.length; i++) {
+      if (snake[i].x === head.x && snake[i].y === head.y) {
+        gameOver();
+        return;
+      }
+    }
+
+    snake.unshift(head);
+
+    if (head.x === food.x && head.y === food.y) {
+      score += 1;
+      scoreEl.textContent = String(score);
+      placeFood();
+    } else {
+      snake.pop();
+    }
+  }
+
+  function drawCell(x, y, color, inset) {
+    inset = inset || 0;
+    ctx.fillStyle = color;
+    ctx.fillRect(x * CELL + inset, y * CELL + inset, CELL - inset * 2, CELL - inset * 2);
+  }
+
+  function render() {
+    // background
+    ctx.fillStyle = "#0a0c11";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // subtle grid
+    ctx.strokeStyle = "rgba(255,255,255,0.03)";
+    ctx.lineWidth = 1;
+    for (var g = 1; g < GRID; g++) {
+      ctx.beginPath();
+      ctx.moveTo(g * CELL, 0);
+      ctx.lineTo(g * CELL, canvas.height);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(0, g * CELL);
+      ctx.lineTo(canvas.width, g * CELL);
+      ctx.stroke();
+    }
+
+    // food
+    drawCell(food.x, food.y, "#ff6b6b", 3);
+
+    // snake
+    for (var i = 0; i < snake.length; i++) {
+      var c = i === 0 ? "#6ee7a8" : "#3fae74";
+      drawCell(snake[i].x, snake[i].y, c, 1);
+    }
+  }
+
+  function loop(ts) {
+    if (running) {
+      if (ts - lastStep >= STEP_MS) {
+        lastStep = ts;
+        step();
+      }
+      render();
+    }
+    requestAnimationFrame(loop);
+  }
+
+  // ---- input ----
+  function setDirection(nx, ny) {
+    // disallow direct reversal (compare against the committed dir)
+    if (nx === -dir.x && ny === -dir.y) return;
+    nextDir = { x: nx, y: ny };
+  }
+
+  document.addEventListener("keydown", function (e) {
+    var k = e.key;
+    switch (k) {
+      case "ArrowUp": case "w": case "W":
+        setDirection(0, -1); e.preventDefault(); break;
+      case "ArrowDown": case "s": case "S":
+        setDirection(0, 1); e.preventDefault(); break;
+      case "ArrowLeft": case "a": case "A":
+        setDirection(-1, 0); e.preventDefault(); break;
+      case "ArrowRight": case "d": case "D":
+        setDirection(1, 0); e.preventDefault(); break;
+      case "Enter": case " ":
+        if (!running) { reset(); e.preventDefault(); }
+        break;
+    }
+  });
+
+  restartBtn.addEventListener("click", function () {
+    reset();
+  });
+
+  // ---- start ----
+  reset();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

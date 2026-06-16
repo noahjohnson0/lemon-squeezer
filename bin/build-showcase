@@ -1,0 +1,83 @@
+#!/usr/bin/env python3
+"""build-showcase - collect the index.html artifacts produced by the showcase
+evals into the deployed site so the /showcase gallery can embed them.
+
+For every host=openrouter, tag=showcase run, copy its produced
+runs/<id>/workspace/index.html into dashboard-next/public/showcase/<eval>/<model>.html
+and write a manifest (showcase.json) the gallery reads. The artifacts are the
+model's own code, shown in sandboxed iframes - that's the whole point.
+
+    bin/build-showcase
+"""
+from __future__ import annotations
+import json, re, shutil
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+OUT = ROOT / "dashboard-next" / "public" / "showcase"
+# tier ladder order (weak -> frontier), for left-to-right display
+TIER = ["llama-3.1-8b", "qwen3-coder-30b", "gpt-oss-120b", "deepseek-v4-pro", "claude-opus-4.8"]
+
+
+def safe(s: str) -> str:
+    return re.sub(r"[^A-Za-z0-9.-]+", "_", s).strip("_")
+
+
+def find_html(run_id: str):
+    ws = ROOT / "runs" / run_id / "workspace"
+    if not ws.is_dir():
+        return None
+    p = ws / "index.html"
+    if p.is_file() and p.stat().st_size > 200:
+        return p
+    # fallback: any non-trivial .html the model wrote
+    cands = [q for q in ws.rglob("*.html") if q.is_file() and q.stat().st_size > 200]
+    return max(cands, key=lambda q: q.stat().st_size) if cands else None
+
+
+def main():
+    rows = [json.loads(l) for l in (ROOT / "runs.jsonl").read_text(encoding="utf-8", errors="replace").splitlines() if l.strip()]
+    show = [r for r in rows if r.get("host") == "openrouter" and r.get("tag") == "showcase"]
+    # keep the latest run per (eval, model)
+    latest = {}
+    for r in sorted(show, key=lambda r: r.get("ts", "")):
+        latest[(r.get("eval"), r.get("model"))] = r
+
+    if OUT.exists():
+        shutil.rmtree(OUT)
+    OUT.mkdir(parents=True, exist_ok=True)
+
+    manifest = {}
+    copied = 0
+    for (ev, model), r in latest.items():
+        html = find_html(r["run_id"])
+        if not html:
+            continue
+        dst_dir = OUT / safe(ev)
+        dst_dir.mkdir(parents=True, exist_ok=True)
+        fname = f"{safe(model)}.html"
+        shutil.copyfile(html, dst_dir / fname)
+        copied += 1
+        manifest.setdefault(ev, []).append({
+            "model": model,
+            "score": r.get("score_pct"),
+            "bytes": html.stat().st_size,
+            "file": f"showcase/{safe(ev)}/{fname}",
+        })
+
+    # order each eval's entries by the tier ladder, then by score
+    def rank(m):
+        return TIER.index(m) if m in TIER else len(TIER)
+    for ev in manifest:
+        manifest[ev].sort(key=lambda e: rank(e["model"]))
+
+    (ROOT / "dashboard-next" / "public" / "showcase.json").write_text(
+        json.dumps({"evals": manifest}, indent=2), encoding="utf-8")
+    print(f"copied {copied} artifacts across {len(manifest)} showcase evals -> dashboard-next/public/showcase/")
+    for ev, items in manifest.items():
+        print(f"  {ev}: {', '.join(i['model'] for i in items)}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Particle Physics Toy</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #0a0a0f;
+    cursor: crosshair;
+    font-family: system-ui, sans-serif;
+  }
+
+  canvas {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    touch-action: none;
+  }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<script>
+(function () {
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d');
+
+  /* ── state ────────────────────────────────────────────── */
+  let W, H;
+  const particles = [];
+  const PARTICLE_COUNT = 180;
+
+  const mouse = { x: -9999, y: -9999, active: false };
+  const pointer = { x: -9999, y: -9999, active: false };
+
+  /* tunables */
+  const ATTRACT_FORCE = 0.35;
+  const ATTRACT_RADIUS = 250;
+  const REPEL_RADIUS = 70;
+  const REPEL_FORCE = 4.5;
+  const MAX_SPEED = 4.2;
+  const MIN_SPEED = 0.3;
+  const DAMPING = 0.998;
+  const WANDER_STRENGTH = 0.08;
+  const LINK_DIST = 130;
+  const TRAIL_ALPHA = 0.08;
+
+  /* ── palette ─────────────────────────────────────────── */
+  const palettes = [
+    { h: 200, s: 80, l: 60 },  /* cool blue */
+    { h: 280, s: 70, l: 60 },  /* violet */
+    { h: 330, s: 85, l: 60 },  /* magenta */
+    { h: 170, s: 75, l: 55 },  /* teal */
+    { h: 35,  s: 90, l: 58 },  /* amber */
+    { h: 10,  s: 85, l: 58 },  /* coral */
+    { h: 260, s: 65, l: 62 },  /* periwinkle */
+  ];
+
+  /* ── helpers ─────────────────────────────────────────── */
+  function rand(min, max) { return Math.random() * (max - min) + min; }
+
+  function hsla(h, s, l, a) {
+    return `hsla(${h | 0},${s | 0}%,${l | 0}%,${a})`;
+  }
+
+  function dist(a, b) {
+    const dx = a.x - b.x;
+    const dy = a.y - b.y;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  /* ── particle factory ────────────────────────────────── */
+  function createParticle(x, y) {
+    const pal = palettes[(Math.random() * palettes.length) | 0];
+    const hueShift = rand(-12, 12);
+    return {
+      x: x ?? rand(0, W),
+      y: y ?? rand(0, H),
+      vx: rand(-1.5, 1.5),
+      vy: rand(-1.5, 1.5),
+      radius: rand(1.6, 4.2),
+      hue: pal.h + hueShift,
+      sat: pal.s + rand(-8, 8),
+      light: pal.l + rand(-10, 10),
+      wanderAngle: rand(0, Math.PI * 2),
+      wanderSpeed: rand(0.02, 0.06),
+    };
+  }
+
+  /* spawn a burst at (x, y) */
+  function burst(x, y, count, power) {
+    for (let i = 0; i < count; i++) {
+      const angle = rand(0, Math.PI * 2);
+      const speed = rand(power * 0.4, power);
+      const p = createParticle(x, y);
+      p.vx = Math.cos(angle) * speed;
+      p.vy = Math.sin(angle) * speed;
+      p.radius = rand(2.0, 5.0);
+      p.light = rand(58, 78);
+      p.sat = rand(80, 100);
+      particles.push(p);
+    }
+    /* trim to avoid runaway particle count */
+    while (particles.length > PARTICLE_COUNT + 80) {
+      particles.shift();
+    }
+  }
+
+  /* ── initialise ──────────────────────────────────────── */
+  function populate() {
+    particles.length = 0;
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      particles.push(createParticle());
+    }
+  }
+
+  /* ── resize ──────────────────────────────────────────── */
+  function resize() {
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  /* ── update ──────────────────────────────────────────── */
+  function update() {
+    const mx = pointer.x;
+    const my = pointer.y;
+    const mActive = pointer.active;
+
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+
+      /* wander */
+      p.wanderAngle += rand(-p.wanderSpeed, p.wanderSpeed);
+      p.vx += Math.cos(p.wanderAngle) * WANDER_STRENGTH;
+      p.vy += Math.sin(p.wanderAngle) * WANDER_STRENGTH;
+
+      /* mouse interaction */
+      if (mActive) {
+        const d = dist(p, pointer);
+        if (d < ATTRACT_RADIUS && d > 0.01) {
+          const dx = mx - p.x;
+          const dy = my - p.y;
+          const ndx = dx / d;
+          const ndy = dy / d;
+
+          if (d < REPEL_RADIUS) {
+            /* repel inside inner radius */
+            const force = REPEL_FORCE * (1 - d / REPEL_RADIUS);
+            p.vx -= ndx * force;
+            p.vy -= ndy * force;
+          } else {
+            /* attract in the ring between repel and attract radii */
+            const t = (d - REPEL_RADIUS) / (ATTRACT_RADIUS - REPEL_RADIUS);
+            /* smoothstep-like falloff */
+            const force = ATTRACT_FORCE * (1 - t * t);
+            p.vx += ndx * force;
+            p.vy += ndy * force;
+          }
+        }
+      }
+
+      /* speed clamping */
+      const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+      if (speed > MAX_SPEED) {
+        const s = MAX_SPEED / speed;
+        p.vx *= s;
+        p.vy *= s;
+      } else if (speed < MIN_SPEED && speed > 0) {
+        const s = MIN_SPEED / speed;
+        p.vx *= s;
+        p.vy *= s;
+      }
+
+      /* damping */
+      p.vx *= DAMPING;
+      p.vy *= DAMPING;
+
+      /* integrate */
+      p.x += p.vx;
+      p.y += p.vy;
+
+      /* wrap edges with a soft margin */
+      const margin = 30;
+      if (p.x < -margin) p.x = W + margin;
+      if (p.x > W + margin) p.x = -margin;
+      if (p.y < -margin) p.y = H + margin;
+      if (p.y > H + margin) p.y = -margin;
+    }
+  }
+
+  /* ── draw ────────────────────────────────────────────── */
+  function draw() {
+    /* trail: draw semi-transparent background */
+    ctx.fillStyle = `rgba(10,10,20,${TRAIL_ALPHA})`;
+    ctx.fillRect(0, 0, W, H);
+
+    /* draw links between nearby particles */
+    const maxLinks = 2800;
+    let linksDrawn = 0;
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        if (linksDrawn >= maxLinks) break;
+        const a = particles[i];
+        const b = particles[j];
+        const d = dist(a, b);
+        if (d < LINK_DIST) {
+          const alpha = (1 - d / LINK_DIST) * 0.28;
+          const midHue = (a.hue + b.hue) / 2;
+          ctx.strokeStyle = hsla(midHue, 60, 58, alpha);
+          ctx.lineWidth = 0.4;
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+          linksDrawn++;
+        }
+      }
+    }
+
+    /* draw particles */
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+
+      /* outer glow */
+      const glowGrad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius * 3.5);
+      glowGrad.addColorStop(0, hsla(p.hue, p.sat, p.light, 0.75));
+      glowGrad.addColorStop(0.4, hsla(p.hue, p.sat, p.light, 0.25));
+      glowGrad.addColorStop(1, hsla(p.hue, p.sat, p.light, 0));
+      ctx.fillStyle = glowGrad;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.radius * 3.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      /* core */
+      const coreGrad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius);
+      coreGrad.addColorStop(0, hsla(p.hue, p.sat, Math.min(p.light + 22, 95), 0.95));
+      coreGrad.addColorStop(0.7, hsla(p.hue, p.sat, p.light, 0.7));
+      coreGrad.addColorStop(1, hsla(p.hue, p.sat, p.light - 10, 0));
+      ctx.fillStyle = coreGrad;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    /* subtle cursor indicator */
+    if (pointer.active) {
+      const r = REPEL_RADIUS;
+      const grad = ctx.createRadialGradient(mouse.x, mouse.y, r * 0.25, mouse.x, mouse.y, r);
+      grad.addColorStop(0, 'rgba(255,255,255,0.06)');
+      grad.addColorStop(0.5, 'rgba(255,255,255,0.03)');
+      grad.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(mouse.x, mouse.y, r, 0, Math.PI * 2);
+      ctx.fill();
+
+      /* inner dot */
+      ctx.fillStyle = 'rgba(255,255,255,0.55)';
+      ctx.beginPath();
+      ctx.arc(mouse.x, mouse.y, 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  /* ── loop ────────────────────────────────────────────── */
+  function loop() {
+    update();
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  /* ── events ──────────────────────────────────────────── */
+  window.addEventListener('resize', resize);
+
+  canvas.addEventListener('mousemove', function (e) {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+    mouse.active = true;
+    pointer.x = e.clientX;
+    pointer.y = e.clientY;
+    pointer.active = true;
+  });
+
+  canvas.addEventListener('mouseleave', function () {
+    mouse.active = false;
+    pointer.active = false;
+  });
+
+  canvas.addEventListener('mouseenter', function (e) {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+    mouse.active = true;
+    pointer.x = e.clientX;
+    pointer.y = e.clientY;
+    pointer.active = true;
+  });
+
+  canvas.addEventListener('mousedown', function (e) {
+    const count = 8 + (Math.random() * 9 | 0);
+    const power = 4 + Math.random() * 5;
+    burst(e.clientX, e.clientY, count, power);
+  });
+
+  /* touch support */
+  canvas.addEventListener('touchmove', function (e) {
+    e.preventDefault();
+    const t = e.touches[0];
+    if (t) {
+      mouse.x = t.clientX;
+      mouse.y = t.clientY;
+      mouse.active = true;
+      pointer.x = t.clientX;
+      pointer.y = t.clientY;
+      pointer.active = true;
+    }
+  }, { passive: false });
+
+  canvas.addEventListener('touchstart', function (e) {
+    e.preventDefault();
+    const t = e.touches[0];
+    if (t) {
+      mouse.x = t.clientX;
+      mouse.y = t.clientY;
+      mouse.active = true;
+      pointer.x = t.clientX;
+      pointer.y = t.clientY;
+      pointer.active = true;
+      const count = 8 + (Math.random() * 9 | 0);
+      const power = 4 + Math.random() * 5;
+      burst(t.clientX, t.clientY, count, power);
+    }
+  }, { passive: false });
+
+  canvas.addEventListener('touchend', function () {
+    mouse.active = false;
+    pointer.active = false;
+  });
+
+  /* ── kick off ────────────────────────────────────────── */
+  resize();
+  populate();
+  loop();
+})();
+</script>
+</body>
+</html>

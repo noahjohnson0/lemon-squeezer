@@ -1,0 +1,140 @@
+{
+  "evals": {
+    "web-snake": [
+      {
+        "model": "qwen3-coder-30b",
+        "score": 100,
+        "bytes": 8928,
+        "file": "showcase/web-snake/qwen3-coder-30b.html"
+      },
+      {
+        "model": "deepseek-v4-pro",
+        "score": 100,
+        "bytes": 14358,
+        "file": "showcase/web-snake/deepseek-v4-pro.html"
+      },
+      {
+        "model": "claude-opus-4.8",
+        "score": 100,
+        "bytes": 6807,
+        "file": "showcase/web-snake/claude-opus-4.8.html"
+      }
+    ],
+    "web-3d-scene": [
+      {
+        "model": "llama-3.1-8b",
+        "score": 100,
+        "bytes": 1847,
+        "file": "showcase/web-3d-scene/llama-3.1-8b.html"
+      },
+      {
+        "model": "qwen3-coder-30b",
+        "score": 100,
+        "bytes": 2932,
+        "file": "showcase/web-3d-scene/qwen3-coder-30b.html"
+      },
+      {
+        "model": "gpt-oss-120b",
+        "score": 100,
+        "bytes": 2679,
+        "file": "showcase/web-3d-scene/gpt-oss-120b.html"
+      },
+      {
+        "model": "deepseek-v4-pro",
+        "score": 100,
+        "bytes": 14404,
+        "file": "showcase/web-3d-scene/deepseek-v4-pro.html"
+      },
+      {
+        "model": "claude-opus-4.8",
+        "score": 100,
+        "bytes": 6375,
+        "file": "showcase/web-3d-scene/claude-opus-4.8.html"
+      }
+    ],
+    "web-particles": [
+      {
+        "model": "qwen3-coder-30b",
+        "score": 100,
+        "bytes": 6318,
+        "file": "showcase/web-particles/qwen3-coder-30b.html"
+      },
+      {
+        "model": "gpt-oss-120b",
+        "score": 100,
+        "bytes": 3227,
+        "file": "showcase/web-particles/gpt-oss-120b.html"
+      },
+      {
+        "model": "deepseek-v4-pro",
+        "score": 100,
+        "bytes": 11399,
+        "file": "showcase/web-particles/deepseek-v4-pro.html"
+      },
+      {
+        "model": "claude-opus-4.8",
+        "score": 100,
+        "bytes": 9409,
+        "file": "showcase/web-particles/claude-opus-4.8.html"
+      }
+    ],
+    "web-landing": [
+      {
+        "model": "llama-3.1-8b",
+        "score": 71,
+        "bytes": 1075,
+        "file": "showcase/web-landing/llama-3.1-8b.html"
+      },
+      {
+        "model": "qwen3-coder-30b",
+        "score": 100,
+        "bytes": 8121,
+        "file": "showcase/web-landing/qwen3-coder-30b.html"
+      },
+      {
+        "model": "gpt-oss-120b",
+        "score": 100,
+        "bytes": 5566,
+        "file": "showcase/web-landing/gpt-oss-120b.html"
+      },
+      {
+        "model": "deepseek-v4-pro",
+        "score": 100,
+        "bytes": 8566,
+        "file": "showcase/web-landing/deepseek-v4-pro.html"
+      },
+      {
+        "model": "claude-opus-4.8",
+        "score": 100,
+        "bytes": 9552,
+        "file": "showcase/web-landing/claude-opus-4.8.html"
+      }
+    ],
+    "web-calculator": [
+      {
+        "model": "llama-3.1-8b",
+        "score": 90,
+        "bytes": 1236,
+        "file": "showcase/web-calculator/llama-3.1-8b.html"
+      },
+      {
+        "model": "qwen3-coder-30b",
+        "score": 100,
+        "bytes": 12471,
+        "file": "showcase/web-calculator/qwen3-coder-30b.html"
+      },
+      {
+        "model": "gpt-oss-120b",
+        "score": 100,
+        "bytes": 5813,
+        "file": "showcase/web-calculator/gpt-oss-120b.html"
+      },
+      {
+        "model": "claude-opus-4.8",
+        "score": 100,
+        "bytes": 10976,
+        "file": "showcase/web-calculator/claude-opus-4.8.html"
+      }
+    ]
+  }
+}

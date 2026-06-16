@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Particle Physics Toy</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            overflow: hidden;
+            background: #000;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+        .info {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+            z-index: 10;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="particleCanvas"></canvas>
+    <div class="info">Move mouse to attract/repel particles | Click to spawn particles</div>
+
+    <script>
+        // Canvas setup
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set canvas to full window size
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        
+        // Particle system
+        const particles = [];
+        const particleCount = 150;
+        const mouse = {
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            radius: 100,
+            isDown: false
+        };
+        
+        // Particle class
+        class Particle {
+            constructor() {
+                this.reset();
+                this.size = Math.random() * 3 + 1;
+                this.color = `hsl(${Math.random() * 360}, 80%, 60%)`;
+            }
+            
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.originalSize = this.size;
+                this.opacity = Math.random() * 0.5 + 0.5;
+            }
+            
+            update() {
+                // Mouse interaction
+                const dx = mouse.x - this.x;
+                const dy = mouse.y - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < mouse.radius) {
+                    const force = (mouse.radius - distance) / mouse.radius;
+                    const angle = Math.atan2(dy, dx);
+                    
+                    if (mouse.isDown) {
+                        // Repel when mouse is pressed
+                        this.vx -= Math.cos(angle) * force * 0.5;
+                        this.vy -= Math.sin(angle) * force * 0.5;
+                    } else {
+                        // Attract when mouse is not pressed
+                        this.vx += Math.cos(angle) * force * 0.2;
+                        this.vy += Math.sin(angle) * force * 0.2;
+                    }
+                }
+                
+                // Apply velocity
+                this.x += this.vx;
+                this.y += this.vy;
+                
+                // Dampening
+                this.vx *= 0.95;
+                this.vy *= 0.95;
+                
+                // Boundary check - wrap around
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.y < 0) this.y = canvas.height;
+                if (this.y > canvas.height) this.y = 0;
+                
+                // Keep particle size consistent
+                this.size = this.originalSize + Math.sin(Date.now() / 100) * 0.5;
+            }
+            
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.globalAlpha = this.opacity;
+                ctx.fill();
+                ctx.closePath();
+            }
+        }
+        
+        // Initialize particles
+        function initParticles() {
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+        }
+        
+        // Mouse event listeners
+        canvas.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
+        
+        canvas.addEventListener('mousedown', () => {
+            mouse.isDown = true;
+            // Create particles at mouse position
+            for (let i = 0; i < 5; i++) {
+                const particle = new Particle();
+                particle.x = mouse.x;
+                particle.y = mouse.y;
+                particle.vx = (Math.random() - 0.5) * 3;
+                particle.vy = (Math.random() - 0.5) * 3;
+                particles.push(particle);
+            }
+        });
+        
+        canvas.addEventListener('mouseup', () => {
+            mouse.isDown = false;
+        });
+        
+        canvas.addEventListener('mouseleave', () => {
+            mouse.isDown = false;
+        });
+        
+        // Animation loop
+        function animate() {
+            // Fade effect - create a semi-transparent overlay to fade previous frames
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Update and draw particles
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+            
+            requestAnimationFrame(animate);
+        }
+        
+        // Initialize and start animation
+        initParticles();
+        animate();
+    </script>
+</body>
+</html>

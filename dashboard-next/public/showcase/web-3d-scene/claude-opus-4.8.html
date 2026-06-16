@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Interactive 3D Scene — Torus Knot</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    background: #0a0a14;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  }
+  #scene {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+    cursor: grab;
+  }
+  #scene:active {
+    cursor: grabbing;
+  }
+  #hud {
+    position: fixed;
+    top: 14px;
+    left: 14px;
+    color: #cfe8ff;
+    background: rgba(10, 14, 28, 0.55);
+    border: 1px solid rgba(120, 170, 255, 0.25);
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.5;
+    pointer-events: none;
+    backdrop-filter: blur(4px);
+    user-select: none;
+  }
+  #hud b { color: #9ecbff; }
+</style>
+</head>
+<body>
+  <canvas id="scene"></canvas>
+  <div id="hud">
+    <b>Drag</b> to orbit · <b>Scroll</b> to zoom<br />
+    Lit, rotating torus knot
+  </div>
+
+  <!-- ONLY external dependency: three.js from a CDN -->
+  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+  <script>
+    (function () {
+      "use strict";
+
+      const canvas = document.getElementById("scene");
+
+      // ----- Renderer -----
+      const renderer = new THREE.WebGLRenderer({
+        canvas: canvas,
+        antialias: true,
+      });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setSize(window.innerWidth, window.innerHeight);
+
+      // ----- Scene -----
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x0a0a14);
+
+      // ----- Camera -----
+      const camera = new THREE.PerspectiveCamera(
+        55,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        100
+      );
+
+      // ----- Lights -----
+      const ambient = new THREE.AmbientLight(0x404060, 1.2);
+      scene.add(ambient);
+
+      const keyLight = new THREE.DirectionalLight(0xffffff, 2.2);
+      keyLight.position.set(5, 6, 4);
+      scene.add(keyLight);
+
+      const fillLight = new THREE.PointLight(0xff7ad9, 1.6, 50);
+      fillLight.position.set(-6, -3, 5);
+      scene.add(fillLight);
+
+      const rimLight = new THREE.PointLight(0x57c7ff, 1.4, 50);
+      rimLight.position.set(0, 5, -6);
+      scene.add(rimLight);
+
+      // ----- Object: rotating, lit torus knot -----
+      const geometry = new THREE.TorusKnotGeometry(1.1, 0.36, 220, 32);
+      const material = new THREE.MeshStandardMaterial({
+        color: 0x4f9dff,
+        metalness: 0.55,
+        roughness: 0.25,
+      });
+      const mesh = new THREE.Mesh(geometry, material);
+      scene.add(mesh);
+
+      // A subtle ground-ish grid for spatial reference (helps see orbit)
+      const grid = new THREE.GridHelper(20, 20, 0x2a3a66, 0x182542);
+      grid.position.y = -3;
+      scene.add(grid);
+
+      // ----- Hand-rolled orbit controls -----
+      const orbit = {
+        radius: 6,
+        minRadius: 2.5,
+        maxRadius: 20,
+        theta: 0.6,   // horizontal angle
+        phi: 1.1,     // vertical angle (polar)
+        target: new THREE.Vector3(0, 0, 0),
+      };
+
+      let isDragging = false;
+      let lastX = 0;
+      let lastY = 0;
+
+      function updateCamera() {
+        const r = orbit.radius;
+        const sinPhi = Math.sin(orbit.phi);
+        camera.position.x = orbit.target.x + r * sinPhi * Math.sin(orbit.theta);
+        camera.position.y = orbit.target.y + r * Math.cos(orbit.phi);
+        camera.position.z = orbit.target.z + r * sinPhi * Math.cos(orbit.theta);
+        camera.lookAt(orbit.target);
+      }
+
+      function onPointerDown(e) {
+        isDragging = true;
+        const p = pointerPos(e);
+        lastX = p.x;
+        lastY = p.y;
+      }
+
+      function onPointerMove(e) {
+        if (!isDragging) return;
+        const p = pointerPos(e);
+        const dx = p.x - lastX;
+        const dy = p.y - lastY;
+        lastX = p.x;
+        lastY = p.y;
+
+        orbit.theta -= dx * 0.005;
+        orbit.phi -= dy * 0.005;
+
+        // clamp vertical angle to avoid flipping at poles
+        const EPS = 0.05;
+        orbit.phi = Math.max(EPS, Math.min(Math.PI - EPS, orbit.phi));
+        updateCamera();
+      }
+
+      function onPointerUp() {
+        isDragging = false;
+      }
+
+      function pointerPos(e) {
+        if (e.touches && e.touches.length) {
+          return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        }
+        return { x: e.clientX, y: e.clientY };
+      }
+
+      canvas.addEventListener("mousedown", onPointerDown);
+      window.addEventListener("mousemove", onPointerMove);
+      window.addEventListener("mouseup", onPointerUp);
+
+      // touch support
+      canvas.addEventListener("touchstart", function (e) {
+        onPointerDown(e);
+      }, { passive: true });
+      window.addEventListener("touchmove", function (e) {
+        onPointerMove(e);
+      }, { passive: true });
+      window.addEventListener("touchend", onPointerUp);
+
+      // zoom with scroll wheel
+      canvas.addEventListener("wheel", function (e) {
+        e.preventDefault();
+        orbit.radius += e.deltaY * 0.01;
+        orbit.radius = Math.max(orbit.minRadius, Math.min(orbit.maxRadius, orbit.radius));
+        updateCamera();
+      }, { passive: false });
+
+      // ----- Resize handling -----
+      function onResize() {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        renderer.setSize(w, h);
+      }
+      window.addEventListener("resize", onResize);
+
+      // ----- Animation loop -----
+      const clock = new THREE.Clock();
+      function animate() {
+        requestAnimationFrame(animate);
+        const t = clock.getElapsedTime();
+
+        // continuous self-rotation
+        mesh.rotation.x = t * 0.4;
+        mesh.rotation.y = t * 0.6;
+
+        // gently shift color hue for life
+        material.color.setHSL((t * 0.05) % 1, 0.6, 0.55);
+
+        renderer.render(scene, camera);
+      }
+
+      updateCamera();
+      animate();
+    })();
+  </script>
+</body>
+</html>

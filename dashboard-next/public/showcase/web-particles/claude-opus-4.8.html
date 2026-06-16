@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Particle Field</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #05060a;
+    cursor: crosshair;
+  }
+  canvas {
+    display: block;
+  }
+  #hint {
+    position: fixed;
+    left: 50%;
+    bottom: 22px;
+    transform: translateX(-50%);
+    color: rgba(255, 255, 255, 0.45);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    pointer-events: none;
+    user-select: none;
+    transition: opacity 1.2s ease;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+  }
+  #hint.fade { opacity: 0; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hint">move the mouse to attract &middot; click to burst &middot; right-click to repel</div>
+
+<script>
+(function () {
+  "use strict";
+
+  const canvas = document.getElementById("c");
+  const ctx = canvas.getContext("2d");
+  const hint = document.getElementById("hint");
+
+  let W = 0, H = 0, DPR = 1;
+
+  function resize() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width = Math.floor(W * DPR);
+    canvas.height = Math.floor(H * DPR);
+    canvas.style.width = W + "px";
+    canvas.style.height = H + "px";
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+  window.addEventListener("resize", resize);
+  resize();
+
+  // ---- Mouse state ----
+  const mouse = {
+    x: W / 2,
+    y: H / 2,
+    active: false,   // is the mouse over the canvas
+    repel: false,    // is repulsion mode active (right button / shift)
+    down: false
+  };
+
+  // ---- Particle system ----
+  const particles = [];
+  const MAX_PARTICLES = 1400;
+
+  function rand(a, b) { return a + Math.random() * (b - a); }
+
+  // Pleasant cool-to-warm palette, picked by speed/age later
+  function hueFor(p) {
+    return p.hue;
+  }
+
+  function makeParticle(x, y, opts) {
+    opts = opts || {};
+    const angle = opts.angle != null ? opts.angle : rand(0, Math.PI * 2);
+    const speed = opts.speed != null ? opts.speed : rand(0, 0.6);
+    return {
+      x: x,
+      y: y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      size: opts.size != null ? opts.size : rand(1.0, 2.8),
+      hue: opts.hue != null ? opts.hue : rand(180, 320),
+      life: opts.life != null ? opts.life : 1,     // 1 = full, fades for burst particles
+      decay: opts.decay != null ? opts.decay : 0,  // 0 = immortal ambient particle
+      mass: rand(0.6, 1.4)
+    };
+  }
+
+  // Seed an ambient field of immortal particles
+  function seed() {
+    particles.length = 0;
+    const count = Math.min(520, Math.floor((W * H) / 2600));
+    for (let i = 0; i < count; i++) {
+      particles.push(makeParticle(rand(0, W), rand(0, H), {
+        speed: rand(0, 0.4),
+        hue: rand(185, 265)
+      }));
+    }
+  }
+  seed();
+
+  // Burst of short-lived particles on click
+  function burst(x, y, n) {
+    n = n || 60;
+    const baseHue = rand(0, 360);
+    for (let i = 0; i < n; i++) {
+      if (particles.length >= MAX_PARTICLES) break;
+      const a = rand(0, Math.PI * 2);
+      particles.push(makeParticle(x, y, {
+        angle: a,
+        speed: rand(2, 7),
+        size: rand(1.4, 3.6),
+        hue: baseHue + rand(-30, 30),
+        life: 1,
+        decay: rand(0.006, 0.016)
+      }));
+    }
+  }
+
+  // ---- Events ----
+  function setMouseFromEvent(e) {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+    mouse.active = true;
+  }
+
+  window.addEventListener("mousemove", function (e) {
+    setMouseFromEvent(e);
+    mouse.repel = e.shiftKey;
+    fadeHint();
+  });
+
+  window.addEventListener("mouseout", function () {
+    mouse.active = false;
+  });
+
+  window.addEventListener("mousedown", function (e) {
+    setMouseFromEvent(e);
+    mouse.down = true;
+    if (e.button === 2 || e.shiftKey) {
+      mouse.repel = true;
+    } else {
+      mouse.repel = false;
+      burst(mouse.x, mouse.y, 70);
+    }
+    fadeHint();
+  });
+
+  window.addEventListener("mouseup", function (e) {
+    mouse.down = false;
+    if (e.button === 2) mouse.repel = e.shiftKey || false;
+  });
+
+  // Allow right-click to repel without showing context menu
+  window.addEventListener("contextmenu", function (e) {
+    e.preventDefault();
+  });
+
+  window.addEventListener("keydown", function (e) {
+    if (e.key === "Shift") mouse.repel = true;
+  });
+  window.addEventListener("keyup", function (e) {
+    if (e.key === "Shift") mouse.repel = false;
+  });
+
+  // Touch support (treat as attract + burst)
+  window.addEventListener("touchmove", function (e) {
+    const t = e.touches[0];
+    if (t) { mouse.x = t.clientX; mouse.y = t.clientY; mouse.active = true; }
+  }, { passive: true });
+  window.addEventListener("touchstart", function (e) {
+    const t = e.touches[0];
+    if (t) {
+      mouse.x = t.clientX; mouse.y = t.clientY; mouse.active = true;
+      burst(mouse.x, mouse.y, 60);
+    }
+    fadeHint();
+  }, { passive: true });
+  window.addEventListener("touchend", function () { mouse.active = false; });
+
+  let hintFaded = false;
+  function fadeHint() {
+    if (hintFaded) return;
+    hintFaded = true;
+    hint.classList.add("fade");
+    setTimeout(function () { hint.remove(); }, 1400);
+  }
+  // Auto-fade hint after a while even without interaction
+  setTimeout(fadeHint, 6000);
+
+  // ---- Simulation ----
+  const FORCE_RADIUS = 240;
+  const FORCE_RADIUS_SQ = FORCE_RADIUS * FORCE_RADIUS;
+
+  function update() {
+    const friction = 0.96;
+
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+
+      // Mouse interaction
+      if (mouse.active) {
+        const dx = mouse.x - p.x;
+        const dy = mouse.y - p.y;
+        const distSq = dx * dx + dy * dy;
+        if (distSq < FORCE_RADIUS_SQ && distSq > 0.01) {
+          const dist = Math.sqrt(distSq);
+          // Falloff: stronger when closer
+          const strength = (1 - dist / FORCE_RADIUS);
+          const nx = dx / dist;
+          const ny = dy / dist;
+          let f = strength * strength * 1.4 / p.mass;
+          if (mouse.repel) f = -f * 1.3;
+          p.vx += nx * f;
+          p.vy += ny * f;
+
+          // A little swirl for organic motion
+          const swirl = strength * 0.25;
+          p.vx += -ny * swirl;
+          p.vy += nx * swirl;
+        }
+      }
+
+      // Integrate
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vx *= friction;
+      p.vy *= friction;
+
+      // Ambient particles wrap around edges; burst particles fade & die
+      if (p.decay > 0) {
+        p.life -= p.decay;
+        if (p.life <= 0) {
+          particles.splice(i, 1);
+          continue;
+        }
+      } else {
+        // gentle drift so it never fully settles
+        p.vx += (Math.random() - 0.5) * 0.03;
+        p.vy += (Math.random() - 0.5) * 0.03;
+
+        if (p.x < -10) p.x = W + 10;
+        else if (p.x > W + 10) p.x = -10;
+        if (p.y < -10) p.y = H + 10;
+        else if (p.y > H + 10) p.y = -10;
+      }
+    }
+  }
+
+  // ---- Render ----
+  function render() {
+    // Fade trail instead of hard clear
+    ctx.globalCompositeOperation = "source-over";
+    ctx.fillStyle = "rgba(5, 6, 10, 0.18)";
+    ctx.fillRect(0, 0, W, H);
+
+    // Glowing additive particles
+    ctx.globalCompositeOperation = "lighter";
+
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+      const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+      const bright = Math.min(1, 0.35 + speed * 0.12) * p.life;
+      const r = p.size + speed * 0.35;
+
+      ctx.beginPath();
+      ctx.fillStyle = "hsla(" + hueFor(p) + ", 90%, " +
+        (55 + speed * 4) + "%, " + bright + ")";
+      ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Cursor glow
+    if (mouse.active) {
+      const g = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 70);
+      const col = mouse.repel ? "255,90,90" : "120,200,255";
+      g.addColorStop(0, "rgba(" + col + ",0.18)");
+      g.addColorStop(1, "rgba(" + col + ",0)");
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(mouse.x, mouse.y, 70, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.globalCompositeOperation = "source-over";
+  }
+
+  function loop() {
+    update();
+    render();
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+
+  // Reseed ambient particles after a resize so density stays nice
+  let resizeTimer = null;
+  window.addEventListener("resize", function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () {
+      // keep burst particles, replace ambient ones
+      for (let i = particles.length - 1; i >= 0; i--) {
+        if (particles[i].decay === 0) particles.splice(i, 1);
+      }
+      const count = Math.min(520, Math.floor((W * H) / 2600));
+      for (let i = 0; i < count; i++) {
+        particles.push(makeParticle(rand(0, W), rand(0, H), {
+          speed: rand(0, 0.4),
+          hue: rand(185, 265)
+        }));
+      }
+    }, 200);
+  });
+
+})();
+</script>
+</body>
+</html>
