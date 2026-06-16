@@ -1,0 +1,12 @@
+{
+  "_comment": "Showcase tier ladder: ask models across the capability spectrum for a single self-contained index.html (game/3D/toy/page/calculator). 1 trial each - we want ONE artifact per (model, task) to embed in the playable /showcase gallery. Light structural scoring; the artifact is the point. Run: bin/cloud-matrix --arms configs/cloud-showcase.json --trials 1 --tag showcase",
+  "singles": [
+    { "label": "llama-3.1-8b",     "model": "meta-llama/llama-3.1-8b-instruct" },
+    { "label": "qwen3-coder-30b",  "model": "qwen/qwen3-coder-30b-a3b-instruct" },
+    { "label": "gpt-oss-120b",     "model": "openai/gpt-oss-120b" },
+    { "label": "deepseek-v4-pro",  "model": "deepseek/deepseek-v4-pro" },
+    { "label": "claude-opus-4.8",  "model": "anthropic/claude-opus-4.8" }
+  ],
+  "mixes": [],
+  "suite": [ "web-snake", "web-3d-scene", "web-particles", "web-landing", "web-calculator" ]
+}
