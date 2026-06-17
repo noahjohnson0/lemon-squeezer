@@ -1,0 +1,121 @@
+#!/usr/bin/env python3
+"""bench-rejudge - LLM-judge the rag-bench MISSES in bench-data.json.
+
+Substring scoring marks correct-but-paraphrased answers wrong (e.g. "longest
+axis" missing the alias "long axis"). This re-judges every per_q record with
+hit=false using a cloud LLM judge and writes a `judge_hit` field (= hit OR the
+judge's verdict) plus per-sweep `hits_judged`/`accuracy_judged`. Hits are kept
+as-is (a substring hit is already correct); only misses are re-checked, and
+identical (question, answer) pairs are judged once and cached.
+
+    bin/bench-rejudge [--judge-model deepseek/deepseek-v4-flash]
+                      [--base-url https://openrouter.ai/api/v1]
+                      [--concurrency 8] [--limit N] [--dry-run]
+
+Env: OPENROUTER_API_KEY (or LEMON_API_KEY).
+"""
+from __future__ import annotations
+import argparse, json, os, sys, urllib.request, urllib.error
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+DATA = ROOT / "bench-data.json"
+
+PROMPT = """You are grading a short-answer question against a reference answer.
+
+Question: {q}
+Reference (correct) answer: {gold}
+Candidate answer: {ans}
+
+Does the candidate convey the same correct core information as the reference?
+Allow paraphrase, extra detail, equivalent units/values, and different wording.
+Mark NO only if the candidate is wrong, missing the key fact, or refuses/says it
+doesn't know. Reply with exactly one word: YES or NO."""
+
+
+def judge(base_url: str, model: str, key: str, q: str, gold: str, ans: str) -> bool:
+    body = json.dumps({
+        "model": model,
+        "messages": [{"role": "user", "content": PROMPT.format(q=q, gold=gold, ans=ans[:4000])}],
+        "temperature": 0, "max_tokens": 5, "stream": False,
+    }).encode()
+    req = urllib.request.Request(
+        base_url.rstrip("/") + "/chat/completions", data=body,
+        headers={"Content-Type": "application/json", "Authorization": f"Bearer {key}"},
+        method="POST")
+    try:
+        with urllib.request.urlopen(req, timeout=60) as r:
+            txt = json.loads(r.read())["choices"][0]["message"]["content"].strip().upper()
+        return txt.startswith("Y")
+    except Exception:
+        return False  # on judge failure, leave it a miss (conservative)
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--judge-model", default="deepseek/deepseek-v4-flash")
+    ap.add_argument("--base-url", default="https://openrouter.ai/api/v1")
+    ap.add_argument("--concurrency", type=int, default=8)
+    ap.add_argument("--limit", type=int, default=None)
+    ap.add_argument("--dry-run", action="store_true")
+    a = ap.parse_args()
+
+    key = os.environ.get("OPENROUTER_API_KEY") or os.environ.get("LEMON_API_KEY")
+    if not key:
+        print("bench-rejudge: set OPENROUTER_API_KEY (or LEMON_API_KEY)", file=sys.stderr)
+        return 3
+
+    data = json.loads(DATA.read_text(encoding="utf-8"))
+    # Collect unique misses to judge: keyed by (id, answer text).
+    todo: dict[tuple, dict] = {}
+    for s in data["sweeps"]:
+        for r in s.get("per_q") or []:
+            if not r.get("hit"):
+                k = (r.get("id"), r.get("model_answer") or "")
+                todo.setdefault(k, {"q": r.get("question", ""), "gold": r.get("answer_value", ""),
+                                    "ans": r.get("model_answer", "")})
+    keys = list(todo)
+    if a.limit:
+        keys = keys[: a.limit]
+    print(f"misses to judge (unique): {len(keys)} | model={a.judge_model}")
+    if a.dry_run:
+        return 0
+
+    verdict: dict[tuple, bool] = {}
+    done = [0]
+    def work(k):
+        v = judge(a.base_url, a.judge_model, key, todo[k]["q"], todo[k]["gold"], todo[k]["ans"])
+        verdict[k] = v
+        done[0] += 1
+        if done[0] % 50 == 0:
+            print(f"  judged {done[0]}/{len(keys)}", flush=True)
+    with ThreadPoolExecutor(max_workers=a.concurrency) as ex:
+        list(ex.map(work, keys))
+
+    flipped = 0
+    for s in data["sweeps"]:
+        pq = s.get("per_q") or []
+        if not pq:
+            continue
+        hj = 0
+        for r in pq:
+            if r.get("hit"):
+                r["judge_hit"] = True
+            else:
+                k = (r.get("id"), r.get("model_answer") or "")
+                v = verdict.get(k, False)
+                r["judge_hit"] = v
+                flipped += int(v)
+            hj += int(r["judge_hit"])
+        s["hits_judged"] = hj
+        s["accuracy_judged"] = round(hj / len(pq), 4)
+        s["score_pct_judged"] = round(100 * hj / len(pq))
+    data["judged_model"] = a.judge_model
+    DATA.write_text(json.dumps(data), encoding="utf-8")
+    print(f"flipped {flipped} misses -> hit. wrote judge_hit + accuracy_judged to {DATA.name}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

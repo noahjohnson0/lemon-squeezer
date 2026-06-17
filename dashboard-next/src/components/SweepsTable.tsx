@@ -50,7 +50,7 @@ function sortSweeps(sweeps: Sweep[], sort: SweepsTableSort): Sweep[] {
       case "tag":
         av = a.tag ?? ""; bv = b.tag ?? ""; break;
       case "accuracy":
-        av = a.accuracy ?? 0; bv = b.accuracy ?? 0; break;
+        av = a.accuracy_judged ?? a.accuracy ?? 0; bv = b.accuracy_judged ?? b.accuracy ?? 0; break;
       case "n":
         av = a.n; bv = b.n; break;
       case "wall":
@@ -111,7 +111,8 @@ export default function SweepsTable({ sweeps, sort, onSortChange, onSelect, sele
               </tr>
             )}
             {sorted.map((s) => {
-              const cls = scoreClassForAcc(s.accuracy);
+              const acc = s.accuracy_judged ?? s.accuracy;  // prefer LLM-judged
+              const cls = scoreClassForAcc(acc);
               const selected = s.sweep_id === selectedId;
               return (
                 <tr
@@ -130,8 +131,11 @@ export default function SweepsTable({ sweeps, sort, onSortChange, onSelect, sele
                     {s.tag ? <span className="chip">{s.tag}</span> : <span className="text-[var(--muted)]">-</span>}
                   </td>
                   <td className="px-3 py-2 text-right">
-                    <span className={`score-${cls} px-2 py-1 rounded text-xs font-bold tabular-nums`}>
-                      {pctAcc(s.accuracy)}
+                    <span
+                      className={`score-${cls} px-2 py-1 rounded text-xs font-bold tabular-nums`}
+                      title={s.accuracy_judged !== undefined ? `LLM-judged; substring ${pctAcc(s.accuracy)}` : "substring/alias match"}
+                    >
+                      {pctAcc(acc)}
                     </span>
                   </td>
                   <td className="px-3 py-2 text-right tabular-nums">
