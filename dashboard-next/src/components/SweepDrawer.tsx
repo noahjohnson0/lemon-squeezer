@@ -1,7 +1,7 @@
 "use client";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMemo, useState } from "react";
-import { BenchData, Sweep, domainBreakdown, pctAcc, scoreClassForAcc } from "@/lib/bench";
+import { BenchData, Sweep, PerQuestion, domainBreakdown, pctAcc, scoreClassForAcc, effHit } from "@/lib/bench";
 
 type Filter = "all" | "hits" | "misses";
 
@@ -27,8 +27,8 @@ export default function SweepDrawer({
     if (!sweep) return [];
     const term = search.trim().toLowerCase();
     return sweep.per_q.filter((r) => {
-      if (filter === "hits" && !r.hit) return false;
-      if (filter === "misses" && r.hit) return false;
+      if (filter === "hits" && !effHit(r)) return false;
+      if (filter === "misses" && effHit(r)) return false;
       if (term && !r.question.toLowerCase().includes(term) && !r.id.toLowerCase().includes(term)) return false;
       return true;
     });
@@ -70,12 +70,26 @@ export default function SweepDrawer({
                 <div className="flex items-center gap-2 flex-wrap mb-2">
                   <span className="chip">{sweep.harness}</span>
                   {sweep.host && <span className="chip">{sweep.host}</span>}
-                  <span
-                    className={`score-${scoreClassForAcc(sweep.accuracy)} px-3 py-1 rounded font-bold tabular-nums`}
-                  >
-                    {pctAcc(sweep.accuracy)}
-                  </span>
-                  <span className="text-xs text-[var(--muted)]">{sweep.hits}/{sweep.n} hits</span>
+                  {sweep.accuracy_judged !== undefined ? (
+                    <>
+                      <span
+                        className={`score-${scoreClassForAcc(sweep.accuracy_judged)} px-3 py-1 rounded font-bold tabular-nums`}
+                        title="LLM-judged accuracy (counts correct-but-paraphrased answers)"
+                      >
+                        {pctAcc(sweep.accuracy_judged)} judged
+                      </span>
+                      <span className="text-xs text-[var(--muted)]" title="raw substring/alias match">
+                        {pctAcc(sweep.accuracy)} substring · {sweep.hits_judged ?? sweep.hits}/{sweep.n} hits
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span className={`score-${scoreClassForAcc(sweep.accuracy)} px-3 py-1 rounded font-bold tabular-nums`}>
+                        {pctAcc(sweep.accuracy)}
+                      </span>
+                      <span className="text-xs text-[var(--muted)]">{sweep.hits}/{sweep.n} hits</span>
+                    </>
+                  )}
                 </div>
                 <div className="text-xs text-[var(--muted)] flex flex-wrap gap-x-3">
                   <span>μ {sweep.wall_seconds_mean?.toFixed(1)}s</span>
@@ -182,16 +196,21 @@ export default function SweepDrawer({
   );
 }
 
-function PerQRow({ r }: { r: { id: string; question: string; answer_value: string; model_answer: string; hit: boolean; matched_alias: string | null; wall_seconds: number; tokens_in: number; tokens_out: number; tool_calls: number } }) {
+function PerQRow({ r }: { r: PerQuestion }) {
   const [open, setOpen] = useState(false);
+  const ok = effHit(r);
+  const flipped = !r.hit && r.judge_hit === true;  // substring missed it, judge rescued it
   return (
     <div className="bg-[var(--panel)] border border-[var(--border)] rounded-lg overflow-hidden">
       <button
         onClick={() => setOpen((o) => !o)}
         className="w-full px-3 py-2 flex items-start gap-3 text-left hover:bg-[var(--panel-2)]"
       >
-        <span className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${r.hit ? "bg-[var(--good)] text-black" : "bg-[var(--bad)] text-white"}`}>
-          {r.hit ? "✓" : "✗"}
+        <span
+          className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${ok ? "bg-[var(--good)] text-black" : "bg-[var(--bad)] text-white"}`}
+          title={flipped ? "judged correct (substring match missed the paraphrase)" : ok ? "correct" : "incorrect"}
+        >
+          {ok ? "✓" : "✗"}
         </span>
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline gap-2 flex-wrap">

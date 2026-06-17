@@ -8,7 +8,8 @@ export type PerQuestion = {
   question: string;
   answer_value: string;
   model_answer: string;
-  hit: boolean;
+  hit: boolean;            // raw substring/alias match
+  judge_hit?: boolean;     // LLM-judged correctness (bench-rejudge); >= hit
   matched_alias: string | null;
   wall_seconds: number;
   tokens_in: number;
@@ -29,6 +30,9 @@ export type Sweep = {
   hits: number;
   accuracy: number;
   score_pct: number;
+  hits_judged?: number;       // from bench-rejudge: LLM-judged hit count
+  accuracy_judged?: number;
+  score_pct_judged?: number;
   wall_seconds_total: number;
   wall_seconds_mean: number;
   tokens_in_total: number;
@@ -53,7 +57,11 @@ export type BenchData = {
   generated_at: string;
   sweeps: Sweep[];
   qsets: Record<string, { questions: Question[] }>;
+  judged_model?: string;   // set by bench-rejudge when judge_hit fields are present
 };
+
+/** A per-question record's effective correctness: judged if available, else substring. */
+export const effHit = (r: PerQuestion): boolean => r.judge_hit ?? r.hit;
 
 export async function loadBenchData(): Promise<BenchData> {
   // The page is served at /bench/ (with trailingSlash). A bare "./bench-data.json" would
