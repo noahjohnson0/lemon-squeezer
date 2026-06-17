@@ -14,9 +14,12 @@ clite_bin="$(command -v clite || echo "$HOME/AppData/Roaming/npm/clite")"
 prompt="$(cat "$prompt_file")"
 
 # Default mode is act + auto-approve (non-interactive). --data-dir isolates state
-# per run so parallel matrix cells don't share one ~/.cline. -t caps runaway loops.
-"$clite_bin" -P openrouter -k "$key" -m "$slug" -c "$ws" \
-    --data-dir "$run_dir/.cline" -t 600 --json "$prompt" 2>&1 | tee "$run_dir/harness.log"
+# per run so parallel matrix cells don't share one ~/.cline. cline's own -t does
+# NOT reliably stop it (it hung 40 min on bloom-filter once), so wrap in a HARD
+# external timeout - on expiry the cell just scores low/0, never jams the pool.
+TO="$(command -v timeout || command -v gtimeout || true)"
+${TO:+$TO 420} "$clite_bin" -P openrouter -k "$key" -m "$slug" -c "$ws" \
+    --data-dir "$run_dir/.cline" -t 360 --json "$prompt" 2>&1 | tee "$run_dir/harness.log"
 
 # Counters from cline's --json stream. Cumulative usage lives on the final
 # run_result and on agent_event usage events (camelCase: inputTokens/outputTokens/
