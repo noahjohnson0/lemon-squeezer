@@ -165,6 +165,15 @@ harness_run() {
 5. **`set -u` and empty arrays.** Use `${ARRAY[@]+"${ARRAY[@]}"}` not
    `"${ARRAY[@]}"` for arrays that might be empty. We hit "unbound variable"
    here at least twice.
+6. **Rubrics need bash 4+ (macOS ships 3.2).** Several hard-tier rubrics
+   (csv-dialect, semver-range, expr-eval, ini-config, dep-resolver, myers-diff,
+   mini-template, sliding-rate-limiter) use `declare -A`. macOS `/bin/bash` is
+   3.2 and rejects it: the rubric crashes in its tally block AFTER all checks
+   pass, emits nothing to stdout → empty `score.json` → `score_pct: "?"`. Every
+   `?` looks like a model failure but isn't. `brew install bash` and run with
+   `PATH=/opt/homebrew/bin:$PATH` (eval-rescore/eval-export call bare `bash`).
+   This is why hard-tier sweeps were originally run on svr (git-bash 5.x); a
+   2026-06-17 GLM 5.2 run on the Mac hit this and needed a bash-5 rescore.
 
 ## Aider's nested .git problem
 
