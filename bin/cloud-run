@@ -116,6 +116,11 @@ def main() -> int:
     ap.add_argument("--agent", choices=["squeezer", "aider"], default="squeezer",
                     help="which single-model harness to drive (for the harness bake-off). "
                          "aider uses its own edit format, so it also drives non-tool-calling models.")
+    ap.add_argument("--harness-adapter", default=None,
+                    help="run an EXTERNAL harness CLI via bin/cloud-harnesses/<name>.sh "
+                         "(generic path - lets any coding agent be benchmarked in the cloud). "
+                         "The adapter gets (ws, prompt_file, model_slug, run_dir, base_url) and "
+                         "$LEMON_API_KEY, and must write tokens_in/tokens_out/tool_calls/cost files.")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--no-append", action="store_true",
                     help="write meta.json + print the row, but don't append to runs.jsonl "
@@ -151,6 +156,13 @@ def main() -> int:
                      "architect": [a.architect_model]}.get(a.pipeline, [])
             extra = "+".join(short(r) for r in roles if r)
             label = f"{a.pipeline}:{'/'.join(short(m) for m in primary.split(','))}" + (f"+{extra}" if extra else "")
+    elif a.harness_adapter:
+        if not a.model:
+            print("cloud-run: --harness-adapter needs a positional model slug", file=sys.stderr)
+            return 2
+        primary = a.model
+        harness = a.harness or f"{a.harness_adapter}-cloud"
+        label = a.label or a.model
     else:
         if not a.model:
             print("cloud-run: need a positional model (or use --pipeline)", file=sys.stderr)
@@ -207,9 +219,31 @@ def main() -> int:
     env["PYTHONUTF8"] = "1"
     env["PYTHONIOENCODING"] = "utf-8"
 
-    # Drive the agent: a mix (squeezer_pipeline), aider, or single squeezer.
-    aider_run = (a.agent == "aider") and not a.pipeline
-    if a.pipeline:
+    # Drive the agent: an external harness adapter, a mix (squeezer_pipeline),
+    # aider, or single squeezer.
+    adapter_run = bool(a.harness_adapter) and not a.pipeline
+    aider_run = (a.agent == "aider") and not a.pipeline and not adapter_run
+    if adapter_run:
+        adapter = ROOT / "bin" / "cloud-harnesses" / f"{a.harness_adapter}.sh"
+        if not adapter.exists():
+            print(f"cloud-run: no such harness adapter: {adapter}", file=sys.stderr)
+            return 2
+        env["OPENROUTER_API_KEY"] = key
+        # Belt-and-suspenders: any CLI that pops a browser (aider's URL offers,
+        # onboarding flows, ...) is neutralised host-wide.
+        env["BROWSER"] = "cmd /c rem" if os.name == "nt" else "true"
+        # Adapter contract: (ws, prompt_file, model_slug, run_dir, base_url) on
+        # argv + $LEMON_API_KEY in env; it writes tokens_in/tokens_out/tool_calls/
+        # cost counter files into run_dir, which the meta block below reads.
+        #
+        # Use the EXPLICIT MSYS (Git) bash, not a bare "bash": on Windows,
+        # subprocess's CreateProcess resolves bare "bash" to System32\bash.exe
+        # (WSL), which can't see Windows-installed CLIs like aider or resolve
+        # C:/ paths. shutil.which finds the Git bash on PATH instead.
+        bash_bin = shutil.which("bash") or "bash"
+        cmd = [bash_bin, posix(adapter), posix(ws), posix(eval_dir / "prompt.md"),
+               primary, posix(run_dir), a.base_url]
+    elif a.pipeline:
         cmd = [sys.executable, str(ROOT / "bin" / "squeezer_pipeline.py"),
                "--workspace", str(ws), "--run-dir", str(run_dir),
                "--prompt-file", str(eval_dir / "prompt.md"),
@@ -229,6 +263,11 @@ def main() -> int:
             env["OLLAMA_API_BASE"] = a.base_url.replace("/v1", "").rstrip("/")
         else:
             env["OPENROUTER_API_KEY"] = key
+        # aider's --yes-always auto-confirms its "open this URL?" prompts (e.g. the
+        # token-limit doc it offers on context overflow), which pops a REAL browser
+        # tab on the host machine. Point BROWSER at a no-op so webbrowser.open()
+        # can never launch one. (cmd builtin on Windows, `true` elsewhere.)
+        env["BROWSER"] = "cmd /c rem" if os.name == "nt" else "true"
         starter = [str(p.relative_to(ws)) for p in sorted(ws.rglob("*")) if p.is_file()]
         prompt_text = (eval_dir / "prompt.md").read_text(encoding="utf-8")
         cmd = [aider_bin, "--model", aider_model, "--yes-always", "--no-auto-commits",
@@ -291,6 +330,7 @@ def main() -> int:
     if a.temperature is not None: meta["temperature"] = a.temperature
     if a.seed is not None:        meta["seed"] = a.seed
     if a.agent != "squeezer":     meta["agent"] = a.agent
+    if a.harness_adapter:         meta["harness_adapter"] = a.harness_adapter
     if a.pipeline:
         meta["mix"] = {"pipeline": a.pipeline, "primary": primary,
                        "critic": a.critic_model, "judge": a.judge_model,

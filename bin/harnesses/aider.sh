@@ -5,6 +5,10 @@ harness_run() {
   local ws="$1" prompt_file="$2" model="$3" run_dir="$4"; shift 4
 
   export OLLAMA_API_BASE="${OLLAMA_API_BASE:-http://localhost:11434}"
+  # --yes-always (below) auto-confirms aider's "open this URL?" prompts, which pops
+  # a real browser tab on the host when a model hits a token limit. A no-op BROWSER
+  # stops webbrowser.open() from ever launching one.
+  export BROWSER="${BROWSER:-true}"
   # Aider's recommended prefix for ollama is "ollama_chat/"
   local aider_model="ollama_chat/${model}"
 
