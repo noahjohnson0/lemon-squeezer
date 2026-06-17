@@ -40,7 +40,8 @@ def load_arms(path: Path):
         arms.append({"kind": "single", "label": s["label"], "model": s["model"],
                      "harness": s.get("harness", "squeezer-cloud"),
                      "agent": s.get("agent", "squeezer"),
-                     "adapter": s.get("adapter")})  # external CLI harness via bin/cloud-harnesses/<adapter>.sh
+                     "adapter": s.get("adapter"),  # external CLI harness via bin/cloud-harnesses/<adapter>.sh
+                     "host": s.get("host")})       # override run host (e.g. openai/anthropic for native-provider harnesses)
     for m in spec.get("mixes", []):
         arms.append({"kind": "mix", "label": m["label"], "harness": m["harness"],
                      "pipeline": m["pipeline"], "primary_model": m["primary_model"],
@@ -83,6 +84,8 @@ def build_cmd(cell, eval_name, tag, base_url):
     cmd = [sys.executable, str(ROOT / "bin" / "cloud-run"), eval_name,
            "--no-append", "--tag", tag, "--base-url", base_url,
            "--label", arm["label"], "--harness", arm["harness"]]
+    if arm.get("host"):
+        cmd += ["--host", arm["host"]]
     if SAMPLE_TEMP is not None: cmd += ["--temperature", str(SAMPLE_TEMP)]
     if SAMPLE_SEED is not None: cmd += ["--seed", str(SAMPLE_SEED)]
     if arm["kind"] == "single":
