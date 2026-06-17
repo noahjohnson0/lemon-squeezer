@@ -106,7 +106,9 @@ export default function Leaderboard({
           harness: h,
           model: m,
           cells,
-          avg: Math.round(avg),
+          avg, // keep exact for ranking; rounded only at display (rounding here
+               // collapsed near-ties so the rank fell through to an alphabetical
+               // tiebreak - e.g. flash leapfrogging pro at 99.0 vs 99.43)
           count: present.length,
           shrunk: 0,
           cost: armCost(host, h, m),
@@ -218,7 +220,7 @@ export default function Leaderboard({
                         </td>
                       ))}
                       <td className="px-3 py-2 text-right">
-                        <ScoreCell s={row.avg} />
+                        <ScoreCell s={Math.round(row.avg)} />
                       </td>
                       <td className="px-3 py-2 text-right">
                         <ScoreCell s={Math.round(row.shrunk)} />
