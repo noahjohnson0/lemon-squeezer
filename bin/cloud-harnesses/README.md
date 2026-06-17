@@ -28,6 +28,28 @@ Anything the adapter prints to stdout is captured into `<run_dir>/stdout.log` by
 `meta.json` (reading those four counter files), so the adapter only worries about
 *running the agent* and *reporting counters*.
 
+## Available adapters
+
+| adapter | CLI | provider | notes |
+|---|---|---|---|
+| `aider` | aider | OpenRouter | parses tokens + cost from its log |
+| `opencode` | opencode (SST) | OpenRouter | JSON event stream; tokens + cost |
+| `crush` | crush (Charm) | OpenRouter | no stdout usage (cost reads 0) |
+| `pi` | pi (@earendil-works) | OpenRouter | native openrouter provider; don't pass `--thinking off` |
+| `cline` | clite (@cline/cli) | OpenRouter | weak models flail on its XML format; heavy context = high cost |
+| `codex` | codex (OpenAI) | **native OpenAI** | uses its own auth; pass `--host openai`; slug ignored (set `CODEX_MODEL`) |
+| `claude-code` | claude (Anthropic) | **native Anthropic** | uses its own auth; pass `--host anthropic`; slug = model alias (sonnet/opus) |
+
+All validated on `cli-tool` (each scored 100 with a capable model). Sweep one with:
+
+```
+# OpenRouter harness across the suite:
+bin/cloud-matrix --arms <arms.json> ...   # arm: {"label":"pi","model":"openai/gpt-oss-20b","adapter":"pi"}
+# or a single cell:
+bin/cloud-run <eval> <model-slug> <tag> --harness-adapter pi
+bin/cloud-run <eval> sonnet <tag> --harness-adapter claude-code --host anthropic
+```
+
 ## Notes
 
 - Set `BROWSER` to a no-op if the CLI ever opens URLs (cloud-run already does this
