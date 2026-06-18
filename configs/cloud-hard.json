@@ -5,6 +5,7 @@
     { "label": "deepseek-v4-flash", "model": "deepseek/deepseek-v4-flash" },
     { "label": "qwen3-max",         "model": "qwen/qwen3-max" },
     { "label": "glm-5.1",           "model": "z-ai/glm-5.1" },
+    { "label": "glm-5.2",           "model": "z-ai/glm-5.2", "_note": "released 2026-06-16; $1.40/4.40 per Mtok, 1M ctx" },
     { "label": "gpt-oss-120b",      "model": "openai/gpt-oss-120b" },
     { "label": "kimi-k2.7-code",    "model": "moonshotai/kimi-k2.7-code" },
     { "label": "qwen3-coder-30b",   "model": "qwen/qwen3-coder-30b-a3b-instruct" },
