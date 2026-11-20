@@ -170,7 +170,7 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 2.5rem 0; }
 }
 
 /* ---------- study cards ---------- */
-.studies { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); margin: 1.2rem 0; }
+.studies { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); margin: 1.2rem 0; }
 .study-card { background: var(--bg); padding: 1.2rem 1.2rem 1.3rem; text-decoration: none; color: var(--ink); display: flex; flex-direction: column; gap: 0.5rem; }
 .study-card:hover { background: var(--bg-2); }
 .study-card h3 { margin: 0; font-size: 1.12rem; }
