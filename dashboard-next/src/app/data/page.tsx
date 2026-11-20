@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import fs from "node:fs";
 import path from "node:path";
-import { runs, studio, totals } from "@/lib/site-data";
+import { studio, totals } from "@/lib/site-data";
 import { fileHref } from "@/components/ui";
 
 export const metadata: Metadata = {
@@ -22,11 +22,10 @@ export default function Data() {
   const t = totals();
   const s = studio();
   const nRows = Object.values(s.exploration).reduce((a, v) => a + v.reduce((b, r) => b + r.tasks, 0), 0);
-  const hosts = new Set(runs().map((r) => r.host)).size;
   const files = [
     {
       f: "runs.jsonl",
-      d: `The coding suite: ${t.runs.toLocaleString("en-US")} runs, one JSON object per line (eval, harness, model, tag, host, score, tokens, wall time, cost, and GPU telemetry for local runs), across ${hosts} venues. Source of the harness bake-off, the cloud comparison and the 12 GB GPU study.`,
+      d: `The coding suite: ${t.runs.toLocaleString("en-US")} runs, one JSON object per line (eval, harness, model, tag, host, score, tokens, wall time, cost, and GPU telemetry for local runs), from the 12 GB GPU, a laptop and cloud endpoints. Source of the harness bake-off, the cloud comparison and the 12 GB GPU study.`,
     },
     {
       f: "studio-summary.json",
@@ -70,7 +69,7 @@ export default function Data() {
         <ul>
           <li>Machine-specific strings (home-directory paths, internal host names) are stripped from the published copies. No values are changed.</li>
           <li>
-            Scores in <code>runs.jsonl</code> are 0 to 100. A score of <code>&quot;?&quot;</code> marks a run whose rubric output could not be
+            Scores in <code>runs.jsonl</code>{" "}are 0 to 100. A score of <code>&quot;?&quot;</code>{" "}marks a run whose rubric output could not be
             parsed; the site counts it as 0.
           </li>
           <li>Latest coding-suite run: {t.newest}. The tool-calling data is refreshed from its own harness as passes finish.</li>

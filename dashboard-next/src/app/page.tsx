@@ -72,7 +72,7 @@ export default function Home() {
       status: ["explore"],
       body: (
         <p>
-          Four big local models ran the same {pooled.n} tasks with and without a sandboxed <code>run_python</code> tool. Pooled, solved tasks
+          Four big local models ran the same {pooled.n} tasks with and without a sandboxed <code>run_python</code>{" "}tool. Pooled, solved tasks
           went from {pooled.b} to {pooled.a}: +{pooled.diff} (95% CI +{pooled.ci[0]} to +{pooled.ci[1]}). Without it, models write a script they
           cannot run and then try to compute the answer in their reasoning until they run out of tokens.
         </p>
@@ -92,7 +92,7 @@ export default function Home() {
       ),
       uncertainty: (
         <>
-          A screen, not a ranking. The frozen final pass ({fin.tasks} tasks per model) is {fin.state}; no model has a final score yet. On the
+          These are exploration rows. The frozen final pass ({fin.tasks} tasks per model) is {fin.state}; no model has a final score yet. On the
           hardest set the comparison between the top two is not clean because checkers were fixed between their runs.
         </>
       ),
@@ -122,7 +122,7 @@ export default function Home() {
           {fmtCost(cheapTied?.costPerTask)} for {cheapTied?.model}, the cheapest single model in the same cluster.
         </p>
       ),
-      uncertainty: <>Differences at the top are inside the intervals; &ldquo;no better&rdquo; is the claim, not &ldquo;worse&rdquo;.</>,
+      uncertainty: <>Differences at the top are inside the intervals. The claim is that mixes score no higher; it does not say they score lower.</>,
       href: "/studies/cloud-models/",
       study: "Cloud model comparison",
     },

@@ -45,7 +45,7 @@ export default function About() {
           <li>Treat harness bugs as findings and publish them.</li>
         </ul>
         <p>
-          The details are on the <Link href="/methods/">Methods</Link> page.
+          The details are on the <Link href="/methods/">Methods</Link>{" "}page.
         </p>
 
         <h2>Hardware</h2>

@@ -217,7 +217,7 @@ export default function Page() {
         <h2 id="results">Results</h2>
         <h3>The 37 screening tasks saturate at the top</h3>
         <p>
-          With <code>run_python</code> available, {shortName(edge.model)} and {shortName(q38.model)} each solved all {edge.tasks} tasks and
+          With <code>run_python</code>{" "}available, {shortName(edge.model)} and {shortName(q38.model)} each solved all {edge.tasks} tasks and
           their outcomes are identical task for task. Five more configurations solved 33 or 34. The Mistral row ran with reasoning switched
           off by a configuration bug and is reported as that, not as the model.
         </p>
@@ -257,7 +257,7 @@ export default function Page() {
       <div className="col prose">
         <h3>The harder suites saturate too, at the very top</h3>
         <p>
-          Both leaders solved all 15 HARD2 tasks: they read the spec, dump the data with one <code>run_python</code> call and script the rest.
+          Both leaders solved all 15 HARD2 tasks: they read the spec, dump the data with one <code>run_python</code>{" "}call and script the rest.
           On HARD3 the split was {h3.a} vs {h3.b}, but that comparison is not clean: the three tasks the second model missed are the three
           whose checkers were found broken and fixed before the first model ran. The final pass reruns both on the fixed checkers.
         </p>
@@ -319,21 +319,21 @@ export default function Page() {
         <h3>Smaller results</h3>
         <ul>
           <li>
-            <strong>Abliteration did not change tool use.</strong> gpt-oss-120b and its abliterated version solved the same number of tasks
+            <strong>Abliteration did not change tool use.</strong>{" "}gpt-oss-120b and its abliterated version solved the same number of tasks
             with and without execution ({abl.a} = {abl.b}; {cmp("gpt-oss-120b: base vs heretic (abliteration), lean+").a} ={" "}
             {cmp("gpt-oss-120b: base vs heretic (abliteration), lean+").b}). They differed in one place: the abliterated model obeyed a prompt
-            injection planted in an order-status page, and the base model did not. One trial, one trap: a lead, not a measurement.
+            injection planted in an order-status page, and the base model did not. This is one trial on one trap, so it is a lead for a follow-up study.
           </li>
           <li>
-            <strong>Engine:</strong> llama.cpp {mlx.a}/37 vs MLX {mlx.b}/37 on gpt-oss-120b at high reasoning, too wide to call, at equal
+            <strong>Engine:</strong>{" "}llama.cpp {mlx.a}/37 vs MLX {mlx.b}/37 on gpt-oss-120b at high reasoning, too wide to call, at equal
             throughput. MLX lost replies to tool calls its parser could not read; llama.cpp&apos;s grammar makes those impossible.
           </li>
           <li>
-            <strong>Reasoning effort:</strong> high vs medium on gpt-oss-120b, {eff.a} vs {eff.b}, too wide to call, at about{" "}
+            <strong>Reasoning effort:</strong>{" "}high vs medium on gpt-oss-120b, {eff.a} vs {eff.b}, too wide to call, at about{" "}
             {Math.round(effHigh.wall_min / base.wall_min)}× the wall time ({Math.round(effHigh.wall_min)} vs {Math.round(base.wall_min)} min).
           </li>
           <li>
-            <strong>Generations:</strong> Qwen3.8-Flash-Next solved {q35.diff} more tasks than its predecessor Qwen3.5-122B (95% CI +{q35.ci[0]}{" "}
+            <strong>Generations:</strong>{" "}Qwen3.8-Flash-Next solved {q35.diff} more tasks than its predecessor Qwen3.5-122B (95% CI +{q35.ci[0]}{" "}
             to +{q35.ci[1]}), the only single-model gap in the screen whose interval clears zero.
           </li>
           <li>
@@ -342,7 +342,7 @@ export default function Page() {
             weights are a rebuild of that model, so this is as much an engine comparison as a model one.
           </li>
           <li>
-            <strong>Failure modes</strong> once the harness bugs were out were model-side: claiming done with the work undone, a swapped
+            <strong>Failure modes</strong>{" "}once the harness bugs were out were model-side: claiming done with the work undone, a swapped
             pair of letters when writing an answer, missed receipts that never say &ldquo;receipt&rdquo;, and reasoning loops that run to the
             reply cap.
           </li>
@@ -382,7 +382,7 @@ export default function Page() {
           grammar forces tool-call keys into schema order, so one model could never add an optional key once it had passed it; the mail mock
           silently ignored parenthesised queries and returned nothing; the code-execution jail could read the expected answers; and the
           simulated world&apos;s date disagreed with the host clock. Rows run before a fix are kept as found and not rerun. The full log is
-          on the <Link href="/methods/#bugs">Methods</Link> page.
+          on the <Link href="/methods/#bugs">Methods</Link>{" "}page.
         </p>
 
         <h2 id="limits">Limitations</h2>

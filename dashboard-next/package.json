@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "node scripts/build-bench-data.js && node scripts/stage-data.mjs && next build",
+    "build": "node scripts/build-bench-data.js && node scripts/stage-data.mjs && next build && node scripts/scrub-out.mjs",
     "bench-data": "node scripts/build-bench-data.js",
     "start": "next start",
     "stage-data": "node scripts/stage-data.mjs"

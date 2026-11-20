@@ -111,9 +111,9 @@ dashboard-next/      # Next.js dashboard -> GitHub Pages (/ local, /cloud cloud)
 ROADMAP.md           # where this is going
 ```
 
-## Dashboard
+## Site
 
-Live at [noahjohnson0.github.io/lemon-squeezer](https://noahjohnson0.github.io/lemon-squeezer/). Reads `runs.jsonl` directly: **/** is the unified leaderboard (local GPUs and cloud arms), **/cloud** is the open-model and local-vs-cloud view, **/local** the hardware side (VRAM, speed, watts). **/studio** is the Mac Studio tool-calling track, read from `studio.json`.
+Live at [noahjohnson0.github.io/lemon-squeezer](https://noahjohnson0.github.io/lemon-squeezer/): the lab's publication. The home page lists the current findings, each with its evidence and an honesty label (exploration, final pass pending, too wide to call); `/studies/` has one page per study (method, results with intervals, limitations, data); `/methods/`, `/data/` (sanitized downloads) and `/about/` complete it. Every number is computed at build time from `runs.jsonl` and `studio/summary.json` (`dashboard-next/src/lib/site-data.ts`). The old `/local`, `/cloud` and `/studio` URLs redirect to the matching study.
 
 ## License
 

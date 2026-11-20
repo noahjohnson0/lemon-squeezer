@@ -105,14 +105,14 @@ export default function Methods() {
         </p>
         <ul>
           <li>
-            <strong>Coding suite.</strong> Our reference harness is <em>squeezer</em>, a ~250-line, dependency-free tool-calling loop with four
+            <strong>Coding suite.</strong>{" "}Our reference harness is <em>squeezer</em>, a ~250-line, dependency-free tool-calling loop with four
             tools (read a file, write a file, list files, run a shell command) that talks to any OpenAI-compatible endpoint. It is minimal and
             transparent on purpose. Third-party harnesses (aider, pi, Cline, opencode, Crush, Codex CLI, Claude Code) run through small shims
-            with the same prompts. Multi-model <em>mixes</em> wire several models over one workspace: plan-then-implement, draft-critique-refine,
+            with the same prompts. Multi-model <em>mixes</em>{" "}wire several models over one workspace: plan-then-implement, draft-critique-refine,
             ensemble-and-judge, and write-tests-then-fix.
           </li>
           <li>
-            <strong>Tool-calling suite.</strong> A separate, jailed harness gives the model file, search, mail, messaging and browser tools over a
+            <strong>Tool-calling suite.</strong>{" "}A separate, jailed harness gives the model file, search, mail, messaging and browser tools over a
             small simulated world, with an optional Python sandbox. It caps each task at 150 steps and each reply at 16k tokens.
           </li>
         </ul>
@@ -132,12 +132,12 @@ export default function Methods() {
         <p>Nothing on this site is scored by a language model or by reading the transcript.</p>
         <ul>
           <li>
-            <strong>Coding tasks</strong> ship a rubric script that imports or runs the program the agent wrote and checks its behaviour on
+            <strong>Coding tasks</strong>{" "}ship a rubric script that imports or runs the program the agent wrote and checks its behaviour on
             inputs, weighted toward runtime correctness: a program that looks right but returns wrong answers loses most of its points. The
             score is the percentage of checks passed. Every check always emits, so the denominator is constant.
           </li>
           <li>
-            <strong>Tool-calling tasks</strong> are checked on the end state: the files on disk, mailbox labels, drafts sent, rows in the
+            <strong>Tool-calling tasks</strong>{" "}are checked on the end state: the files on disk, mailbox labels, drafts sent, rows in the
             message database. A task counts as solved only when every check passes. Each hard task has a reference solution that passes and a
             test that an untouched workspace fails.
           </li>
@@ -150,24 +150,24 @@ export default function Methods() {
         <h2 id="stats">Statistics</h2>
         <ul>
           <li>
-            <strong>Aggregate per task first.</strong> Trials of the same task share its difficulty, so they are not independent. A model&apos;s
+            <strong>Aggregate per task first.</strong>{" "}Trials of the same task share its difficulty, so they are not independent. A model&apos;s
             score is the mean over tasks of each task&apos;s mean over its trials; every task weighs the same. A failed run counts as zero.
           </li>
           <li>
-            <strong>Cluster bootstrap.</strong> The 95% interval on that score resamples tasks with replacement ({BOOT_B.toLocaleString("en-US")}{" "}
+            <strong>Cluster bootstrap.</strong>{" "}The 95% interval on that score resamples tasks with replacement ({BOOT_B.toLocaleString("en-US")}{" "}
             resamples, fixed seed) and takes the 2.5th and 97.5th percentiles. Models with fewer than 8 tasks get no interval and are not ranked.
           </li>
           <li>
-            <strong>Wilson intervals</strong> for solve rates (k of n tasks solved), which behave at 0% and 100% where the normal approximation
+            <strong>Wilson intervals</strong>{" "}for solve rates (k of n tasks solved), which behave at 0% and 100% where the normal approximation
             does not.
           </li>
           <li>
-            <strong>Paired differences.</strong> When two conditions ran on the same tasks (two harnesses, two models, with and without a tool),
+            <strong>Paired differences.</strong>{" "}When two conditions ran on the same tasks (two harnesses, two models, with and without a tool),
             we difference them per task and bootstrap the mean difference. Unpaired cells are dropped. That is the only comparison we draw
             conclusions from.
           </li>
           <li>
-            <strong>Rule:</strong> if the 95% interval on a difference includes zero, the result is reported as too wide to call, whatever the
+            <strong>Rule:</strong>{" "}if the 95% interval on a difference includes zero, the result is reported as too wide to call, whatever the
             point estimate is.
           </li>
         </ul>
@@ -182,7 +182,7 @@ export default function Methods() {
             <Chip s="wide" /> The interval includes zero. We do not claim a difference either way.
           </li>
           <li>
-            <Chip s="explore" /> Run while the method was still changing, or with too few trials to rank. Useful as a screen; not a result.
+            <Chip s="explore" /> Run while the method was still changing, or with too few trials to rank. Use it to pick candidates for a final pass.
           </li>
           <li>
             <Chip s="pending" /> A frozen, preregistered pass is running and will replace the exploration numbers.
@@ -203,7 +203,7 @@ export default function Methods() {
         <h2 id="explore">Exploration and the final pass</h2>
         <p>
           Exploration is where the harness gets debugged: one trial per task, fixes between runs, models dropped and added. Its numbers are a
-          screen. The <em>final pass</em> then runs the shortlisted models on a frozen harness (hashed before the start), on fresh workspaces at
+          screen. The <em>final pass</em>{" "}then runs the shortlisted models on a frozen harness (hashed before the start), on fresh workspaces at
           a seed never used in exploration, with the analysis fixed in advance. Only final-pass numbers are presented as a ranking. A model&apos;s
           final score counts once its whole pass is done; partial passes show progress only.
         </p>
@@ -235,7 +235,7 @@ export default function Methods() {
         <h2 id="audit">The coding-suite rubric audit</h2>
         <p>
           An adversarial review of the coding suite found 26 rubrics that could award 100% to a non-working stub: an import error dropped the
-          behavioural checks and collapsed the denominator, so a file containing only <code>x = 1</code> could pass. All 26 were rewritten so
+          behavioural checks and collapsed the denominator, so a file containing only <code>x = 1</code>{" "}could pass. All 26 were rewritten so
           every check always emits (a stub now scores about 10%), and all 2,894 affected runs were re-scored. The same review found an unpaired
           harness comparison (a resume key that ignored the experiment tag), answer leakage in one task&apos;s comments, and best-of-trials
           aggregation; each was fixed, and every number on this site is from after the audit.
@@ -249,7 +249,7 @@ export default function Methods() {
           <li>The tool-calling harness is not public yet; its per-task rows are.</li>
         </ul>
         <p>
-          See the <Link href="/data/">data</Link> page for the files every number is computed from.
+          See the <Link href="/data/">data</Link>{" "}page for the files every number is computed from.
         </p>
       </div>
     </>

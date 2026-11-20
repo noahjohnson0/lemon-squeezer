@@ -54,9 +54,9 @@ function Plot({ pts, W, H, xTicks, yDomain, labels, fs }: { pts: Pt[]; W: number
           .filter((p) => p.showLabel)
           .map((p) => {
             const right = X(p.x) < W * 0.72;
-            const below = p.y > yDomain[1] - 4; // top row is crowded: label under the point
+            const below = p.y > yDomain[1] - 4; // top row is crowded: label above the point, in the top margin
             return (
-              <text key={p.label} className="lbl" x={X(p.x) + (below ? 0 : right ? 8 : -8)} y={Y(p.y) + (below ? fs * 1.6 : 3.5)} textAnchor={below ? "middle" : right ? "start" : "end"} style={{ fontSize: fs }}>
+              <text key={p.label} className="lbl" x={X(p.x) + (below ? 0 : right ? 8 : -8)} y={Y(p.y) + (below ? -fs * 0.9 : 3.5)} textAnchor={below ? "middle" : right ? "start" : "end"} style={{ fontSize: fs }}>
                 {p.label}
               </text>
             );

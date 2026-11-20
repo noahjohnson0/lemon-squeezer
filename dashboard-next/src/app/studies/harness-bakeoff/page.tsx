@@ -127,13 +127,13 @@ export default function Page() {
             returns wrong answers loses most of its points. See <Link href="/methods/#scoring">Methods</Link>.
           </li>
           <li>
-            <strong>squeezer</strong> is our ~250-line reference agent: four tools (read, write, list, bash) in a plain tool-calling loop. It is
-            transparent and hackable, not a claimed best agent. <strong>aider</strong> edits through whole-file and diff formats instead of
+            <strong>squeezer</strong>{" "}is our ~250-line reference agent: four tools (read, write, list, bash) in a plain tool-calling loop. It is
+            transparent and hackable, not a claimed best agent. <strong>aider</strong>{" "}edits through whole-file and diff formats instead of
             tool calls.
           </li>
           <li>
             The first bake-off was unpaired (a resume bug let one arm run far more cells than the other). The comparison here uses only the
-            (eval, model) cells where <em>both</em> harnesses ran: each side&apos;s mean over its trials in that cell, then the paired difference.
+            (eval, model) cells where <em>both</em>{" "}harnesses ran: each side&apos;s mean over its trials in that cell, then the paired difference.
             The 95% interval is a bootstrap over cells, computed when this site is built.
           </li>
         </ul>
@@ -145,7 +145,7 @@ export default function Page() {
           n="1"
           title="Mean score per model under each harness, shared cells only"
           sub="Same model, same evals, only the harness changes."
-          caption={<>Source: <code>runs.jsonl</code>, tag <code>bakeoff</code>, harnesses <code>aider-cloud</code> and <code>squeezer-cloud</code>.</>}
+          caption={<>Source: <code>runs.jsonl</code>, tag <code>bakeoff</code>, harnesses <code>aider-cloud</code>{" "}and <code>squeezer-cloud</code>.</>}
           table={
             <DataTable
               head={["model", "shared cells", "squeezer", "aider", "aider − squeezer", "95% CI", "aider wins / squeezer wins / ties"]}
@@ -237,7 +237,7 @@ export default function Page() {
 
         <h2 id="data">Data</h2>
         <p>
-          <a href={fileHref("data/runs.jsonl")}>runs.jsonl</a>, one JSON object per run. Filter on <code>tag</code> = <code>bakeoff</code> or{" "}
+          <a href={fileHref("data/runs.jsonl")}>runs.jsonl</a>, one JSON object per run. Filter on <code>tag</code> = <code>bakeoff</code>{" "}or{" "}
           <code>harness-bakeoff</code>.
         </p>
         <pre>

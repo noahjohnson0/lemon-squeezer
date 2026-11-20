@@ -225,20 +225,21 @@ Without this, concurrent runs share Ollama's queue → wall-time and per-second
 telemetry attribution become meaningless. The lock is the difference between
 a benchmark and a guess.
 
-## Dashboard rules
+## Site rules (dashboard-next/)
 
 - It's a Next.js 16 static export (`output: 'export'`) at `dashboard-next/`.
-  `next build` writes `dashboard-next/out/` which the GH Pages workflow
-  publishes as `noahjohnson0.github.io/lemon-squeezer/`.
-- Reads `./runs.jsonl` and `./inflight.json` (relative), plus static JSON committed under
-  `public/` (`scores.json`, `showcase.json`, `studio.json`, and `bench-data.json` built at deploy). runs.jsonl and inflight.json are
-  symlinks at dev-time (`public/<name>` → `../../<name>`); the GH workflow
-  copies the resolved files in at build time.
-- `inflight.json` is treated as ephemeral. If older than 30s, the live panel
-  hides itself, so a missing watcher doesn't break the page.
-- NO external API calls at runtime. Static-only.
-- DO NOT reintroduce a server. The dashboard must keep working when checked
-  into GH Pages with no backend.
+  `bun run build` writes `dashboard-next/out/`, which the GH Pages workflow
+  publishes as `noahjohnson0.github.io/lemon-squeezer/` (basePath `/lemon-squeezer` in production).
+- It is a research publication, not a live dashboard. Pages are server components that
+  compute every number at build time from the repo-root `runs.jsonl` and
+  `studio/summary.json` via `src/lib/site-data.ts`. Never hand-type a result number into page copy;
+  derive it there so a rebuild from new data keeps the text true.
+- `scripts/stage-data.mjs` publishes sanitized copies of the data under `public/data/`
+  (home paths and host names stripped); `scripts/scrub-out.mjs` fails the build if any
+  machine-specific string reaches `out/`.
+- Honesty labels (`Chip` in `src/components/ui.tsx`): exploration, final pass pending,
+  too wide to call (95% CI includes zero), CI clears zero, historical snapshot.
+- NO external API calls at runtime. Static-only. DO NOT reintroduce a server.
 
 ## Memory locations the dashboard reads
 

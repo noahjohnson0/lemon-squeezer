@@ -94,7 +94,7 @@ export default function Page() {
       <div className="col-wide">
         <Keys
           items={[
-            { v: `${c.tied.length}`, l: `arms whose interval reaches the top arm's lower bound (${top.lo}%)`, s: "a cluster, not a winner" },
+            { v: `${c.tied.length}`, l: `arms whose interval reaches the top arm's lower bound (${top.lo}%)`, s: "the data does not rank them" },
             { v: fmtCost(v.costPerTask), l: `per task for ${v.model} at ${v.mean.toFixed(1)}%`, s: `${v.scorePerDollar?.toLocaleString("en-US")} score points per dollar` },
             { v: `${c.bestMix.mean.toFixed(1)} vs ${c.bestSingle.mean.toFixed(1)}`, l: `best mix (${c.bestMix.model}) vs best single model`, s: "mixes do not raise the ceiling" },
           ]}
@@ -112,11 +112,11 @@ export default function Page() {
             a few points below the cluster at a small fraction of its cost.
           </li>
           <li>
-            <strong>Mixes</strong> (a frontier model planning for a cheap one, draft-critique-refine, ensembles, write-tests-then-fix) sit
+            <strong>Mixes</strong>{" "}(a frontier model planning for a cheap one, draft-critique-refine, ensembles, write-tests-then-fix) sit
             inside or below the cluster; none scores above the best single model. Their use is rescuing weak models.
           </li>
           <li>
-            <strong>Reasoning and coding-specialist models</strong> did not stand out: {r1 && <>deepseek-r1 scored {r1.mean.toFixed(1)}%</>}
+            <strong>Reasoning and coding-specialist models</strong>{" "}did not stand out: {r1 && <>deepseek-r1 scored {r1.mean.toFixed(1)}%</>}
             {coders.length > 0 && <>, and {coders.map((a) => `${a.model} ${a.mean.toFixed(1)}%`).join(", ")}</>}.
           </li>
         </ul>
@@ -167,6 +167,23 @@ export default function Page() {
         </Figure>
       </div>
 
+      <div className="col-wide">
+        <Figure
+          n="2"
+          title="The top of the board, zoomed"
+          sub="Arms with a mean of 90% or more, on an axis from 85 to 100. Same data and intervals as Figure 1."
+          caption="The lemon band marks the top arm's interval. Every highlighted arm's interval reaches into it."
+        >
+          <DotPlot
+            rows={boardRows.filter((_, i) => c.arms[i].mean >= 90)}
+            domain={[85, 100]}
+            ticks={[85, 90, 95, 100]}
+            axis="mean score % (axis starts at 85)"
+            band={top.lo !== null && top.hi !== null ? [top.lo, top.hi] : undefined}
+          />
+        </Figure>
+      </div>
+
       <div className="col prose">
         <h2 id="cost">What the score costs</h2>
         <p>
@@ -176,7 +193,7 @@ export default function Page() {
       </div>
       <div className="col-wide">
         <Figure
-          n="2"
+          n="3"
           title="Mean score against mean cost per task"
           sub="Filled: single model. Hollow: mix. Lemon: the top arm and the value pick. Hover a point for its name."
           caption="Cost is the provider-reported cost of the run's API calls, averaged over all runs of the arm. Scoring compute is not included."
@@ -194,7 +211,7 @@ export default function Page() {
       </div>
       <div className="col-wide">
         <Figure
-          n="3"
+          n="4"
           title="Hard tier: mean score by model"
           sub={`${c.hard.nRuns} runs, ${c.hard.dates[0]} to ${c.hard.dates[1]}. Cluster-bootstrap 95% intervals over ${c.hard.nEvals} evals.`}
           caption={<>Source: <code>runs.jsonl</code>, tag <code>hard-tier</code>. Not comparable with Figure 1: different tasks.</>}
@@ -227,8 +244,8 @@ export default function Page() {
         </ul>
         <h2 id="data">Data</h2>
         <p>
-          <a href={fileHref("data/runs.jsonl")}>runs.jsonl</a>: filter <code>host</code> = <code>openrouter</code> and <code>tag</code> ={" "}
-          <code>fable-hunt</code> (or <code>hard-tier</code>).
+          <a href={fileHref("data/runs.jsonl")}>runs.jsonl</a>: filter <code>host</code> = <code>openrouter</code>{" "}and <code>tag</code> ={" "}
+          <code>fable-hunt</code>{" "}(or <code>hard-tier</code>).
         </p>
         <pre>
           <code>{`bin/cloud-report --tag fable-hunt --by-eval

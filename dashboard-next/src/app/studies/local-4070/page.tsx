@@ -34,7 +34,11 @@ export default function Page() {
 
   const powered = L.models.filter((m) => m.powerW !== null && m.lo !== null).sort((a, b) => a.powerW! - b.powerW!);
   const powerRows: DotRow[] = powered.map((m) => ({
-    label: short(m.model),
+    label: (
+      <>
+        {short(m.model)} <span className="s">· scores {m.mean.toFixed(0)}%</span>
+      </>
+    ),
     title: `${m.model}: mean GPU power ${m.powerW} W over ${m.telemetryN} runs; ${m.whPerTask} Wh per task`,
     v: m.powerW!,
     val: `${m.powerW} W`,
@@ -238,7 +242,7 @@ export default function Page() {
           <p>
             FINDINGS-CLOUD.md reported a 3 to 5 point &ldquo;quant tax&rdquo; for local 4-bit builds. Recomputed from the current runs with
             evals paired, the gap is {L.venue.map((p) => `${p.diff > 0 ? "+" : ""}${p.diff.toFixed(1)} (${p.label})`).join(" and ")}, with
-            intervals about ±20 points wide. The data supports &ldquo;no detectable difference&rdquo;, not a measured tax.
+            intervals about ±20 points wide. The data supports &ldquo;no detectable difference&rdquo; and does not measure a tax.
           </p>
         </Note>
 
@@ -251,7 +255,7 @@ export default function Page() {
         </ul>
         <h2 id="data">Data</h2>
         <p>
-          <a href={fileHref("data/runs.jsonl")}>runs.jsonl</a>: rows with <code>host</code> = <code>4070</code> (or no host, for the oldest
+          <a href={fileHref("data/runs.jsonl")}>runs.jsonl</a>: rows with <code>host</code> = <code>4070</code>{" "}(or no host, for the oldest
           rows). Telemetry aggregates are under <code>telemetry</code>.
         </p>
         <pre>
