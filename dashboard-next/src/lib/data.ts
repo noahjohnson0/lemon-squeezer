@@ -83,6 +83,12 @@ export type Inflight = {
 
 // `rel` lets sub-routes reach the site-root runs.jsonl: "./runs.jsonl" from the
 // "/" page, "../runs.jsonl" from "/cloud/" (trailingSlash is on).
+// Hosts that are cloud APIs, not local hardware. OpenRouter serves the open-weight arms; openai and
+// anthropic carry the vendor CLI harness rows (codex-cloud, claude-code-cloud). Anything else
+// (4070, m4max, legacy rows with no host) is a local box.
+export const CLOUD_HOSTS = new Set(["openrouter", "openai", "anthropic"]);
+export const isCloudHost = (host?: string | null) => CLOUD_HOSTS.has(host ?? "4070");
+
 export async function loadRuns(rel = "./runs.jsonl"): Promise<Run[]> {
   const r = await fetch(`${rel}?t=${Date.now()}`, { cache: "no-store" });
   if (!r.ok) throw new Error(`runs.jsonl ${r.status}`);

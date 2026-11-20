@@ -1,8 +1,12 @@
 # 🍋 Lemon-Squeezer - Findings
 
-Auto-generated from `runs.jsonl`. 207 runs, 26 evals, 7 harnesses, 9 models. Last updated by the build.
+Generated from `runs.jsonl` when it held 207 runs, 26 evals, 7 harnesses, 9 models.
 
-> See `dashboard-next/public/findings.md` for the live-rebuilt version that the dashboard renders. This top-level copy is the human-readable snapshot.
+> **Historical snapshot (May 2026, the first 207 local runs).** This file is not regenerated:
+> the run, eval and model counts above are from then. Current write-ups: [FINDINGS-CLOUD.md](FINDINGS-CLOUD.md)
+> (open-weight models and harnesses, cloud), [FINDINGS-STUDIO.md](FINDINGS-STUDIO.md) (big local models as
+> tool-calling agents, Mac Studio). `bin/eval-export` rebuilds `dashboard-next/public/findings.md` from all of
+> `runs.jsonl` (best score per cell, every venue mixed), which is a raw table, not a finding.
 
 ## Headline
 

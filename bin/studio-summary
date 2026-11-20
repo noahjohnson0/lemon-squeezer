@@ -1,0 +1,332 @@
+#!/usr/bin/env python3
+"""Rebuild the Mac Studio tool-calling summary from the per-task rows in studio/rows/.
+
+Writes studio/summary.json, copies it to dashboard-next/public/studio.json (the /studio page reads
+it), and rewrites the generated tables in FINDINGS-STUDIO.md (between the studio:* markers).
+Stdlib only, deterministic (fixed bootstrap seed). Rows come from bin/studio-pull.
+
+Usage: bin/studio-summary
+"""
+import json
+import math
+import os
+import random
+import re
+import shutil
+import sys
+from collections import Counter, defaultdict
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ROWS = os.path.join(ROOT, "studio", "rows")
+
+# Model keys as the harness names them -> what was served. GB = file size on disk.
+MODELS = {
+    "edge0-145b": ("Edge0-145B", "NVFP4 (own engine)", "~60 resident", "edge0-strata"),
+    "qwen3.8-flash-next": ("Qwen3.8-Flash-Next", "UD-Q3_K_XL", "89", "llama.cpp"),
+    "ornith-1.5-122b": ("Ornith-1.5-122B", "UD-Q4_K_XL", "80", "llama.cpp"),
+    "nemotron-3.5-super-120b": ("Nemotron-3.5-Super-120B", "UD-Q4_K_XL", "87", "llama.cpp"),
+    "nemotron-3.5-bolt-74b": ("Nemotron-3.5-Bolt-74B", "UD-Q6_K_XL", "72", "llama.cpp"),
+    "laguna-s-2.1": ("Laguna-S-2.1", "UD-Q4_K_XL", "73", "llama.cpp"),
+    "qwen3.5-122b-a10b": ("Qwen3.5-122B-A10B", "UD-Q4_K_XL", "77", "llama.cpp"),
+    "qwen3-coder-next": ("Qwen3-Coder-Next", "UD-Q6_K_XL", "73", "llama.cpp"),
+    "gpt-oss-120b-effhigh": ("gpt-oss-120b (reasoning high)", "MXFP4", "63", "llama.cpp"),
+    "gpt-oss-120b-base": ("gpt-oss-120b", "MXFP4", "63", "llama.cpp"),
+    "gpt-oss-120b-heretic": ("gpt-oss-120b heretic (abliterated)", "MXFP4", "65", "llama.cpp"),
+    "gpt-oss-120b-mlx": ("gpt-oss-120b (reasoning high, MLX)", "MXFP4-Q8", "~65", "mlx-lm (patched)"),
+    "mistral-small-4-119b": ("Mistral-Small-4-119B (reasoning off by mistake)", "UD-Q4_K_XL", "74", "llama.cpp"),
+    "mistral-small-4-rhigh": ("Mistral-Small-4-119B (reasoning high)", "UD-Q4_K_XL", "74", "llama.cpp"),
+    "qwen3-235b-abliterated": ("Qwen3-235B-A22B abliterated", "i1-IQ3_M, 65k ctx", "103", "llama.cpp"),
+    "qwen3-235b-plain": ("Qwen3-235B-A22B", "i1-IQ3_M, 65k ctx", "103", "llama.cpp"),
+    "ripple-65b": ("Ripple-65B-Preview (dense)", "Q8_0", "69", "llama.cpp"),
+}
+WEEK_SUITES = ("basic", "stress", "hard", "general", "apps")  # the 37-task "week" set
+SUITE_SIZES = {"week": 37, "hard2": 15, "hard3": 12, "week3": 64}
+SMOKE_TASKS = {"edit_config", "ledger_reconcile", "docs_rag", "gmail_receipts", "web_settings"}
+# lean+ has no exec and no archive tool, so these two cannot be solved on it (WEEK.md amendment 2).
+NO_EXEC_UNSOLVABLE = {"release_zip", "vendor_unpack"}
+FINAL_SEED = "10000"
+TAG_RE = re.compile(r"^(?P<key>.+?)(?:\.(?P<tools>lean\+x|pi))?"
+                    r"(?:\.(?P<suite>hard2|hard3|week2|week3|smoke))?(?:\.s(?P<seed>\d+))?$")
+
+
+def wilson(k, n, z=1.96):
+    if n == 0:
+        return None, None
+    p = k / n
+    d = 1 + z * z / n
+    c = (p + z * z / (2 * n)) / d
+    h = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / d
+    return round(max(0.0, c - h), 3), round(min(1.0, c + h), 3)
+
+
+def paired(a, b, b_iters=10000, seed=0):
+    """Solved(a) - solved(b) over the tasks both ran, with a bootstrap over tasks (95% CI).
+    a and b map task -> row, or task -> list of rows (pooled over several models, still resampled by task)."""
+    common = sorted(set(a) & set(b))
+    s = lambda v: sum(int(r["solved"]) for r in (v if isinstance(v, list) else [v]))
+    d = [s(a[t]) - s(b[t]) for t in common]
+    n = len(d)
+    if n == 0:
+        return None
+    rng = random.Random(seed)
+    sims = sorted(sum(d[rng.randrange(n)] for _ in range(n)) for _ in range(b_iters))
+    lo, hi = sims[int(0.025 * b_iters)], sims[int(0.975 * b_iters) - 1]
+    if not any(d):
+        verdict = "same tasks solved"
+    elif lo > 0:
+        verdict = "A ahead"
+    elif hi < 0:
+        verdict = "B ahead"
+    else:
+        verdict = "too wide to call"
+    return {"n": n, "a": sum(s(a[t]) for t in common), "b": sum(s(b[t]) for t in common),
+            "diff": sum(d), "ci": [lo, hi], "discordant": sum(1 for x in d if x), "verdict": verdict}
+
+
+def load():
+    tags_path = os.path.join(ROOT, "studio", "tags.json")
+    status = json.load(open(tags_path)) if os.path.exists(tags_path) else {}
+    passes = {}
+    for fn in sorted(os.listdir(ROWS)):
+        if not fn.endswith(".jsonl"):
+            continue
+        tag = fn[:-len(".jsonl")]
+        rows = [json.loads(l) for l in open(os.path.join(ROWS, fn), encoding="utf-8") if l.strip()]
+        by_task = {}
+        for r in sorted(rows, key=lambda r: r.get("run", 0)):
+            by_task[r["task"]] = r  # a task rerun in a later run dir supersedes the earlier row
+        m = TAG_RE.match(tag)
+        tools = m["tools"] or "lean+"
+        suite = m["suite"] or "week"
+        if suite == "week" and tools == "lean+x" and set(by_task) <= SMOKE_TASKS:
+            suite = "smoke"
+        passes[tag] = {"tag": tag, "key": m["key"], "tools": tools, "suite": suite, "seed": m["seed"],
+                       "status": status.get(tag, "partial"), "rows": by_task, "raw_rows": len(rows)}
+    return passes
+
+
+def stats(p):
+    rs = list(p["rows"].values())
+    n = len(rs)
+    solved = sum(r["solved"] for r in rs)
+    lo, hi = wilson(solved, n)
+    wall = sum(r["wall_s"] for r in rs)
+    comp = sum(r.get("completion_tokens") or 0 for r in rs)
+    timed = [r for r in rs if r.get("predicted_ms")]
+    decode = (sum(r["predicted_n"] for r in timed) / (sum(r["predicted_ms"] for r in timed) / 1000)) if timed else None
+    by_suite = defaultdict(lambda: [0, 0])
+    for r in rs:
+        s = "week" if r["suite"] in WEEK_SUITES else r["suite"]
+        by_suite[s][0] += int(r["solved"])
+        by_suite[s][1] += 1
+    label, quant, gb, engine = MODELS.get(p["key"], (p["key"], "?", "?", "?"))
+    expected = SUITE_SIZES.get(p["suite"], 5 if p["suite"] == "smoke" else (30 if p["tools"] == "pi" else n))
+    return {
+        "tag": p["tag"], "key": p["key"], "model": label, "quant": quant, "gb": gb, "engine": engine,
+        "tools": p["tools"], "suite": p["suite"], "status": p["status"],
+        "tasks": n, "expected_tasks": expected, "solved": solved, "wilson95": [lo, hi],
+        "checks_passed": sum(r["passed"] for r in rs), "checks_total": sum(r["total"] for r in rs),
+        "by_suite": {k: {"solved": v[0], "tasks": v[1]} for k, v in sorted(by_suite.items())},
+        "wall_min": round(wall / 60, 1),
+        "tok_s_over_wall": round(comp / wall, 1) if wall else None,
+        "decode_tok_s": round(decode, 1) if decode else None,
+        "tool_calls": sum(r.get("tool_calls") or 0 for r in rs),
+        "tool_errors": sum(r.get("tool_errors") or 0 for r in rs),
+        "fail_stops": dict(Counter(r["stop_reason"] for r in rs if not r["solved"])),
+        "failed_tasks": sorted(r["task"] for r in rs if not r["solved"]),
+        "superseded_rows": p["raw_rows"] - n,
+    }
+
+
+def cmp(name, passes, ta, tb, note="", drop=()):
+    if ta not in passes or tb not in passes:
+        return None
+    a = {k: v for k, v in passes[ta]["rows"].items() if k not in drop}
+    b = {k: v for k, v in passes[tb]["rows"].items() if k not in drop}
+    res = paired(a, b)
+    if res is None:
+        return None
+    return {"name": name, "a": ta, "b": tb, "note": note, **res}
+
+
+def main():
+    passes = load()
+    explo = {t: p for t, p in passes.items() if not (p["suite"] == "week3" and p["seed"] == FINAL_SEED)}
+    final = {t: p for t, p in passes.items() if p["suite"] == "week3" and p["seed"] == FINAL_SEED}
+
+    groups = defaultdict(list)
+    for t, p in explo.items():
+        g = {"lean+x": {"week": "leanx_week", "hard2": "leanx_hard2", "hard3": "leanx_hard3", "smoke": "smoke"},
+             "lean+": {"week": "lean_week"}, "pi": {"week": "pi_week"}}.get(p["tools"], {}).get(p["suite"], "other")
+        if p["tools"] == "lean+x" and p["suite"] == "smoke" and t.endswith(".smoke"):
+            continue  # Edge0's smoke rows are already inside its full lean+x pass
+        groups[g].append(stats(p))
+    for g in groups.values():
+        g.sort(key=lambda s: (-s["solved"] / max(1, s["tasks"]), -s["checks_passed"], s["wall_min"]))
+
+    X = ".lean+x"
+    comparisons = [c for c in [
+        cmp("Edge0-145B vs Qwen3.8-Flash-Next, 37 tasks", passes, "edge0-145b" + X, "qwen3.8-flash-next" + X),
+        cmp("Edge0-145B vs Qwen3.8-Flash-Next, HARD2", passes, "edge0-145b" + X + ".hard2", "qwen3.8-flash-next" + X + ".hard2"),
+        cmp("Edge0-145B vs Qwen3.8-Flash-Next, HARD3", passes, "edge0-145b" + X + ".hard3", "qwen3.8-flash-next" + X + ".hard3",
+            "HARD3 checkers were fixed between these two runs (FINDINGS-STUDIO.md, bug 11)"),
+        cmp("Qwen3.8-Flash-Next vs Nemotron-3.5-Super, HARD2", passes, "qwen3.8-flash-next" + X + ".hard2", "nemotron-3.5-super-120b" + X + ".hard2"),
+        cmp("Qwen3.8-Flash-Next vs Nemotron-3.5-Super, 37 tasks", passes, "qwen3.8-flash-next" + X, "nemotron-3.5-super-120b" + X),
+        cmp("Qwen3.8-Flash-Next vs Qwen3.5-122B, 37 tasks", passes, "qwen3.8-flash-next" + X, "qwen3.5-122b-a10b" + X),
+        cmp("gpt-oss-120b: llama.cpp vs MLX (both reasoning high)", passes, "gpt-oss-120b-effhigh" + X, "gpt-oss-120b-mlx" + X),
+        cmp("gpt-oss-120b: reasoning high vs medium", passes, "gpt-oss-120b-effhigh" + X, "gpt-oss-120b-base" + X),
+        cmp("gpt-oss-120b: base vs heretic (abliteration), lean+x", passes, "gpt-oss-120b-base" + X, "gpt-oss-120b-heretic" + X),
+        cmp("gpt-oss-120b: base vs heretic (abliteration), lean+", passes, "gpt-oss-120b-base", "gpt-oss-120b-heretic"),
+        cmp("Qwen3.8-Flash-Next: lean+x vs pi harness, 30 tasks", passes, "qwen3.8-flash-next" + X, "qwen3.8-flash-next.pi",
+            "pi has no mail or browser tools, so only the 30 tasks without them"),
+    ] + [
+        cmp(f"{MODELS[k][0]}: lean+x vs lean+ (code execution)", passes, k + X, k,
+            "35 tasks: release_zip and vendor_unpack need exec, so they are left out", drop=NO_EXEC_UNSOLVABLE)
+        for k in ("gpt-oss-120b-base", "gpt-oss-120b-heretic", "qwen3.5-122b-a10b", "ornith-1.5-122b")
+    ] if c]
+    # The same four models pooled: is code execution worth it at all? Resampled by task.
+    pool_keys = [k for k in ("gpt-oss-120b-base", "gpt-oss-120b-heretic", "qwen3.5-122b-a10b", "ornith-1.5-122b")
+                 if k + X in passes and k in passes]
+    if pool_keys:
+        pa, pb = defaultdict(list), defaultdict(list)
+        for k in pool_keys:
+            for t, r in passes[k + X]["rows"].items():
+                if t not in NO_EXEC_UNSOLVABLE and t in passes[k]["rows"]:
+                    pa[t].append(r)
+                    pb[t].append(passes[k]["rows"][t])
+        res = paired(pa, pb)
+        if res:
+            comparisons.append({"name": f"lean+x vs lean+ (code execution), {len(pool_keys)} models pooled",
+                                "a": "+".join(k + X for k in pool_keys), "b": "+".join(pool_keys),
+                                "note": "35 tasks x 4 models, bootstrap resamples tasks", **res})
+
+    final_rows = []
+    for t, p in sorted(final.items()):
+        s = stats(p)
+        s["expected_tasks"] = SUITE_SIZES["week3"]
+        final_rows.append(s)
+    final_rows.sort(key=lambda s: (s["status"] != "done", -s["solved"], s["wall_min"]))
+    done = [s for s in final_rows if s["status"] == "done"]
+    final_cmp = []
+    if len(done) >= 2:
+        lead = done[0]
+        for s in done[1:]:
+            c = cmp(f"{lead['model']} vs {s['model']}, final pass", passes, lead["tag"], s["tag"])
+            if c:
+                final_cmp.append(c)
+    final_state = "pending" if not final_rows else ("done" if len(done) == len(final_rows) and len(done) >= 7 else "running")
+
+    summary = {
+        "schema": 1,
+        "venue": {"name": "Mac Studio", "hardware": "M5 Max, 128 GB unified memory, GPU wired limit 120 GB",
+                  "engine": "llama.cpp llama-server (--jinja, 131k context, full offload, one model at a time)"},
+        "status": "exploration" if final_state != "done" else "final",
+        "note": ("Exploration: one trial per task, harness bugs were found and fixed while these ran, so rows "
+                 "from different days are not on identical code. The final pass (frozen harness, 64 tasks, "
+                 "fresh seed) is the result; it is " + final_state + "."),
+        "last_row_wall_s_total": round(sum(r["wall_s"] for p in passes.values() for r in p["rows"].values())),
+        "exploration": dict(sorted(groups.items())),
+        "comparisons": comparisons,
+        "final": {"state": final_state, "seed_offset": int(FINAL_SEED), "tasks": SUITE_SIZES["week3"],
+                  "models": final_rows, "comparisons": final_cmp},
+    }
+    out = os.path.join(ROOT, "studio", "summary.json")
+    with open(out, "w", encoding="utf-8") as f:
+        json.dump(summary, f, indent=1)
+        f.write("\n")
+    pub = os.path.join(ROOT, "dashboard-next", "public", "studio.json")
+    shutil.copyfile(out, pub)
+    write_findings(summary)
+    print(f"studio-summary: {sum(len(g) for g in groups.values())} exploration passes, "
+          f"{len(comparisons)} comparisons, final pass {final_state} ({len(done)}/{len(final_rows)} models done)")
+
+
+def pct(lohi):
+    return f"{round(lohi[0] * 100)}-{round(lohi[1] * 100)}%" if lohi[0] is not None else "-"
+
+
+def fails(s):
+    return ", ".join(f"{k} {v}" for k, v in sorted(s["fail_stops"].items())) or "-"
+
+
+def tps(s):
+    return s["decode_tok_s"] if s["decode_tok_s"] else (f"{s['tok_s_over_wall']}*" if s["tok_s_over_wall"] else "-")
+
+
+def table(rows, cols):
+    out = ["| " + " | ".join(c[0] for c in cols) + " |", "|" + "|".join(c[1] for c in cols) + "|"]
+    for r in rows:
+        out.append("| " + " | ".join(str(c[2](r)) for c in cols) + " |")
+    return out
+
+
+MODEL_COLS = [
+    ("model", "---", lambda s: s["model"] + ("" if s["status"] == "done" else " (partial)")),
+    ("quant", "---", lambda s: s["quant"]),
+    ("solved", "---:", lambda s: f"**{s['solved']}/{s['tasks']}**"),
+    ("95% CI (Wilson)", "---:", lambda s: pct(s["wilson95"])),
+    ("checks", "---:", lambda s: f"{s['checks_passed']}/{s['checks_total']}"),
+    ("fails by stop reason", "---", fails),
+    ("wall", "---:", lambda s: f"{s['wall_min']:.0f} min"),
+    ("tok/s", "---:", tps),
+]
+
+
+def write_findings(sm):
+    path = os.path.join(ROOT, "FINDINGS-STUDIO.md")
+    if not os.path.exists(path):
+        return
+    text = open(path, encoding="utf-8").read()
+    ex = sm["exploration"]
+    gen = ["_Generated by `bin/studio-summary` from `studio/rows/`. tok/s is llama.cpp's decode rate where the row "
+           "has timings, else (marked *) completion tokens over wall time, which includes prefill and tool time._", ""]
+    for key, title in [("leanx_week", "lean+x, the 37 screening tasks"), ("leanx_hard2", "lean+x, HARD2 (15 harder tasks)"),
+                       ("leanx_hard3", "lean+x, HARD3 (12 long-horizon tasks)"), ("lean_week", "lean+ (no code execution), 37 tasks"),
+                       ("pi_week", "pi harness (bash/read/write/edit), 30 tasks"), ("smoke", "5-task smoke checks")]:
+        if ex.get(key):
+            gen += [f"#### {title}", ""] + table(ex[key], MODEL_COLS) + [""]
+    gen += ["#### Paired comparisons (bootstrap over tasks, 95% CI on the difference in tasks solved)", ""]
+    gen += table(sm["comparisons"], [
+        ("A vs B", "---", lambda c: c["name"]),
+        ("tasks", "---:", lambda c: c["n"]),
+        ("A", "---:", lambda c: c["a"]),
+        ("B", "---:", lambda c: c["b"]),
+        ("A-B [95% CI]", "---:", lambda c: f"{c['diff']:+d} [{c['ci'][0]:+d}, {c['ci'][1]:+d}]"),
+        ("verdict", "---", lambda c: c["verdict"] + (f" ({c['note']})" if c["note"] else "")),
+    ])
+    text = replace_block(text, "studio:exploration", "\n".join(gen))
+
+    fin = sm["final"]
+    if not fin["models"]:
+        fgen = ["**Pending.** The final pass is running on the Studio; nothing from it is reported yet."]
+    else:
+        fgen = [f"**State: {fin['state']}.** One pass per model, 64 tasks, frozen harness, seed offset {fin['seed_offset']}. "
+                "Partial rows show progress only; a model's score counts once its pass is done.", ""]
+        fcols = [("model", "---", MODEL_COLS[0][2]), ("progress", "---:", lambda s: f"{s['tasks']}/64")]
+        fcols += [(c[0], c[1], (lambda f: (lambda s: f(s) if s["status"] == "done" else "..."))(c[2])) for c in MODEL_COLS[2:]]
+        fcols.insert(3, ("37 / HARD2 / HARD3", "---:", lambda s: " / ".join(
+            str(s["by_suite"].get(k, {}).get("solved", 0)) for k in ("week", "hard2", "hard3")) if s["status"] == "done" else "..."))
+        fgen += table(fin["models"], fcols)
+        if fin["comparisons"]:
+            fgen += ["", "Leader vs each other model, paired over the 64 tasks:", ""]
+            fgen += table(fin["comparisons"], [
+                ("A vs B", "---", lambda c: c["name"]),
+                ("A-B [95% CI]", "---:", lambda c: f"{c['diff']:+d} [{c['ci'][0]:+d}, {c['ci'][1]:+d}]"),
+                ("verdict", "---", lambda c: c["verdict"])])
+    text = replace_block(text, "studio:final", "\n".join(fgen))
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(text)
+
+
+def replace_block(text, name, body):
+    begin, end = f"<!-- {name}:begin -->", f"<!-- {name}:end -->"
+    if begin not in text or end not in text:
+        sys.stderr.write(f"studio-summary: no {name} markers in FINDINGS-STUDIO.md, block not written\n")
+        return text
+    head, rest = text.split(begin, 1)
+    _, tail = rest.split(end, 1)
+    return f"{head}{begin}\n{body}\n{end}{tail}"
+
+
+if __name__ == "__main__":
+    main()

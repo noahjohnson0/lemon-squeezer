@@ -18,17 +18,19 @@ A reproducible study of what actually makes a language model *finish real coding
 
 ...and we score every run by *running the code it produced*, not by vibes. The point is the squeeze: the most useful work per dollar, per watt, and per gigabyte of VRAM.
 
-## Three venues, one benchmark
+## Four venues
 
-| | Local (4070) | Local (M4 Max) | Cloud |
-|---|---|---|---|
-| Hardware | RTX 4070 Super, 12 GB | M4 Max, 48 GB unified | rented on [OpenRouter](https://openrouter.ai) |
-| Cost | electricity (~kWh) | electricity (~kWh) | API fees (~$/task) |
-| Privacy | total, offline | total, offline | none |
-| Model ceiling | ~14-30B (quantized) | ~70B+ | 480B+ frontier-open |
-| Runner | `bin/eval-run` | `bin/eval-run --host m4max` | `bin/cloud-run` / `bin/cloud-matrix` |
+| | Local (4070) | Local (M4 Max) | Local (Mac Studio) | Cloud |
+|---|---|---|---|---|
+| Hardware | RTX 4070 Super, 12 GB | M4 Max, 48 GB unified | M5 Max, 128 GB unified (120 GB GPU limit) | rented on [OpenRouter](https://openrouter.ai) |
+| Cost | electricity (~kWh) | electricity (~kWh) | electricity (~kWh) | API fees (~$/task) |
+| Privacy | total, offline | total, offline | total, offline | none |
+| Model ceiling | ~14-30B (quantized) | ~70B+ | ~120B MoE at Q4, 235B at 3-bit | 480B+ frontier-open |
+| Engine | Ollama | Ollama | llama.cpp (`llama-server`) | provider |
+| Benchmark | coding suite | coding suite | agentic tool calling | coding suite |
+| Runner | `bin/eval-run` | `bin/eval-run --host m4max` | separate harness; rows in [`studio/`](studio/) | `bin/cloud-run` / `bin/cloud-matrix` |
 
-Same agent, same tasks, same scoring across all three, so model-vs-model, harness-vs-harness, and local-vs-cloud are honest comparisons. (The M4 Max venue is on the [roadmap](ROADMAP.md), not yet run.)
+On the coding suite it is the same agent, same tasks and same scoring for the 4070, the M4 Max and the cloud, so model-vs-model, harness-vs-harness and local-vs-cloud are honest comparisons there. (The M4 Max venue has 3 smoke runs so far; a real sweep is on the [roadmap](ROADMAP.md).) The **Mac Studio** runs a different benchmark: big local models as tool-calling agents on files, mail, messages and an intranet, scored on the end state. Its scores do not compare with the coding suite's. See [FINDINGS-STUDIO.md](FINDINGS-STUDIO.md).
 
 ## What we have found so far
 
@@ -37,12 +39,13 @@ These are real but **early**, and we are deliberate about not overclaiming (see 
 - **The harness can matter more than the model.** A controlled cloud bake-off (same model, same evals, only the harness changes), compared on the cells where *both* harnesses ran, shows aider beating our `squeezer` loop overall (79.7% vs 46.8% on the paired cells) - and the gap explodes on weak models: `qwen3-coder-30b` goes **7% (squeezer) -> 76% (aider)**, `llama-3.1-8b` **12% -> 74%**, on identical weights. Strong models tie (gpt-oss-120b and deepseek-v4-flash both 100% either way). Weak models are rescued by the right harness. See [FINDINGS-CLOUD.md](FINDINGS-CLOUD.md).
 - **For the cloud "which open model" question:** a cluster of cheap open models (deepseek-v4-pro/flash, qwen3-max, glm-5.1, kimi) lands in the high 90s on our suite with overlapping confidence intervals (a tie, not one winner), and the value pick `gpt-oss-120b` gets ~92% for about **$0.0007 per task**. Multi-model *mixes* mostly do not beat the best single model; they are a **weak-model rescue kit**, not a ceiling-raiser. Full writeup: [FINDINGS-CLOUD.md](FINDINGS-CLOUD.md).
 - **Reasoning models underperform at agentic coding** here, and "coding-specialist" models did not beat strong generalists.
+- **Big local models as agents (Mac Studio, exploration; final pass pending).** On 37 tool-calling tasks Edge0-145B and Qwen3.8-Flash-Next both solved 37/37 and both solved all 15 of a harder set; five more models sit at 33-34/37. Giving the agent a `run_python` tool was the biggest lever (+17 tasks over 4 models on 35 shared tasks, 95% CI +3 to +33). Abliteration (gpt-oss-120b vs its heretic) did not change the solve count (29 = 29), though the heretic obeyed a planted prompt injection the base ignored; MLX vs llama.cpp on gpt-oss-120b was 29 vs 31 at equal speed, too wide to call. About half the first day's failures were harness bugs (a grammar that forces schema key order, a mail mock that ignored parentheses, a jail that could read the answers, a world clock that disagreed with the host's); all twelve are written up. Single trials on a moving harness: a screen, not a ranking. See [FINDINGS-STUDIO.md](FINDINGS-STUDIO.md).
 
 ## How it works
 
 Everything runs through one small agent, `bin/squeezer.py`: a ~250-line, dependency-free tool-calling loop (`read_file` / `write_file` / `list_files` / `run_bash`) that talks to any OpenAI-compatible endpoint. Point it at local Ollama or at OpenRouter; only the base URL and model change. It also recovers tool calls from models that emit them as plain text, so it drives local models that stricter harnesses reject.
 
-> **On `squeezer` itself:** it is our *reference* harness (minimal, transparent, hackable), not a claimed best-in-class agent. In our local head-to-heads aider currently scores higher. Settling "is squeezer actually good?" needs a proper harness bake-off against aider / pi / others on identical models and a standard external benchmark. That experiment is queued (see [ROADMAP.md](ROADMAP.md)).
+> **On `squeezer` itself:** it is our *reference* harness (minimal, transparent, hackable), not a claimed best-in-class agent. The controlled cloud bake-off (same models, same evals, eight harnesses incl. aider, pi, cline, codex and claude-code; see [FINDINGS-CLOUD.md](FINDINGS-CLOUD.md)) has aider well ahead of squeezer on weak models and a tie on strong ones. A standard external benchmark to put these numbers on a common ruler is still queued (see [ROADMAP.md](ROADMAP.md)).
 
 ```
         prompt.md ──► squeezer agent ──► workspace/ ──► rubric.sh ──► score%
@@ -74,7 +77,7 @@ bin/cloud-report --tag fable-hunt --by-eval                # leaderboard: score,
 bin/energy-report --watts 250 --price 0.15 --by-model      # local electricity: kWh + cost
 ```
 
-The arms under test live in [`configs/cloud-arms.json`](configs/cloud-arms.json) (currently 26 single models + 13 mixes). The eval suite is 40 tasks and growing.
+The arms under test live in [`configs/cloud-arms.json`](configs/cloud-arms.json) (currently 26 single models + 13 mixes). The cloud suite there is 39 tasks (port-scanner, the 40th, was dropped as environment-dependent), with a separate 10-task hard tier.
 
 ## Eval anatomy
 
@@ -98,16 +101,19 @@ bin/
   eval-run                             # local runner (Ollama), GPU-locked + telemetry
   cloud-run / cloud-matrix             # cloud runner + budgeted parallel sweep
   cloud-report / energy-report         # leaderboard ($) + electricity (kWh)
+  studio-pull / studio-summary         # Mac Studio tool-calling rows -> studio/summary.json
+  studio-refresh [--pr]                # both, plus a PR, once the final pass lands
 evals/<name>/        # prompt.md + rubric.sh (+ optional files/)
 configs/cloud-arms.json   # the experiment design (models + mixes)
 runs.jsonl           # one JSON per run, the source of truth
+studio/rows/         # Mac Studio tool-calling rows, one JSON per task (separate benchmark)
 dashboard-next/      # Next.js dashboard -> GitHub Pages (/ local, /cloud cloud)
 ROADMAP.md           # where this is going
 ```
 
 ## Dashboard
 
-Live at [noahjohnson0.github.io/lemon-squeezer](https://noahjohnson0.github.io/lemon-squeezer/). Reads `runs.jsonl` directly: **/** is the local leaderboard, **/cloud** is the open-model and local-vs-cloud view.
+Live at [noahjohnson0.github.io/lemon-squeezer](https://noahjohnson0.github.io/lemon-squeezer/). Reads `runs.jsonl` directly: **/** is the unified leaderboard (local GPUs and cloud arms), **/cloud** is the open-model and local-vs-cloud view, **/local** the hardware side (VRAM, speed, watts). **/studio** is the Mac Studio tool-calling track, read from `studio.json`.
 
 ## License
 

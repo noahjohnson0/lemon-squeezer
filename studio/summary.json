@@ -1,0 +1,1488 @@
+{
+ "schema": 1,
+ "venue": {
+  "name": "Mac Studio",
+  "hardware": "M5 Max, 128 GB unified memory, GPU wired limit 120 GB",
+  "engine": "llama.cpp llama-server (--jinja, 131k context, full offload, one model at a time)"
+ },
+ "status": "exploration",
+ "note": "Exploration: one trial per task, harness bugs were found and fixed while these ran, so rows from different days are not on identical code. The final pass (frozen harness, 64 tasks, fresh seed) is the result; it is running.",
+ "last_row_wall_s_total": 108164,
+ "exploration": {
+  "lean_week": [
+   {
+    "tag": "ornith-1.5-122b",
+    "key": "ornith-1.5-122b",
+    "model": "Ornith-1.5-122B",
+    "quant": "UD-Q4_K_XL",
+    "gb": "80",
+    "engine": "llama.cpp",
+    "tools": "lean+",
+    "suite": "week",
+    "status": "done",
+    "tasks": 37,
+    "expected_tasks": 37,
+    "solved": 29,
+    "wilson95": [
+     0.628,
+     0.886
+    ],
+    "checks_passed": 153,
+    "checks_total": 170,
+    "by_suite": {
+     "week": {
+      "solved": 29,
+      "tasks": 37
+     }
+    },
+    "wall_min": 164.9,
+    "tok_s_over_wall": 40.9,
+    "decode_tok_s": null,
+    "tool_calls": 566,
+    "tool_errors": 15,
+    "fail_stops": {
+     "done": 2,
+     "out_of_tokens": 5,
+     "request_error": 1
+    },
+    "failed_tasks": [
+     "config_drift",
+     "contacts_merge",
+     "gmail_receipts",
+     "hunt",
+     "ledger_reconcile",
+     "refund_audit",
+     "release_zip",
+     "vendor_unpack"
+    ],
+    "superseded_rows": 0
+   },
+   {
+    "tag": "qwen3.5-122b-a10b",
+    "key": "qwen3.5-122b-a10b",
+    "model": "Qwen3.5-122B-A10B",
+    "quant": "UD-Q4_K_XL",
+    "gb": "77",
+    "engine": "llama.cpp",
+    "tools": "lean+",
+    "suite": "week",
+    "status": "done",
+    "tasks": 37,
+    "expected_tasks": 37,
+    "solved": 27,
+    "wilson95": [
+     0.57,
+     0.846
+    ],
+    "checks_passed": 150,
+    "checks_total": 170,
+    "by_suite": {
+     "week": {
+      "solved": 27,
+      "tasks": 37
+     }
+    },
+    "wall_min": 155.8,
+    "tok_s_over_wall": 37.5,
+    "decode_tok_s": null,
+    "tool_calls": 783,
+    "tool_errors": 8,
+    "fail_stops": {
+     "done": 5,
+     "out_of_tokens": 5
+    },
+    "failed_tasks": [
+     "config_drift",
+     "contacts_merge",
+     "gmail_receipts",
+     "hunt",
+     "imsg_export",
+     "inventory_reconcile",
+     "ledger_reconcile",
+     "release_zip",
+     "runbook_todos",
+     "vendor_unpack"
+    ],
+    "superseded_rows": 0
+   },
+   {
+    "tag": "nemotron-3.5-super-120b",
+    "key": "nemotron-3.5-super-120b",
+    "model": "Nemotron-3.5-Super-120B",
+    "quant": "UD-Q4_K_XL",
+    "gb": "87",
+    "engine": "llama.cpp",
+    "tools": "lean+",
+    "suite": "week",
+    "status": "partial",
+    "tasks": 22,
+    "expected_tasks": 37,
+    "solved": 14,
+    "wilson95": [
+     0.43,
+     0.803
+    ],
+    "checks_passed": 85,
+    "checks_total": 108,
+    "by_suite": {
+     "week": {
+      "solved": 14,
+      "tasks": 22
+     }
+    },
+    "wall_min": 67.1,
+    "tok_s_over_wall": 33.1,
+    "decode_tok_s": null,
+    "tool_calls": 269,
+    "tool_errors": 3,
+    "fail_stops": {
+     "request_error": 4,
+     "done": 1,
+     "out_of_tokens": 3
+    },
+    "failed_tasks": [
+     "bulk_rename",
+     "contacts_merge",
+     "create_many",
+     "edit_config",
+     "hunt",
+     "ledger_reconcile",
+     "organize",
+     "runbook_todos"
+    ],
+    "superseded_rows": 4
+   },
+   {
+    "tag": "gpt-oss-120b-base",
+    "key": "gpt-oss-120b-base",
+    "model": "gpt-oss-120b",
+    "quant": "MXFP4",
+    "gb": "63",
+    "engine": "llama.cpp",
+    "tools": "lean+",
+    "suite": "week",
+    "status": "done",
+    "tasks": 37,
+    "expected_tasks": 37,
+    "solved": 22,
+    "wilson95": [
+     0.435,
+     0.737
+    ],
+    "checks_passed": 145,
+    "checks_total": 170,
+    "by_suite": {
+     "week": {
+      "solved": 22,
+      "tasks": 37
+     }
+    },
+    "wall_min": 79.3,
+    "tok_s_over_wall": 24.2,
+    "decode_tok_s": null,
+    "tool_calls": 477,
+    "tool_errors": 9,
+    "fail_stops": {
+     "repeat_loop": 1,
+     "done": 13,
+     "out_of_tokens": 1
+    },
+    "failed_tasks": [
+     "config_drift",
+     "contacts_merge",
+     "docs_rag",
+     "gmail_cleanup",
+     "gmail_receipts",
+     "hunt",
+     "imsg_tokyo",
+     "incident_timeline",
+     "ledger_reconcile",
+     "organize",
+     "refund_audit",
+     "refund_triage",
+     "release_zip",
+     "runbook_todos",
+     "vendor_unpack"
+    ],
+    "superseded_rows": 0
+   },
+   {
+    "tag": "gpt-oss-120b-heretic",
+    "key": "gpt-oss-120b-heretic",
+    "model": "gpt-oss-120b heretic (abliterated)",
+    "quant": "MXFP4",
+    "gb": "65",
+    "engine": "llama.cpp",
+    "tools": "lean+",
+    "suite": "week",
+    "status": "done",
+    "tasks": 37,
+    "expected_tasks": 37,
+    "solved": 22,
+    "wilson95": [
+     0.435,
+     0.737
+    ],
+    "checks_passed": 140,
+    "checks_total": 170,
+    "by_suite": {
+     "week": {
+      "solved": 22,
+      "tasks": 37
+     }
+    },
+    "wall_min": 39.3,
+    "tok_s_over_wall": 65.6,
+    "decode_tok_s": null,
+    "tool_calls": 560,
+    "tool_errors": 18,
+    "fail_stops": {
+     "repeat_loop": 2,
+     "done": 10,
+     "out_of_tokens": 2,
+     "request_error": 1
+    },
+    "failed_tasks": [
+     "config_drift",
+     "contacts_merge",
+     "docs_rag",
+     "gmail_cleanup",
+     "gmail_receipts",
+     "imsg_export",
+     "incident_timeline",
+     "ledger_reconcile",
+     "organize",
+     "refund_audit",
+     "refund_triage",
+     "release_zip",
+     "runbook_todos",
+     "vendor_unpack",
+     "web_order_status"
+    ],
+    "superseded_rows": 0
+   }
+  ],
+  "leanx_hard2": [
+   {
+    "tag": "edge0-145b.lean+x.hard2",
+    "key": "edge0-145b",
+    "model": "Edge0-145B",
+    "quant": "NVFP4 (own engine)",
+    "gb": "~60 resident",
+    "engine": "edge0-strata",
+    "tools": "lean+x",
+    "suite": "hard2",
+    "status": "done",
+    "tasks": 15,
+    "expected_tasks": 15,
+    "solved": 15,
+    "wilson95": [
+     0.796,
+     1.0
+    ],
+    "checks_passed": 108,
+    "checks_total": 108,
+    "by_suite": {
+     "hard2": {
+      "solved": 15,
+      "tasks": 15
+     }
+    },
+    "wall_min": 31.9,
+    "tok_s_over_wall": 79.2,
+    "decode_tok_s": 91.9,
+    "tool_calls": 356,
+    "tool_errors": 2,
+    "fail_stops": {},
+    "failed_tasks": [],
+    "superseded_rows": 0
+   },
+   {
+    "tag": "qwen3.8-flash-next.lean+x.hard2",
+    "key": "qwen3.8-flash-next",
+    "model": "Qwen3.8-Flash-Next",
+    "quant": "UD-Q3_K_XL",
+    "gb": "89",
+    "engine": "llama.cpp",
+    "tools": "lean+x",
+    "suite": "hard2",
+    "status": "done",
+    "tasks": 15,
+    "expected_tasks": 15,
+    "solved": 15,
+    "wilson95": [
+     0.796,
+     1.0
+    ],
+    "checks_passed": 108,
+    "checks_total": 108,
+    "by_suite": {
+     "hard2": {
+      "solved": 15,
+      "tasks": 15
+     }
+    },
+    "wall_min": 51.3,
+    "tok_s_over_wall": 47.4,
+    "decode_tok_s": 52.1,
+    "tool_calls": 395,
+    "tool_errors": 2,
+    "fail_stops": {},
+    "failed_tasks": [],
+    "superseded_rows": 0
+   },
+   {
+    "tag": "nemotron-3.5-super-120b.lean+x.hard2",
+    "key": "nemotron-3.5-super-120b",
+    "model": "Nemotron-3.5-Super-120B",
+    "quant": "UD-Q4_K_XL",
+    "gb": "87",
+    "engine": "llama.cpp",
+    "tools": "lean+x",
+    "suite": "hard2",
+    "status": "done",
+    "tasks": 15,
+    "expected_tasks": 15,
+    "solved": 13,
+    "wilson95": [
+     0.621,
+     0.963
+    ],
+    "checks_passed": 103,
+    "checks_total": 108,
+    "by_suite": {
+     "hard2": {
+      "solved": 13,
+      "tasks": 15
+     }
+    },
+    "wall_min": 112.7,
+    "tok_s_over_wall": 33.4,
+    "decode_tok_s": 35.0,
+    "tool_calls": 299,
+    "tool_errors": 2,
+    "fail_stops": {
+     "out_of_tokens": 1,
+     "done": 1
+    },
+    "failed_tasks": [
+     "donor_receipts",
+     "mailmerge_resume"
+    ],
+    "superseded_rows": 0
+   }
+  ],
+  "leanx_hard3": [
+   {
+    "tag": "edge0-145b.lean+x.hard3",
+    "key": "edge0-145b",
+    "model": "Edge0-145B",
+    "quant": "NVFP4 (own engine)",
+    "gb": "~60 resident",
+    "engine": "edge0-strata",
+    "tools": "lean+x",
+    "suite": "hard3",
+    "status": "done",
+    "tasks": 12,
+    "expected_tasks": 12,
+    "solved": 11,
+    "wilson95": [
+     0.646,
+     0.985
+    ],
+    "checks_passed": 124,
+    "checks_total": 125,
+    "by_suite": {
+     "hard3": {
+      "solved": 11,
+      "tasks": 12
+     }
+    },
+    "wall_min": 42.5,
+    "tok_s_over_wall": 80.3,
+    "decode_tok_s": 94.1,
+    "tool_calls": 677,
+    "tool_errors": 2,
+    "fail_stops": {
+     "done": 1
+    },
+    "failed_tasks": [
+     "offboarding"
+    ],
+    "superseded_rows": 0
+   },
+   {
+    "tag": "qwen3.8-flash-next.lean+x.hard3",
+    "key": "qwen3.8-flash-next",
+    "model": "Qwen3.8-Flash-Next",
+    "quant": "UD-Q3_K_XL",
+    "gb": "89",
+    "engine": "llama.cpp",
+    "tools": "lean+x",
+    "suite": "hard3",
+    "status": "done",
+    "tasks": 12,
+    "expected_tasks": 12,
+    "solved": 9,
+    "wilson95": [
+     0.468,
+     0.911
+    ],
+    "checks_passed": 114,
+    "checks_total": 125,
+    "by_suite": {
+     "hard3": {
+      "solved": 9,
+      "tasks": 12
+     }
+    },
+    "wall_min": 73.6,
+    "tok_s_over_wall": 47.3,
+    "decode_tok_s": 51.6,
+    "tool_calls": 687,
+    "tool_errors": 4,
+    "fail_stops": {
+     "done": 3
+    },
+    "failed_tasks": [
+     "ledger_bug",
+     "refund_desk",
+     "sync_bug"
+    ],
+    "superseded_rows": 0
+   }
+  ],
+  "leanx_week": [
+   {
+    "tag": "edge0-145b.lean+x",
+    "key": "edge0-145b",
+    "model": "Edge0-145B",
+    "quant": "NVFP4 (own engine)",
+    "gb": "~60 resident",
+    "engine": "edge0-strata",
+    "tools": "lean+x",
+    "suite": "week",
+    "status": "done",
+    "tasks": 37,
+    "expected_tasks": 37,
+    "solved": 37,
+    "wilson95": [
+     0.906,
+     1.0
+    ],
+    "checks_passed": 170,
+    "checks_total": 170,
+    "by_suite": {
+     "week": {
+      "solved": 37,
+      "tasks": 37
+     }
+    },
+    "wall_min": 38.8,
+    "tok_s_over_wall": 71.7,
+    "decode_tok_s": 89.1,
+    "tool_calls": 604,
+    "tool_errors": 3,
+    "fail_stops": {},
+    "failed_tasks": [],
+    "superseded_rows": 0
+   },
+   {
+    "tag": "qwen3.8-flash-next.lean+x",
+    "key": "qwen3.8-flash-next",
+    "model": "Qwen3.8-Flash-Next",
+    "quant": "UD-Q3_K_XL",
+    "gb": "89",
+    "engine": "llama.cpp",
+    "tools": "lean+x",
+    "suite": "week",
+    "status": "done",
+    "tasks": 37,
+    "expected_tasks": 37,
+    "solved": 37,
+    "wilson95": [
+     0.906,
+     1.0
+    ],
+    "checks_passed": 170,
+    "checks_total": 170,
+    "by_suite": {
+     "week": {
+      "solved": 37,
+      "tasks": 37
+     }
+    },
+    "wall_min": 48.9,
+    "tok_s_over_wall": 45.9,
+    "decode_tok_s": null,
+    "tool_calls": 525,
+    "tool_errors": 1,
+    "fail_stops": {},
+    "failed_tasks": [],
+    "superseded_rows": 0
+   },
+   {
+    "tag": "nemotron-3.5-super-120b.lean+x",
+    "key": "nemotron-3.5-super-120b",
+    "model": "Nemotron-3.5-Super-120B",
+    "quant": "UD-Q4_K_XL",
+    "gb": "87",
+    "engine": "llama.cpp",
+    "tools": "lean+x",
+    "suite": "week",
+    "status": "done",
+    "tasks": 37,
+    "expected_tasks": 37,
+    "solved": 34,
+    "wilson95": [
+     0.787,
+     0.972
+    ],
+    "checks_passed": 166,
+    "checks_total": 170,
+    "by_suite": {
+     "week": {
+      "solved": 34,
+      "tasks": 37
+     }
+    },
+    "wall_min": 72.2,
+    "tok_s_over_wall": 32.7,
+    "decode_tok_s": null,
+    "tool_calls": 482,
+    "tool_errors": 2,
+    "fail_stops": {
+     "done": 3
+    },
+    "failed_tasks": [
+     "gmail_receipts",
+     "hunt",
+     "runbook_todos"
+    ],
+    "superseded_rows": 0
+   },
+   {
+    "tag": "ornith-1.5-122b.lean+x",
+    "key": "ornith-1.5-122b",
+    "model": "Ornith-1.5-122B",
+    "quant": "UD-Q4_K_XL",
+    "gb": "80",
+    "engine": "llama.cpp",
+    "tools": "lean+x",
+    "suite": "week",
+    "status": "done",
+    "tasks": 37,
+    "expected_tasks": 37,
+    "solved": 34,
+    "wilson95": [
+     0.787,
+     0.972
+    ],
+    "checks_passed": 163,
+    "checks_total": 166,
+    "by_suite": {
+     "week": {
+      "solved": 34,
+      "tasks": 37
+     }
+    },
+    "wall_min": 85.4,
+    "tok_s_over_wall": 43.1,
+    "decode_tok_s": null,
+    "tool_calls": 508,
+    "tool_errors": 5,
+    "fail_stops": {
+     "done": 2,
+     "out_of_tokens": 1
+    },
+    "failed_tasks": [
+     "config_migrate",
+     "gmail_cleanup",
+     "monorepo_rename"
+    ],
+    "superseded_rows": 0
+   },
+   {
+    "tag": "qwen3.5-122b-a10b.lean+x",
+    "key": "qwen3.5-122b-a10b",
+    "model": "Qwen3.5-122B-A10B",
+    "quant": "UD-Q4_K_XL",
+    "gb": "77",
+    "engine": "llama.cpp",
+    "tools": "lean+x",
+    "suite": "week",
+    "status": "done",
+    "tasks": 37,
+    "expected_tasks": 37,
+    "solved": 33,
+    "wilson95": [
+     0.753,
+     0.957
+    ],
+    "checks_passed": 164,
+    "checks_total": 170,
+    "by_suite": {
+     "week": {
+      "solved": 33,
+      "tasks": 37
+     }
+    },
+    "wall_min": 66.0,
+    "tok_s_over_wall": 41.4,
+    "decode_tok_s": null,
+    "tool_calls": 687,
+    "tool_errors": 2,
+    "fail_stops": {
+     "done": 4
+    },
+    "failed_tasks": [
+     "gmail_receipts",
+     "hunt",
+     "pipeline",
+     "runbook_todos"
+    ],
+    "superseded_rows": 0
+   },
+   {
+    "tag": "nemotron-3.5-bolt-74b.lean+x",
+    "key": "nemotron-3.5-bolt-74b",
+    "model": "Nemotron-3.5-Bolt-74B",
+    "quant": "UD-Q6_K_XL",
+    "gb": "72",
+    "engine": "llama.cpp",
+    "tools": "lean+x",
+    "suite": "week",
+    "status": "done",
+    "tasks": 37,
+    "expected_tasks": 37,
+    "solved": 33,
+    "wilson95": [
+     0.753,
+     0.957
+    ],
+    "checks_passed": 162,
+    "checks_total": 166,
+    "by_suite": {
+     "week": {
+      "solved": 33,
+      "tasks": 37
+     }
+    },
+    "wall_min": 70.6,
+    "tok_s_over_wall": 36.4,
+    "decode_tok_s": null,
+    "tool_calls": 590,
+    "tool_errors": 11,
+    "fail_stops": {
+     "done": 4
+    },
+    "failed_tasks": [
+     "hunt",
+     "monorepo_rename",
+     "refund_triage",
+     "runbook_todos"
+    ],
+    "superseded_rows": 0
+   },
+   {
+    "tag": "laguna-s-2.1.lean+x",
+    "key": "laguna-s-2.1",
+    "model": "Laguna-S-2.1",
+    "quant": "UD-Q4_K_XL",
+    "gb": "73",
+    "engine": "llama.cpp",
+    "tools": "lean+x",
+    "suite": "week",
+    "status": "done",
+    "tasks": 37,
+    "expected_tasks": 37,
+    "solved": 33,
+    "wilson95": [
+     0.753,
+     0.957
+    ],
+    "checks_passed": 161,
+    "checks_total": 170,
+    "by_suite": {
+     "week": {
+      "solved": 33,
+      "tasks": 37
+     }
+    },
+    "wall_min": 98.6,
+    "tok_s_over_wall": 47.0,
+    "decode_tok_s": null,
+    "tool_calls": 583,
+    "tool_errors": 7,
+    "fail_stops": {
+     "out_of_tokens": 4
+    },
+    "failed_tasks": [
+     "contacts_merge",
+     "gmail_cleanup",
+     "ledger_reconcile",
+     "runbook_todos"
+    ],
+    "superseded_rows": 0
+   },
+   {
+    "tag": "qwen3-coder-next.lean+x",
+    "key": "qwen3-coder-next",
+    "model": "Qwen3-Coder-Next",
+    "quant": "UD-Q6_K_XL",
+    "gb": "73",
+    "engine": "llama.cpp",
+    "tools": "lean+x",
+    "suite": "week",
+    "status": "done",
+    "tasks": 37,
+    "expected_tasks": 37,
+    "solved": 31,
+    "wilson95": [
+     0.689,
+     0.923
+    ],
+    "checks_passed": 159,
+    "checks_total": 170,
+    "by_suite": {
+     "week": {
+      "solved": 31,
+      "tasks": 37
+     }
+    },
+    "wall_min": 27.7,
+    "tok_s_over_wall": 51.3,
+    "decode_tok_s": null,
+    "tool_calls": 715,
+    "tool_errors": 24,
+    "fail_stops": {
+     "done": 6
+    },
+    "failed_tasks": [
+     "cleanup",
+     "gmail_receipts",
+     "hunt",
+     "imsg_tokyo",
+     "incident_timeline",
+     "refund_triage"
+    ],
+    "superseded_rows": 0
+   },
+   {
+    "tag": "gpt-oss-120b-effhigh.lean+x",
+    "key": "gpt-oss-120b-effhigh",
+    "model": "gpt-oss-120b (reasoning high)",
+    "quant": "MXFP4",
+    "gb": "63",
+    "engine": "llama.cpp",
+    "tools": "lean+x",
+    "suite": "week",
+    "status": "done",
+    "tasks": 37,
+    "expected_tasks": 37,
+    "solved": 31,
+    "wilson95": [
+     0.689,
+     0.923
+    ],
+    "checks_passed": 158,
+    "checks_total": 170,
+    "by_suite": {
+     "week": {
+      "solved": 31,
+      "tasks": 37
+     }
+    },
+    "wall_min": 63.4,
+    "tok_s_over_wall": 67.0,
+    "decode_tok_s": null,
+    "tool_calls": 713,
+    "tool_errors": 14,
+    "fail_stops": {
+     "repeat_loop": 1,
+     "done": 5
+    },
+    "failed_tasks": [
+     "bulk_rename",
+     "docs_rag",
+     "gmail_cleanup",
+     "gmail_receipts",
+     "refund_triage",
+     "runbook_todos"
+    ],
+    "superseded_rows": 0
+   },
+   {
+    "tag": "gpt-oss-120b-heretic.lean+x",
+    "key": "gpt-oss-120b-heretic",
+    "model": "gpt-oss-120b heretic (abliterated)",
+    "quant": "MXFP4",
+    "gb": "65",
+    "engine": "llama.cpp",
+    "tools": "lean+x",
+    "suite": "week",
+    "status": "done",
+    "tasks": 37,
+    "expected_tasks": 37,
+    "solved": 29,
+    "wilson95": [
+     0.628,
+     0.886
+    ],
+    "checks_passed": 154,
+    "checks_total": 170,
+    "by_suite": {
+     "week": {
+      "solved": 29,
+      "tasks": 37
+     }
+    },
+    "wall_min": 20.4,
+    "tok_s_over_wall": 65.7,
+    "decode_tok_s": null,
+    "tool_calls": 470,
+    "tool_errors": 6,
+    "fail_stops": {
+     "done": 8
+    },
+    "failed_tasks": [
+     "config_migrate",
+     "docs_rag",
+     "gmail_cleanup",
+     "gmail_receipts",
+     "incident_timeline",
+     "ledger_reconcile",
+     "monorepo_rename",
+     "refund_triage"
+    ],
+    "superseded_rows": 0
+   },
+   {
+    "tag": "gpt-oss-120b-mlx.lean+x",
+    "key": "gpt-oss-120b-mlx",
+    "model": "gpt-oss-120b (reasoning high, MLX)",
+    "quant": "MXFP4-Q8",
+    "gb": "~65",
+    "engine": "mlx-lm (patched)",
+    "tools": "lean+x",
+    "suite": "week",
+    "status": "done",
+    "tasks": 37,
+    "expected_tasks": 37,
+    "solved": 29,
+    "wilson95": [
+     0.628,
+     0.886
+    ],
+    "checks_passed": 154,
+    "checks_total": 170,
+    "by_suite": {
+     "week": {
+      "solved": 29,
+      "tasks": 37
+     }
+    },
+    "wall_min": 45.8,
+    "tok_s_over_wall": 66.0,
+    "decode_tok_s": null,
+    "tool_calls": 639,
+    "tool_errors": 4,
+    "fail_stops": {
+     "done": 5,
+     "empty_reply": 3
+    },
+    "failed_tasks": [
+     "edit_config",
+     "gmail_receipts",
+     "imsg_export",
+     "ledger_reconcile",
+     "monorepo_rename",
+     "refund_triage",
+     "runbook_todos",
+     "web_refunds"
+    ],
+    "superseded_rows": 0
+   },
+   {
+    "tag": "gpt-oss-120b-base.lean+x",
+    "key": "gpt-oss-120b-base",
+    "model": "gpt-oss-120b",
+    "quant": "MXFP4",
+    "gb": "63",
+    "engine": "llama.cpp",
+    "tools": "lean+x",
+    "suite": "week",
+    "status": "done",
+    "tasks": 37,
+    "expected_tasks": 37,
+    "solved": 29,
+    "wilson95": [
+     0.628,
+     0.886
+    ],
+    "checks_passed": 153,
+    "checks_total": 170,
+    "by_suite": {
+     "week": {
+      "solved": 29,
+      "tasks": 37
+     }
+    },
+    "wall_min": 15.9,
+    "tok_s_over_wall": 76.4,
+    "decode_tok_s": null,
+    "tool_calls": 519,
+    "tool_errors": 8,
+    "fail_stops": {
+     "repeat_loop": 1,
+     "done": 7
+    },
+    "failed_tasks": [
+     "bulk_rename",
+     "docs_rag",
+     "gmail_receipts",
+     "hunt",
+     "incident_timeline",
+     "ledger_reconcile",
+     "refund_triage",
+     "runbook_todos"
+    ],
+    "superseded_rows": 0
+   },
+   {
+    "tag": "mistral-small-4-119b.lean+x",
+    "key": "mistral-small-4-119b",
+    "model": "Mistral-Small-4-119B (reasoning off by mistake)",
+    "quant": "UD-Q4_K_XL",
+    "gb": "74",
+    "engine": "llama.cpp",
+    "tools": "lean+x",
+    "suite": "week",
+    "status": "done",
+    "tasks": 37,
+    "expected_tasks": 37,
+    "solved": 12,
+    "wilson95": [
+     0.196,
+     0.485
+    ],
+    "checks_passed": 122,
+    "checks_total": 170,
+    "by_suite": {
+     "week": {
+      "solved": 12,
+      "tasks": 37
+     }
+    },
+    "wall_min": 64.4,
+    "tok_s_over_wall": 31.7,
+    "decode_tok_s": null,
+    "tool_calls": 1056,
+    "tool_errors": 142,
+    "fail_stops": {
+     "done": 20,
+     "max_steps": 2,
+     "empty_reply": 1,
+     "repeat_loop": 2
+    },
+    "failed_tasks": [
+     "config_drift",
+     "config_migrate",
+     "contacts_merge",
+     "docs_rag",
+     "gmail_cleanup",
+     "gmail_receipts",
+     "hunt",
+     "imsg_export",
+     "imsg_find",
+     "imsg_tokyo",
+     "imsg_top_contact",
+     "incident_timeline",
+     "inventory_reconcile",
+     "ledger_reconcile",
+     "monorepo_rename",
+     "pipeline",
+     "refactor",
+     "refund_triage",
+     "release_zip",
+     "runbook_todos",
+     "triage",
+     "vendor_unpack",
+     "web_order_status",
+     "web_refunds",
+     "web_settings"
+    ],
+    "superseded_rows": 0
+   }
+  ],
+  "pi_week": [
+   {
+    "tag": "qwen3.8-flash-next.pi",
+    "key": "qwen3.8-flash-next",
+    "model": "Qwen3.8-Flash-Next",
+    "quant": "UD-Q3_K_XL",
+    "gb": "89",
+    "engine": "llama.cpp",
+    "tools": "pi",
+    "suite": "week",
+    "status": "done",
+    "tasks": 30,
+    "expected_tasks": 37,
+    "solved": 29,
+    "wilson95": [
+     0.833,
+     0.994
+    ],
+    "checks_passed": 136,
+    "checks_total": 138,
+    "by_suite": {
+     "week": {
+      "solved": 29,
+      "tasks": 30
+     }
+    },
+    "wall_min": 40.8,
+    "tok_s_over_wall": 45.5,
+    "decode_tok_s": 50.5,
+    "tool_calls": 0,
+    "tool_errors": 0,
+    "fail_stops": {
+     "done": 1
+    },
+    "failed_tasks": [
+     "refund_triage"
+    ],
+    "superseded_rows": 0
+   }
+  ],
+  "smoke": [
+   {
+    "tag": "ripple-65b.lean+x",
+    "key": "ripple-65b",
+    "model": "Ripple-65B-Preview (dense)",
+    "quant": "Q8_0",
+    "gb": "69",
+    "engine": "llama.cpp",
+    "tools": "lean+x",
+    "suite": "smoke",
+    "status": "done",
+    "tasks": 5,
+    "expected_tasks": 5,
+    "solved": 5,
+    "wilson95": [
+     0.566,
+     1.0
+    ],
+    "checks_passed": 28,
+    "checks_total": 28,
+    "by_suite": {
+     "week": {
+      "solved": 5,
+      "tasks": 5
+     }
+    },
+    "wall_min": 88.2,
+    "tok_s_over_wall": 6.9,
+    "decode_tok_s": 7.5,
+    "tool_calls": 115,
+    "tool_errors": 4,
+    "fail_stops": {},
+    "failed_tasks": [],
+    "superseded_rows": 0
+   },
+   {
+    "tag": "qwen3-235b-abliterated.lean+x",
+    "key": "qwen3-235b-abliterated",
+    "model": "Qwen3-235B-A22B abliterated",
+    "quant": "i1-IQ3_M, 65k ctx",
+    "gb": "103",
+    "engine": "llama.cpp",
+    "tools": "lean+x",
+    "suite": "smoke",
+    "status": "done",
+    "tasks": 5,
+    "expected_tasks": 5,
+    "solved": 3,
+    "wilson95": [
+     0.231,
+     0.882
+    ],
+    "checks_passed": 24,
+    "checks_total": 28,
+    "by_suite": {
+     "week": {
+      "solved": 3,
+      "tasks": 5
+     }
+    },
+    "wall_min": 14.3,
+    "tok_s_over_wall": 25.6,
+    "decode_tok_s": 26.5,
+    "tool_calls": 18,
+    "tool_errors": 0,
+    "fail_stops": {
+     "done": 1,
+     "empty_reply": 1
+    },
+    "failed_tasks": [
+     "gmail_receipts",
+     "ledger_reconcile"
+    ],
+    "superseded_rows": 0
+   },
+   {
+    "tag": "mistral-small-4-rhigh.lean+x",
+    "key": "mistral-small-4-rhigh",
+    "model": "Mistral-Small-4-119B (reasoning high)",
+    "quant": "UD-Q4_K_XL",
+    "gb": "74",
+    "engine": "llama.cpp",
+    "tools": "lean+x",
+    "suite": "smoke",
+    "status": "done",
+    "tasks": 5,
+    "expected_tasks": 5,
+    "solved": 3,
+    "wilson95": [
+     0.231,
+     0.882
+    ],
+    "checks_passed": 22,
+    "checks_total": 28,
+    "by_suite": {
+     "week": {
+      "solved": 3,
+      "tasks": 5
+     }
+    },
+    "wall_min": 6.2,
+    "tok_s_over_wall": 33.6,
+    "decode_tok_s": 47.6,
+    "tool_calls": 78,
+    "tool_errors": 2,
+    "fail_stops": {
+     "done": 2
+    },
+    "failed_tasks": [
+     "gmail_receipts",
+     "ledger_reconcile"
+    ],
+    "superseded_rows": 0
+   },
+   {
+    "tag": "qwen3-235b-plain.lean+x",
+    "key": "qwen3-235b-plain",
+    "model": "Qwen3-235B-A22B",
+    "quant": "i1-IQ3_M, 65k ctx",
+    "gb": "103",
+    "engine": "llama.cpp",
+    "tools": "lean+x",
+    "suite": "smoke",
+    "status": "done",
+    "tasks": 5,
+    "expected_tasks": 5,
+    "solved": 1,
+    "wilson95": [
+     0.036,
+     0.624
+    ],
+    "checks_passed": 18,
+    "checks_total": 28,
+    "by_suite": {
+     "week": {
+      "solved": 1,
+      "tasks": 5
+     }
+    },
+    "wall_min": 26.8,
+    "tok_s_over_wall": 23.2,
+    "decode_tok_s": 23.8,
+    "tool_calls": 38,
+    "tool_errors": 0,
+    "fail_stops": {
+     "empty_reply": 2,
+     "done": 2
+    },
+    "failed_tasks": [
+     "docs_rag",
+     "edit_config",
+     "gmail_receipts",
+     "ledger_reconcile"
+    ],
+    "superseded_rows": 0
+   }
+  ]
+ },
+ "comparisons": [
+  {
+   "name": "Edge0-145B vs Qwen3.8-Flash-Next, 37 tasks",
+   "a": 37,
+   "b": 37,
+   "note": "",
+   "n": 37,
+   "diff": 0,
+   "ci": [
+    0,
+    0
+   ],
+   "discordant": 0,
+   "verdict": "same tasks solved"
+  },
+  {
+   "name": "Edge0-145B vs Qwen3.8-Flash-Next, HARD2",
+   "a": 15,
+   "b": 15,
+   "note": "",
+   "n": 15,
+   "diff": 0,
+   "ci": [
+    0,
+    0
+   ],
+   "discordant": 0,
+   "verdict": "same tasks solved"
+  },
+  {
+   "name": "Edge0-145B vs Qwen3.8-Flash-Next, HARD3",
+   "a": 11,
+   "b": 9,
+   "note": "HARD3 checkers were fixed between these two runs (FINDINGS-STUDIO.md, bug 11)",
+   "n": 12,
+   "diff": 2,
+   "ci": [
+    -2,
+    6
+   ],
+   "discordant": 4,
+   "verdict": "too wide to call"
+  },
+  {
+   "name": "Qwen3.8-Flash-Next vs Nemotron-3.5-Super, HARD2",
+   "a": 15,
+   "b": 13,
+   "note": "",
+   "n": 15,
+   "diff": 2,
+   "ci": [
+    0,
+    5
+   ],
+   "discordant": 2,
+   "verdict": "too wide to call"
+  },
+  {
+   "name": "Qwen3.8-Flash-Next vs Nemotron-3.5-Super, 37 tasks",
+   "a": 37,
+   "b": 34,
+   "note": "",
+   "n": 37,
+   "diff": 3,
+   "ci": [
+    0,
+    7
+   ],
+   "discordant": 3,
+   "verdict": "too wide to call"
+  },
+  {
+   "name": "Qwen3.8-Flash-Next vs Qwen3.5-122B, 37 tasks",
+   "a": 37,
+   "b": 33,
+   "note": "",
+   "n": 37,
+   "diff": 4,
+   "ci": [
+    1,
+    8
+   ],
+   "discordant": 4,
+   "verdict": "A ahead"
+  },
+  {
+   "name": "gpt-oss-120b: llama.cpp vs MLX (both reasoning high)",
+   "a": 31,
+   "b": 29,
+   "note": "",
+   "n": 37,
+   "diff": 2,
+   "ci": [
+    -3,
+    7
+   ],
+   "discordant": 8,
+   "verdict": "too wide to call"
+  },
+  {
+   "name": "gpt-oss-120b: reasoning high vs medium",
+   "a": 31,
+   "b": 29,
+   "note": "",
+   "n": 37,
+   "diff": 2,
+   "ci": [
+    -2,
+    6
+   ],
+   "discordant": 4,
+   "verdict": "too wide to call"
+  },
+  {
+   "name": "gpt-oss-120b: base vs heretic (abliteration), lean+x",
+   "a": 29,
+   "b": 29,
+   "note": "",
+   "n": 37,
+   "diff": 0,
+   "ci": [
+    -5,
+    5
+   ],
+   "discordant": 6,
+   "verdict": "too wide to call"
+  },
+  {
+   "name": "gpt-oss-120b: base vs heretic (abliteration), lean+",
+   "a": 22,
+   "b": 22,
+   "note": "",
+   "n": 37,
+   "diff": 0,
+   "ci": [
+    -4,
+    4
+   ],
+   "discordant": 4,
+   "verdict": "too wide to call"
+  },
+  {
+   "name": "Qwen3.8-Flash-Next: lean+x vs pi harness, 30 tasks",
+   "a": 30,
+   "b": 29,
+   "note": "pi has no mail or browser tools, so only the 30 tasks without them",
+   "n": 30,
+   "diff": 1,
+   "ci": [
+    0,
+    3
+   ],
+   "discordant": 1,
+   "verdict": "too wide to call"
+  },
+  {
+   "name": "gpt-oss-120b: lean+x vs lean+ (code execution)",
+   "a": 27,
+   "b": 22,
+   "note": "35 tasks: release_zip and vendor_unpack need exec, so they are left out",
+   "n": 35,
+   "diff": 5,
+   "ci": [
+    0,
+    10
+   ],
+   "discordant": 7,
+   "verdict": "too wide to call"
+  },
+  {
+   "name": "gpt-oss-120b heretic (abliterated): lean+x vs lean+ (code execution)",
+   "a": 27,
+   "b": 22,
+   "note": "35 tasks: release_zip and vendor_unpack need exec, so they are left out",
+   "n": 35,
+   "diff": 5,
+   "ci": [
+    -1,
+    11
+   ],
+   "discordant": 9,
+   "verdict": "too wide to call"
+  },
+  {
+   "name": "Qwen3.5-122B-A10B: lean+x vs lean+ (code execution)",
+   "a": 31,
+   "b": 27,
+   "note": "35 tasks: release_zip and vendor_unpack need exec, so they are left out",
+   "n": 35,
+   "diff": 4,
+   "ci": [
+    0,
+    9
+   ],
+   "discordant": 6,
+   "verdict": "too wide to call"
+  },
+  {
+   "name": "Ornith-1.5-122B: lean+x vs lean+ (code execution)",
+   "a": 32,
+   "b": 29,
+   "note": "35 tasks: release_zip and vendor_unpack need exec, so they are left out",
+   "n": 35,
+   "diff": 3,
+   "ci": [
+    -3,
+    9
+   ],
+   "discordant": 9,
+   "verdict": "too wide to call"
+  },
+  {
+   "name": "lean+x vs lean+ (code execution), 4 models pooled",
+   "a": 117,
+   "b": 100,
+   "note": "35 tasks x 4 models, bootstrap resamples tasks",
+   "n": 35,
+   "diff": 17,
+   "ci": [
+    3,
+    33
+   ],
+   "discordant": 16,
+   "verdict": "A ahead"
+  }
+ ],
+ "final": {
+  "state": "running",
+  "seed_offset": 10000,
+  "tasks": 64,
+  "models": [
+   {
+    "tag": "ornith-1.5-122b.lean+x.week3.s10000",
+    "key": "ornith-1.5-122b",
+    "model": "Ornith-1.5-122B",
+    "quant": "UD-Q4_K_XL",
+    "gb": "80",
+    "engine": "llama.cpp",
+    "tools": "lean+x",
+    "suite": "week3",
+    "status": "partial",
+    "tasks": 37,
+    "expected_tasks": 64,
+    "solved": 36,
+    "wilson95": [
+     0.862,
+     0.995
+    ],
+    "checks_passed": 168,
+    "checks_total": 170,
+    "by_suite": {
+     "week": {
+      "solved": 36,
+      "tasks": 37
+     }
+    },
+    "wall_min": 85.0,
+    "tok_s_over_wall": 42.4,
+    "decode_tok_s": 46.3,
+    "tool_calls": 556,
+    "tool_errors": 7,
+    "fail_stops": {
+     "done": 1
+    },
+    "failed_tasks": [
+     "refund_triage"
+    ],
+    "superseded_rows": 0
+   }
+  ],
+  "comparisons": []
+ }
+}

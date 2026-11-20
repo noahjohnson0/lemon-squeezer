@@ -7,6 +7,7 @@ const LINKS = [
   { href: "/", label: "Overview" },
   { href: "/cloud", label: "Cloud" },
   { href: "/local", label: "Local GPU" },
+  { href: "/studio", label: "Mac Studio" },
   { href: "/orchestration", label: "Orchestration" },
   { href: "/showcase", label: "Showcase" },
   { href: "/bench", label: "RAG eval" },

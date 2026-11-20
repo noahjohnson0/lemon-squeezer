@@ -39,6 +39,8 @@ configs/                     # system-prompt augments (--read'd by aider, --syst
 hosts/                       # per-machine env profiles (4070.env, m4max.env)
 runs/<run_id>/               # one dir per run: workspace + meta.json + score.json + metrics.csv + logs
 dashboard-next/              # Next.js static export, deployed to GitHub Pages
+studio/rows/<tag>.jsonl      # Mac Studio tool-calling rows (separate benchmark, see below)
+studio/summary.json          # built by bin/studio-summary; copied to dashboard-next/public/studio.json
 ```
 
 ## Run lifecycle (`bin/eval-run`)
@@ -101,6 +103,17 @@ Windows gotchas already handled in `cloud-run`: eval `setup.sh`/`rubric.sh` are
 fed to `bash -s` on stdin with CRLF stripped, and the workspace is passed as a
 **ROOT-relative POSIX path** (drive-letter `C:/...` paths don't resolve in MSYS
 bash `[[ -f ]]` tests). Don't "fix" these back to plain `bash script.sh "$WS"`.
+
+## Mac Studio tool-calling track (`studio/`)
+
+A separate benchmark (big local models as tool-calling agents, scored on end state), run by a
+harness outside this repo. Only its per-task rows live here. `bin/studio-pull` copies them over ssh
+(read-only; config `STUDIO_SSH` / `STUDIO_DIR` in `~/.config/lemon-squeezer.env`, never committed),
+`bin/studio-summary` rebuilds `studio/summary.json`, `dashboard-next/public/studio.json` (the
+`/studio` page) and the tables between the `studio:*` markers in FINDINGS-STUDIO.md.
+`bin/studio-refresh --pr` does both in a throwaway worktree and opens a PR. Keep hostnames, home
+paths and user names out of the rows (studio-pull strips paths from error text). Its scores never
+mix with runs.jsonl.
 
 ## Adding a new eval
 
@@ -217,7 +230,8 @@ a benchmark and a guess.
 - It's a Next.js 16 static export (`output: 'export'`) at `dashboard-next/`.
   `next build` writes `dashboard-next/out/` which the GH Pages workflow
   publishes as `noahjohnson0.github.io/lemon-squeezer/`.
-- Reads ONLY `./runs.jsonl` and `./inflight.json` (relative). Both files are
+- Reads `./runs.jsonl` and `./inflight.json` (relative), plus static JSON committed under
+  `public/` (`scores.json`, `showcase.json`, `studio.json`, and `bench-data.json` built at deploy). runs.jsonl and inflight.json are
   symlinks at dev-time (`public/<name>` → `../../<name>`); the GH workflow
   copies the resolved files in at build time.
 - `inflight.json` is treated as ephemeral. If older than 30s, the live panel
