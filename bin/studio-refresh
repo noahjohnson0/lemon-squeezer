@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# Refresh the Mac Studio tool-calling data: pull the latest rows (bin/studio-pull), rebuild the
+# summary, the /studio dashboard data and FINDINGS-STUDIO.md's tables (bin/studio-summary).
+#
+#   bin/studio-refresh         # in this checkout; review the diff and commit yourself
+#   bin/studio-refresh --pr    # in a throwaway worktree off origin/main: commit, push a branch,
+#                              # open a PR. Leaves this checkout (and any uncommitted work) alone.
+#
+# The final pass is reported once its tags carry a .done on the Studio; until then its rows show as
+# progress only. Prose in FINDINGS-STUDIO.md / README.md outside the generated blocks is not touched:
+# once the final pass is done, rewrite the headline from the new tables by hand.
+set -euo pipefail
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+if [ "${1:-}" != "--pr" ]; then
+  "$ROOT/bin/studio-pull"
+  "$ROOT/bin/studio-summary"
+  git -C "$ROOT" status --short -- studio FINDINGS-STUDIO.md dashboard-next/public/studio.json
+  exit 0
+fi
+
+command -v gh > /dev/null || { echo "studio-refresh: --pr needs the gh CLI" >&2; exit 1; }
+git -C "$ROOT" fetch -q origin main
+WT="$(mktemp -d)/lemon-squeezer-studio"
+BR="studio-refresh-$(date +%Y%m%d-%H%M)"
+git -C "$ROOT" worktree add -q -b "$BR" "$WT" origin/main
+cleanup() {  # the pushed branch lives on origin; drop the local copy with the worktree
+  git -C "$ROOT" worktree remove --force "$WT" 2> /dev/null || true
+  git -C "$ROOT" branch -q -D "$BR" 2> /dev/null || true
+}
+trap cleanup EXIT
+
+"$WT/bin/studio-pull"
+"$WT/bin/studio-summary"
+cd "$WT"
+git add studio FINDINGS-STUDIO.md dashboard-next/public/studio.json
+if git diff --cached --quiet; then
+  echo "studio-refresh: no new rows; nothing to open"
+  exit 0
+fi
+STATE="$(python3 -c 'import json;print(json.load(open("studio/summary.json"))["final"]["state"])')"
+git commit -q -m "Refresh Mac Studio tool-calling rows (final pass: $STATE)
+
+Pulled with bin/studio-pull, rebuilt with bin/studio-summary."
+git push -q -u origin "$BR"
+gh pr create --base main --head "$BR" \
+  --title "Refresh Mac Studio tool-calling rows (final pass: $STATE)" \
+  --body "Rows pulled with \`bin/studio-pull\`, summary, \`/studio\` data and FINDINGS-STUDIO.md tables rebuilt with \`bin/studio-summary\`. Final pass state: **$STATE**. Prose outside the generated blocks is unchanged; update the headline by hand once the final pass is done."

@@ -1,6 +1,6 @@
 "use client";
 import { motion, AnimatePresence } from "framer-motion";
-import { Run, bayesianRank, meanPer, scoreClass, unique, isMainSuite, fmtCost } from "@/lib/data";
+import { Run, bayesianRank, meanPer, scoreClass, unique, isMainSuite, fmtCost, isCloudHost } from "@/lib/data";
 import { harnessBlurb } from "@/lib/blurbs";
 
 function ScoreCell({ s, runId, onClick }: { s: number; runId?: string; onClick?: (id: string) => void }) {
@@ -16,13 +16,13 @@ function ScoreCell({ s, runId, onClick }: { s: number; runId?: string; onClick?:
   );
 }
 
-// Venue at a glance: a cloud for OpenRouter, a GPU chip for a local box. The host
+// Venue at a glance: a cloud for a cloud API host, a GPU chip for a local box. The host
 // name is on hover, so this also doubles as the "what's a host" explainer.
 function HostGlyph({ host }: { host: string }) {
-  const cloud = host === "openrouter";
+  const cloud = isCloudHost(host);
   return (
     <span
-      title={cloud ? "cloud · OpenRouter" : `local GPU · ${host}`}
+      title={cloud ? `cloud · ${host === "openrouter" ? "OpenRouter" : host}` : `local GPU · ${host}`}
       className="inline-flex items-center text-[var(--muted)]"
     >
       {cloud ? (

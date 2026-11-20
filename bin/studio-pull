@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+# Pull the Mac Studio tool-calling rows (one JSON row per task) into studio/rows/<tag>.jsonl.
+#
+# The runs live on the Studio under $STUDIO_DIR/runs/week/: each <tag>.dirs lists the run dirs of
+# one model x toolset x suite pass, <tag>.done marks a finished pass, and each run dir has a
+# results.jsonl. A pass still running has no .dirs yet, so its dirs come from the "run dir:" lines
+# of <tag>.log. Rows only: no transcripts, workspaces or server logs.
+#
+# Read-only on the Studio. Never deletes a local tag file (a tag moved aside on the Studio stays
+# here until removed by hand). Config: STUDIO_SSH (ssh target) and STUDIO_DIR (harness dir,
+# relative to the remote home), from the environment or ~/.config/lemon-squeezer.env.
+#
+# Usage: bin/studio-pull            # then bin/studio-summary
+set -euo pipefail
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+[ -f "$HOME/.config/lemon-squeezer.env" ] && source "$HOME/.config/lemon-squeezer.env"
+: "${STUDIO_SSH:?set STUDIO_SSH (ssh target of the Studio), e.g. in ~/.config/lemon-squeezer.env}"
+: "${STUDIO_DIR:?set STUDIO_DIR (tool-sandbox dir relative to the remote home)}"
+
+TMP="$(mktemp)"
+trap 'rm -f "$TMP"' EXIT
+
+# Remote side prints "ROW <tag> <dir index> <json>" per row and "TAG <tag> done|partial" per tag.
+# shellcheck disable=SC2016
+ssh -o BatchMode=yes "$STUDIO_SSH" "cd \"$STUDIO_DIR/runs/week\" && bash -s" > "$TMP" <<'REMOTE'
+set -u
+shopt -s nullglob
+tags=$( { for f in *.dirs *.log; do echo "${f%.*}"; done; } | sort -u)
+for t in $tags; do
+  if [ -f "$t.dirs" ]; then dirs=$(cat "$t.dirs")
+  else dirs=$(grep '^run dir:' "$t.log" 2>/dev/null | cut -d' ' -f3 | sort -u); fi
+  [ -z "$dirs" ] && continue
+  if [ -f "$t.done" ]; then echo "TAG	$t	done"; else echo "TAG	$t	partial"; fi
+  i=0
+  for d in $dirs; do
+    [ -f "$d/results.jsonl" ] && awk -v t="$t" -v i="$i" 'NF {print "ROW\t" t "\t" i "\t" $0}' "$d/results.jsonl"
+    i=$((i + 1))
+  done
+done
+REMOTE
+
+python3 - "$ROOT" "$TMP" <<'PY'
+import json, os, re, sys
+from collections import defaultdict
+
+root, src = sys.argv[1], sys.argv[2]
+rows, status = defaultdict(list), {}
+# Fields the summary never uses, or that could carry machine-specific text.
+DROP = {"dir", "route", "git_sha", "judge", "judge_p", "judge_pushbacks", "judge_errors", "elide"}
+HOME_PATH = re.compile(r"(/Users|/home)/[^\s'\"]+")
+for line in open(src, encoding="utf-8"):
+    parts = line.rstrip("\n").split("\t", 3)
+    if parts[0] == "TAG":
+        status[parts[1]] = parts[2]
+    elif parts[0] == "ROW":
+        r = json.loads(parts[3])
+        r = {k: v for k, v in r.items() if k not in DROP}
+        if isinstance(r.get("error"), str):
+            r["error"] = HOME_PATH.sub("<path>", r["error"])[:300]
+        r["tag"], r["run"] = parts[1], int(parts[2])
+        rows[parts[1]].append(r)
+
+out = os.path.join(root, "studio", "rows")
+os.makedirs(out, exist_ok=True)
+for tag, rs in sorted(rows.items()):
+    with open(os.path.join(out, f"{tag}.jsonl"), "w", encoding="utf-8") as f:
+        for r in rs:
+            f.write(json.dumps(r, sort_keys=True) + "\n")
+tags_path = os.path.join(root, "studio", "tags.json")
+known = json.load(open(tags_path)) if os.path.exists(tags_path) else {}
+known.update({t: status.get(t, "partial") for t in rows})
+with open(tags_path, "w", encoding="utf-8") as f:
+    json.dump(dict(sorted(known.items())), f, indent=1)
+    f.write("\n")
+n = sum(len(v) for v in rows.values())
+partial = sorted(t for t in rows if status.get(t) != "done")
+print(f"studio-pull: {n} rows in {len(rows)} tags -> studio/rows/"
+      + (f"; partial (no .done: running or abandoned): {', '.join(partial)}" if partial else ""))
+PY

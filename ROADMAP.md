@@ -2,7 +2,7 @@
 
 ## Mission
 
-lemon-squeezer exists to find **what actually gets real coding work done by open-weight LLMs as agents** - holding prompts and rubrics fixed while varying model × harness × config × venue, across a 12 GB consumer GPU and rented open weights on OpenRouter. The product of that research is two things outsiders can act on: an honest, statistically-defensible leaderboard, and a recommender that turns "given my GPU, budget, and privacy needs, what do I run?" into a copy-pasteable command. The identity is the squeeze, not any one model.
+lemon-squeezer exists to find **what actually gets real coding work done by open-weight LLMs as agents** - holding prompts and rubrics fixed while varying model × harness × config × venue, across a 12 GB consumer GPU, a 128 GB Mac Studio and rented open weights on OpenRouter. The product of that research is two things outsiders can act on: an honest, statistically-defensible leaderboard, and a recommender that turns "given my GPU, budget, and privacy needs, what do I run?" into a copy-pasteable command. The identity is the squeeze, not any one model.
 
 The current state of the repo has a credible *direction* but two structural cracks: the headline numbers rest on uncontrolled sampling and a median of one trial per cell, and the "same prompts, same venue-comparison" honesty claim is computed over **different task sets** locally vs. cloud. Everything below is ordered to fix the foundation before building on it.
 
@@ -60,6 +60,16 @@ Still open (the honest gaps), incl. items from the codex re-verification (CODEX-
 **Why:** some low scores are calibration bugs, not difficulty - port-scanner sits at 17.7% because its rubric needs a live network, marking correct scanners wrong and polluting every arm's mean equally. A rubric that can't pass a correct solution can't measure models.
 **First step:** add a CI check that runs each eval's reference impl through its rubric and asserts `score==100`; start by auditing the bottom tier (port-scanner, sudoku, chem-balance, solar-position). Tag environment-dependent evals (`environment=network`) and exclude them from the headline mean.
 **Effort/payoff:** M / **high** - this is the gate that keeps the suite honest as it grows; the CLAUDE.md stdout/JSON-corruption discipline becomes structural instead of folklore.
+
+### 4b. Mac Studio venue (128 GB): finish and publish the tool-calling week screen
+**Status (2026-11-20):** exploration done and published ([FINDINGS-STUDIO.md](FINDINGS-STUDIO.md), `/studio`, rows in `studio/rows/`); the final pass (top 6 + Ripple-65B, 64 tasks, frozen harness, seed offset 10000) is running and ends around 2026-11-22.
+**Next steps:**
+- When it finishes: `bin/studio-refresh --pr`, then rewrite the FINDINGS-STUDIO.md headline and the README bullet from the final tables (the exploration numbers stay, labelled as such).
+- Publish the tool-calling harness itself (tasks, checkers, toolsets) so the rows are reproducible by others, not just inspectable.
+- More than one seed per model before claiming a winner between the top two: one pass makes a 1-3 task gap too wide to call.
+- Run the **coding suite** on the Studio too (llama.cpp's OpenAI endpoint works with `squeezer`), so the 120B-class local models land on the same ruler as the 4070 and the cloud. That is the first real local-vs-cloud comparison at the top end.
+- The M4 Max venue is still 3 smoke runs; fold it into the same plan or drop it from the venue table.
+**Effort/payoff:** S (refresh) to M (coding suite) / **high** - the only venue where 100B+ models run locally.
 
 ---
 
@@ -131,6 +141,8 @@ Still open (the honest gaps), incl. items from the codex re-verification (CODEX-
 - **Does the harness > model finding survive matched n + CIs?** Quantify it as a number: "switching squeezer→aider moves mean +X pp [CI] vs. best-vs-worst model +Y pp."
 - **Where is the quantization knee on a 12 GB card?** Specifically, is q5 of a 30B-MoE ever worth its VRAM over q4, and does fp16 CPU-spill ever buy back points (hypothesis: never on a 4070)?
 - **Can a large-but-sparse MoE "punch above 12 GB" via CPU/GPU offload** - and at what tok/s tax?
+- **Does the tool-calling ranking from the Mac Studio carry over to the coding suite?** (Edge0 / Qwen3.8-Flash-Next top the agent screen; nothing at that size has run the coding rubrics locally.)
+- **Grammar-constrained decoding vs a free parser**: llama.cpp's tool-call grammar removes invalid-JSON calls (the MLX gap) but forces schema key order. What else does it silently forbid?
 - **Does the cloud mix-as-rescue pattern (69%→92%) replicate locally** on a 14B model wrapped in verify/critique, and at what energy cost?
 - **Held-out vs spec-given:** how much does score drop when the rubric's checked values are hidden from the prompt? (A direct measure of memorization/spec-copying.)
 - **Does score correlate with tool_calls/iterations**, and which arms finish in 3 calls vs. flail to the iter cap?

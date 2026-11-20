@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { loadRuns, loadInflight, type Run, type Inflight } from "@/lib/data";
+import { loadRuns, loadInflight, isCloudHost, type Run, type Inflight } from "@/lib/data";
 import Headline from "@/components/Headline";
 import LiveRuns from "@/components/LiveRuns";
 import HardwarePanel from "@/components/HardwarePanel";
@@ -35,8 +35,9 @@ export default function LocalPage() {
     return () => { cancelled = true; clearInterval(id); };
   }, []);
 
-  // Local venues only - cloud (openrouter) runs carry no GPU telemetry.
-  const localRuns = useMemo(() => runs.filter((r) => (r.host ?? "4070") !== "openrouter"), [runs]);
+  // Local venues only - cloud runs (OpenRouter, and the vendor-CLI rows on openai/anthropic) carry
+  // no GPU telemetry.
+  const localRuns = useMemo(() => runs.filter((r) => !isCloudHost(r.host)), [runs]);
   const selectedRun = selectedRunId ? runs.find((r) => r.run_id === selectedRunId) ?? null : null;
 
   return (
