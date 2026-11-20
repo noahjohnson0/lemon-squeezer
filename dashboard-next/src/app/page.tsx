@@ -167,12 +167,12 @@ export default function Home() {
       study: "Tool-calling screen",
     },
     {
-      claim: "Agent benchmarks need a bug hunt before they need more models.",
+      claim: "Harness bugs caused about half of the first day's failures in our tool-calling screen.",
       status: [],
       body: (
         <p>
-          Roughly half of the first day&apos;s failures in the tool-calling screen were the harness: a decoding grammar that fixes key order, a
-          mail mock that ignored parentheses, a code jail that could read the answers, a simulated clock three weeks off the host&apos;s. In the
+          The bugs included a decoding grammar that fixes key order, a
+          mail mock that ignored parentheses, a code jail that could read the answers, and a simulated clock three weeks off the host&apos;s. Each made models look worse (one could have made them look better) and each is now fixed with a test. In the
           coding suite, 26 rubrics could award full marks to a stub until an audit rewrote them.
         </p>
       ),
@@ -187,7 +187,7 @@ export default function Home() {
       <section className="masthead col-wide">
         <div className="kicker">An independent local-LLM lab</div>
         <h1>What open-weight models finish when they work as agents</h1>
-        <p className="dek col" style={{ marginLeft: 0 }}>
+        <p className="dek" style={{ maxWidth: "var(--measure)" }}>
           We run open-weight language models as agents on hardware a person can own (a 12 GB gaming GPU, a 128 GB workstation) and on rented
           endpoints, and score each run by executing its code or inspecting the state it left behind. Below is what we currently believe, the
           evidence for it, and how sure we are.
