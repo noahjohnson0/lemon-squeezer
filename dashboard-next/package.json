@@ -4,25 +4,21 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "node scripts/build-bench-data.js && next build",
+    "build": "node scripts/build-bench-data.js && node scripts/stage-data.mjs && next build && node scripts/scrub-out.mjs",
     "bench-data": "node scripts/build-bench-data.js",
-    "start": "next start"
+    "start": "next start",
+    "stage-data": "node scripts/stage-data.mjs"
   },
   "dependencies": {
-    "@react-three/drei": "^10.7.7",
-    "@react-three/fiber": "^9.6.1",
-    "framer-motion": "^12.38.0",
     "next": "16.2.6",
     "react": "19.2.4",
-    "react-dom": "19.2.4",
-    "three": "^0.184.0"
+    "react-dom": "19.2.4"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@types/three": "^0.184.1",
     "tailwindcss": "^4",
     "typescript": "^5"
   },

@@ -10,13 +10,23 @@
 </tr>
 </table>
 
-**How much can you squeeze out of an LLM?**
+**What works locally, on which hardware, for which job.**
 
-A reproducible study of what actually makes a language model *finish real coding work*. We hold the prompts and rubrics fixed and vary the four things you actually control:
+lemon-squeezer has two tracks. Each track has one goal.
+
+| | Benchmarks | Research |
+|---|---|---|
+| Goal | Say what works locally, on which hardware, for which job (coding agents, tool calling) | Find and report effects that are not already published |
+| A claim is | A ranking or a recommendation with an interval, a cost and a speed | A new effect with an interval, replicated, after a related-work check |
+| Novelty | Not required. The work has to be practical, reproducible and current | Required |
+| Format | Study pages built from the run data in this repo | Papers. A line that is not ready is listed with its question and no numbers |
+| Where | This repo and the site's home, `/studies/`, `/methods/`, `/data/` | The site's `/research/` page. The experiments are run in a separate lab repo |
+
+The benchmarks hold the prompts and rubrics fixed and vary four things:
 
 > **model** x **harness** x **config** x **venue**
 
-...and we score every run by *running the code it produced*, not by vibes. The point is the squeeze: the most useful work per dollar, per watt, and per gigabyte of VRAM.
+Every run is scored by running the code it produced or by checking the state it left behind.
 
 ## Four venues
 
@@ -32,14 +42,17 @@ A reproducible study of what actually makes a language model *finish real coding
 
 On the coding suite it is the same agent, same tasks and same scoring for the 4070, the M4 Max and the cloud, so model-vs-model, harness-vs-harness and local-vs-cloud are honest comparisons there. (The M4 Max venue has 3 smoke runs so far; a real sweep is on the [roadmap](ROADMAP.md).) The **Mac Studio** runs a different benchmark: big local models as tool-calling agents on files, mail, messages and an intranet, scored on the end state. Its scores do not compare with the coding suite's. See [FINDINGS-STUDIO.md](FINDINGS-STUDIO.md).
 
-## What we have found so far
+## Current benchmark results
 
-These are real but **early**, and we are deliberate about not overclaiming (see *Honesty* below).
+The site computes every number from `runs.jsonl` and `studio/summary.json` at build time, so the numbers are on the site and are not repeated here. The home page has the current picks per job and hardware, and these notes:
 
-- **The harness can matter more than the model.** A controlled cloud bake-off (same model, same evals, only the harness changes), compared on the cells where *both* harnesses ran, shows aider beating our `squeezer` loop overall (79.7% vs 46.8% on the paired cells) - and the gap explodes on weak models: `qwen3-coder-30b` goes **7% (squeezer) -> 76% (aider)**, `llama-3.1-8b` **12% -> 74%**, on identical weights. Strong models tie (gpt-oss-120b and deepseek-v4-flash both 100% either way). Weak models are rescued by the right harness. See [FINDINGS-CLOUD.md](FINDINGS-CLOUD.md).
-- **For the cloud "which open model" question:** a cluster of cheap open models (deepseek-v4-pro/flash, qwen3-max, glm-5.1, kimi) lands in the high 90s on our suite with overlapping confidence intervals (a tie, not one winner), and the value pick `gpt-oss-120b` gets ~92% for about **$0.0007 per task**. Multi-model *mixes* mostly do not beat the best single model; they are a **weak-model rescue kit**, not a ceiling-raiser. Full writeup: [FINDINGS-CLOUD.md](FINDINGS-CLOUD.md).
-- **Reasoning models underperform at agentic coding** here, and "coding-specialist" models did not beat strong generalists.
-- **Big local models as agents (Mac Studio, exploration; final pass pending).** On 37 tool-calling tasks Edge0-145B and Qwen3.8-Flash-Next both solved 37/37 and both solved all 15 of a harder set; five more models sit at 33-34/37. Giving the agent a `run_python` tool was the biggest lever (+17 tasks over 4 models on 35 shared tasks, 95% CI +3 to +33). Abliteration (gpt-oss-120b vs its heretic) did not change the solve count (29 = 29), though the heretic obeyed a planted prompt injection the base ignored; MLX vs llama.cpp on gpt-oss-120b was 29 vs 31 at equal speed, too wide to call. About half the first day's failures were harness bugs (a grammar that forces schema key order, a mail mock that ignored parentheses, a jail that could read the answers, a world clock that disagreed with the host's); all twelve are written up. Single trials on a moving harness: a screen, not a ranking. See [FINDINGS-STUDIO.md](FINDINGS-STUDIO.md).
+- llama.cpp's tool-call grammar accepts keys only in schema order. One tool listed an optional key late, and a model that wrote its keys in another order could not send that parameter.
+- The tool-calling exploration found twelve harness bugs. The gaps between the top models were smaller than the effect of those bugs, and most paired model comparisons are too wide to call.
+- MLX and llama.cpp ran gpt-oss-120b at the same throughput. The score gap is too wide to call. MLX returned empty replies on tool calls its parser could not read, and llama.cpp's grammar prevents those.
+- Abliteration showed no cost on tool use for gpt-oss-120b. The interval is wide, so a small cost is not ruled out.
+- The pi harness matched a purpose-built toolset with a strong model. With weak models it scored below aider, whose edit format avoids the tool calls that small models fail at.
+
+Results that a reader would expect (code execution helps an agent, a newer model beats its predecessor) are in the study pages and are not headlined. Comparisons whose interval includes zero are listed as too wide to call. The tool-calling numbers are exploration until the final pass is done. Write-ups: [FINDINGS-STUDIO.md](FINDINGS-STUDIO.md), [FINDINGS-CLOUD.md](FINDINGS-CLOUD.md).
 
 ## How it works
 
@@ -111,9 +124,14 @@ dashboard-next/      # Next.js dashboard -> GitHub Pages (/ local, /cloud cloud)
 ROADMAP.md           # where this is going
 ```
 
-## Dashboard
+## Site
 
-Live at [noahjohnson0.github.io/lemon-squeezer](https://noahjohnson0.github.io/lemon-squeezer/). Reads `runs.jsonl` directly: **/** is the unified leaderboard (local GPUs and cloud arms), **/cloud** is the open-model and local-vs-cloud view, **/local** the hardware side (VRAM, speed, watts). **/studio** is the Mac Studio tool-calling track, read from `studio.json`.
+Live at [noahjohnson0.github.io/lemon-squeezer](https://noahjohnson0.github.io/lemon-squeezer/). The header has one tab per track.
+
+- **Benchmarks.** The home page has the current picks, the notes above and the comparisons that are too wide to call. `/studies/` has one page per study (method, results with intervals, limitations, data). `/methods/` and `/data/` (sanitized downloads) belong to this track. Every number is computed at build time from `runs.jsonl` and `studio/summary.json` (`dashboard-next/src/lib/site-data.ts`).
+- **Research.** `/research/` states the bar (related-work check, an effect with an interval, replication) and lists each line of work with its question and its status against the bar (`dashboard-next/src/lib/research.ts`). A line gets a paper page when it clears the bar. Until then the page states no result for it.
+
+The old `/local`, `/cloud` and `/studio` URLs redirect to the matching study.
 
 ## License
 

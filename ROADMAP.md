@@ -2,7 +2,12 @@
 
 ## Mission
 
-lemon-squeezer exists to find **what actually gets real coding work done by open-weight LLMs as agents** - holding prompts and rubrics fixed while varying model × harness × config × venue, across a 12 GB consumer GPU, a 128 GB Mac Studio and rented open weights on OpenRouter. The product of that research is two things outsiders can act on: an honest, statistically-defensible leaderboard, and a recommender that turns "given my GPU, budget, and privacy needs, what do I run?" into a copy-pasteable command. The identity is the squeeze, not any one model.
+lemon-squeezer has two tracks, and each has one goal.
+
+- **Benchmarks.** Say what works locally, on which hardware, for which job (coding agents, tool calling). The work is practical, reproducible and current. A claim is a ranking or a recommendation with an interval, a cost and a speed. Novelty is not required. The benchmarks hold prompts and rubrics fixed and vary model × harness × config × venue, across a 12 GB consumer GPU, a 128 GB workstation and rented open weights. The outputs are a leaderboard with intervals and a recommender for "given my hardware, budget and privacy needs, what do I run".
+- **Research.** Find and report effects that are not already published (the Neural Engine, mixture-of-experts routing and pruning, agents for system administration). A claim is published when it has passed a related-work check, shows an effect with an interval and has been replicated. It is written up as a paper. A line that is not ready is listed on the site's `/research/` page with its question and no numbers. The experiments run in a separate lab repo, and this repo holds only the public page.
+
+Everything below this section is the benchmarks roadmap. The research track's next step is its first paper page, for whichever line clears the bar first.
 
 The current state of the repo has a credible *direction* but two structural cracks: the headline numbers rest on uncontrolled sampling and a median of one trial per cell, and the "same prompts, same venue-comparison" honesty claim is computed over **different task sets** locally vs. cloud. Everything below is ordered to fix the foundation before building on it.
 
