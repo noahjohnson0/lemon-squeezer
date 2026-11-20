@@ -45,11 +45,11 @@ export default function Data() {
     <>
       <header className="study-head col-wide">
         <div className="col" style={{ marginLeft: 0 }}>
-          <div className="kicker">Data</div>
+          <div className="kicker">Benchmarks track · Data</div>
           <h1>Download the data</h1>
           <p className="dek">
-            Every number on this site is computed from these files when the site is built. Nothing is typed in by hand. Rebuild the site from
-            the repository and you get the same numbers.
+            Every benchmark number on this site is computed from these files when the site is built. A rebuild from the repository gives the
+            same numbers.
           </p>
         </div>
       </header>
@@ -70,7 +70,7 @@ export default function Data() {
           <li>Machine-specific strings (home-directory paths, internal host names) are stripped from the published copies. No values are changed.</li>
           <li>
             Scores in <code>runs.jsonl</code>{" "}are 0 to 100. A score of <code>&quot;?&quot;</code>{" "}marks a run whose rubric output could not be
-            parsed; the site counts it as 0.
+            parsed, and the site counts it as 0.
           </li>
           <li>Latest coding-suite run: {t.newest}. The tool-calling data is refreshed from its own harness as passes finish.</li>
           <li>License: MIT, like the code.</li>

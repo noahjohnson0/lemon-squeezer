@@ -3,8 +3,8 @@ import Link from "next/link";
 import { DataTable } from "@/components/ui";
 
 export const metadata: Metadata = {
-  title: "About the lab",
-  description: "An independent lab studying open-weight language models as agents on hardware a person can own.",
+  title: "About",
+  description: "lemon-squeezer has two tracks: benchmarks of open-weight models on hardware a person can own, and research on new methods.",
 };
 
 export default function About() {
@@ -13,36 +13,41 @@ export default function About() {
       <header className="study-head col-wide">
         <div className="col" style={{ marginLeft: 0 }}>
           <div className="kicker">About</div>
-          <h1>About the lab</h1>
+          <h1>About lemon-squeezer</h1>
           <p className="dek">
-            lemon-squeezer is the publishing arm of a small, independent research program on open-weight language models: how to make them
-            faster, more accurate and better at agentic work on hardware a person can own.
+            lemon-squeezer is an independent project on open-weight language models that run on hardware a person can own. It has two tracks,
+            and each track has one goal.
           </p>
         </div>
       </header>
       <div className="col prose">
-        <h2>What we study</h2>
+        <h2>Benchmarks</h2>
         <p>
-          The program&apos;s question is practical: given a model you can download and a machine you can buy, how much real work can you get
-          out of it, and what moves that number? The variables we control are the model, the agent harness around it, its configuration
-          (quantization, reasoning effort, tools) and the venue it runs on. Results get published here when a study has data worth reading,
-          with its method, its limits and its raw rows.
+          The goal of the benchmarks track is to say what works locally, on which hardware, for which job. The jobs so far are coding agents
+          and tool calling. A benchmark claim is a ranking or a recommendation, and it comes with an interval, a cost and a speed. The work is
+          meant to be practical, reproducible and current, and it does not need to be new. A known result measured again on this year&apos;s
+          models is still useful to someone choosing what to run.
         </p>
-        <p>Lines of work in the program, published here as they reach that bar:</p>
-        <ul>
-          <li>Open models as tool-calling and coding agents (the studies on this site).</li>
-          <li>A multi-host system-administration benchmark for agents.</li>
-          <li>Mixture-of-experts internals: routing, expert pruning, adding experts.</li>
-          <li>Running parts of models on unusual hardware, such as a laptop&apos;s neural engine.</li>
-        </ul>
+        <p>
+          The variables are the model, the agent harness around it, its configuration (quantization, reasoning effort, tools) and the venue it
+          runs on. The <Link href="/studies/">studies</Link> report them with their methods, limits and raw rows.
+        </p>
 
-        <h2>How we work</h2>
+        <h2>Research</h2>
+        <p>
+          The goal of the research track is to find and report effects that are not already published. The current lines are on the Apple
+          Neural Engine, on mixture-of-experts routing and pruning, and on agents for system administration. A research claim is published
+          when it has passed a related-work check, shows an effect with an interval and has been replicated. Until then a line is listed on
+          the <Link href="/research/">Research</Link> page with its question and its status, and no result is stated for it.
+        </p>
+
+        <h2>Rules for both tracks</h2>
         <ul>
-          <li>Score by executing code or checking end state, never by a model&apos;s own report or another model&apos;s opinion.</li>
-          <li>Preregister the question and analysis; log every change as a dated amendment.</li>
-          <li>Report intervals, and say &ldquo;too wide to call&rdquo; when they include zero.</li>
-          <li>Publish the rows, not only the summary.</li>
-          <li>Treat harness bugs as findings and publish them.</li>
+          <li>A run is scored by executing code or checking end state. A model&apos;s own report and another model&apos;s opinion are never scored.</li>
+          <li>The question and the analysis are written down before the runs, and every later change is logged as a dated amendment.</li>
+          <li>Every difference is reported with an interval, and it is called too wide to call when the interval includes zero.</li>
+          <li>The per-task rows are published along with the summary.</li>
+          <li>Harness bugs are logged and published with their effect on the scores.</li>
         </ul>
         <p>
           The details are on the <Link href="/methods/">Methods</Link>{" "}page.
@@ -65,8 +70,8 @@ export default function About() {
 
         <h2>Corrections</h2>
         <p>
-          When new data or an audit changes a published number, the page shows the new number and says what changed. Earlier write-ups stay in
-          the repository with a note that they are historical. Report a problem by opening an issue on the{" "}
+          When new data or an audit changes a published number, the page shows the new number and states what changed. Earlier write-ups stay
+          in the repository with a note that they are historical. Report a problem by opening an issue on the{" "}
           <a href="https://github.com/noahjohnson0/lemon-squeezer/issues">repository</a>.
         </p>
       </div>

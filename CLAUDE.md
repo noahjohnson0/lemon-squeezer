@@ -6,10 +6,24 @@ from the code alone.
 
 ## What this repo is
 
-A reproducible benchmark for **local-LLM coding agents** on consumer GPUs. We
-test combinations of `(harness, model, eval, config, host)` and surface the
-findings on a static dashboard. The point is to figure out what local
-combination actually completes real-world coding tasks.
+The public repo and site for two tracks. Each track has one goal, and a change belongs to
+exactly one of them.
+
+- **Benchmarks** (this repo's code and data): say what works locally, on which hardware, for
+  which job (coding agents, tool calling). Claims are rankings and recommendations with an
+  interval, a cost and a speed. Novelty is not the point. We test combinations of
+  `(harness, model, eval, config, host)` and publish the results as study pages.
+- **Research** (the site's `/research/` page only; experiments live in a separate lab repo):
+  new effects that are not already published. A claim is published only after a related-work
+  check, an effect with an interval, and a replication. A line that is not ready gets its
+  question and its bar status in `dashboard-next/src/lib/research.ts`, with no numbers.
+
+Rules that follow from the split:
+- Do not headline a result a reader would expect (code execution helps, a newer model beats an
+  older one). It can stay in a study page as method context.
+- Do not put a research number on a benchmarks page, or a benchmark ranking on the research page.
+- Write site copy flat and technical: no antithesis ("not X but Y"), no aphorisms, no reveals,
+  no triplets, no hype.
 
 ## Anatomy
 
@@ -73,7 +87,7 @@ eval-run [--host <name>] <harness> <eval> <model> <tag> [-- harness-flags...]
 `bin/cloud-run` is the cloud counterpart of `eval-run`: same prompts, same
 rubrics, but it drives an **open-weight model rented on OpenRouter** instead of
 local Ollama. No GPU, no lock, no telemetry - a cloud run is just HTTP + local
-rubric scoring, so it's safe to parallelise and runs fine on the Windows box.
+rubric scoring, so it's safe to parallelise and runs fine on a Windows host.
 
 ```
 # single open model:
@@ -185,7 +199,7 @@ harness_run() {
    pass, emits nothing to stdout → empty `score.json` → `score_pct: "?"`. Every
    `?` looks like a model failure but isn't. `brew install bash` and run with
    `PATH=/opt/homebrew/bin:$PATH` (eval-rescore/eval-export call bare `bash`).
-   This is why hard-tier sweeps were originally run on svr (git-bash 5.x); a
+   This is why hard-tier sweeps were originally run on the Windows host (git-bash 5.x); a
    2026-06-17 GLM 5.2 run on the Mac hit this and needed a bash-5 rescore.
 
 ## Aider's nested .git problem
@@ -230,13 +244,16 @@ a benchmark and a guess.
 - It's a Next.js 16 static export (`output: 'export'`) at `dashboard-next/`.
   `bun run build` writes `dashboard-next/out/`, which the GH Pages workflow
   publishes as `noahjohnson0.github.io/lemon-squeezer/` (basePath `/lemon-squeezer` in production).
-- It is a research publication, not a live dashboard. Pages are server components that
+- The site has two tracks (header tabs): Benchmarks (home, `/studies/`, `/methods/`, `/data/`)
+  and Research (`/research/`, built from `src/lib/research.ts`).
+- It is a publication with no live data. Pages are server components that
   compute every number at build time from the repo-root `runs.jsonl` and
   `studio/summary.json` via `src/lib/site-data.ts`. Never hand-type a result number into page copy;
   derive it there so a rebuild from new data keeps the text true.
 - `scripts/stage-data.mjs` publishes sanitized copies of the data under `public/data/`
   (home paths and host names stripped); `scripts/scrub-out.mjs` fails the build if any
   machine-specific string reaches `out/`.
+- The harness bug log is `src/lib/bugs.ts`; pages print its length, so add a bug there.
 - Honesty labels (`Chip` in `src/components/ui.tsx`): exploration, final pass pending,
   too wide to call (95% CI includes zero), CI clears zero, historical snapshot.
 - NO external API calls at runtime. Static-only. DO NOT reintroduce a server.

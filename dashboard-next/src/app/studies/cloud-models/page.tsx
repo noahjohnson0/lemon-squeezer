@@ -69,9 +69,9 @@ export default function Page() {
   return (
     <>
       <StudyHead
-        kicker="Study · coding agents · cloud-served open weights"
+        kicker="Benchmarks · coding agents · cloud-served open weights"
         title="Open models as coding agents, compared"
-        dek={`${c.nSingles} open-weight models and ${c.nMixes} multi-model mixes on one coding suite, scored by running their code. Where does the top really sit, and what does it cost?`}
+        dek={`${c.nSingles} open-weight models and ${c.nMixes} multi-model mixes on one coding suite, scored by running their code. This study reports which arms lead and what each costs per task.`}
         chips={<Chip s="wide">Top cluster: too close to call</Chip>}
         meta={[
           ["Runs", `${c.nRuns.toLocaleString("en-US")}`],
@@ -96,7 +96,7 @@ export default function Page() {
           items={[
             { v: `${c.tied.length}`, l: `arms whose interval reaches the top arm's lower bound (${top.lo}%)`, s: "the data does not rank them" },
             { v: fmtCost(v.costPerTask), l: `per task for ${v.model} at ${v.mean.toFixed(1)}%`, s: `${v.scorePerDollar?.toLocaleString("en-US")} score points per dollar` },
-            { v: `${c.bestMix.mean.toFixed(1)} vs ${c.bestSingle.mean.toFixed(1)}`, l: `best mix (${c.bestMix.model}) vs best single model`, s: "mixes do not raise the ceiling" },
+            { v: `${c.bestMix.mean.toFixed(1)} vs ${c.bestSingle.mean.toFixed(1)}`, l: `best mix (${c.bestMix.model}) vs best single model`, s: "intervals overlap, too wide to call" },
           ]}
         />
       </div>
@@ -104,19 +104,20 @@ export default function Page() {
         <h2 id="summary">Summary</h2>
         <ul>
           <li>
-            <strong>The top is a tie.</strong> {c.tied.length} arms, single models and mixes, have intervals that reach the leader&apos;s lower
-            bound. Ranking inside that group is not supported by the data.
+            <strong>The top group is tied.</strong>{" "}{c.tied.length} arms, single models and mixes, have intervals that reach the leader&apos;s
+            lower bound. The data does not support a ranking inside that group.
           </li>
           <li>
-            <strong>Value:</strong> {v.model} scores {v.mean.toFixed(1)}% (95% CI {fmtCI(v.lo, v.hi)}) for about {fmtCost(v.costPerTask)} a task,
-            a few points below the cluster at a small fraction of its cost.
+            <strong>Value.</strong> {v.model} scores {v.mean.toFixed(1)}% (95% CI {fmtCI(v.lo, v.hi)}) for about {fmtCost(v.costPerTask)} a task,
+            against {fmtCost(top.costPerTask)} a task for the leader at {top.mean.toFixed(1)}%.
           </li>
           <li>
             <strong>Mixes</strong>{" "}(a frontier model planning for a cheap one, draft-critique-refine, ensembles, write-tests-then-fix) sit
-            inside or below the cluster; none scores above the best single model. Their use is rescuing weak models.
+            inside or below the tied group, and none scores above the best single model. The intervals overlap, so this is too wide to call
+            in either direction.
           </li>
           <li>
-            <strong>Reasoning and coding-specialist models</strong>{" "}did not stand out: {r1 && <>deepseek-r1 scored {r1.mean.toFixed(1)}%</>}
+            <strong>Reasoning and coding-specialist models</strong>{" "}did not lead. {r1 && <>deepseek-r1 scored {r1.mean.toFixed(1)}%</>}
             {coders.length > 0 && <>, and {coders.map((a) => `${a.model} ${a.mean.toFixed(1)}%`).join(", ")}</>}.
           </li>
         </ul>
@@ -125,16 +126,16 @@ export default function Page() {
         <ul>
           <li>
             Every arm runs under the same reference agent loop (squeezer) or a mix built on it, against the same prompts and rubrics, through
-            one API provider. Only the model changes. Under a stronger harness, weaker models would score higher (see the{" "}
+            one API provider, so the model is the only variable. Under a stronger harness, weaker models would score higher (see the{" "}
             <Link href="/studies/harness-bakeoff/">harness bake-off</Link>).
           </li>
           <li>
-            Score: the mean over evals of each eval&apos;s mean over its trials, so every eval weighs the same; a failed run counts as zero.
-            Interval: cluster bootstrap over evals (2,000 resamples, seeded). Arms are ordered by lower bound, as in <code>bin/cloud-report</code>.
+            The score is the mean over evals of each eval&apos;s mean over its trials, so every eval weighs the same, and a failed run counts
+            as zero. The interval is a seeded cluster bootstrap over evals. Arms are ordered by lower bound, as in <code>bin/cloud-report</code>.
           </li>
           <li>
-            One eval (a port scanner) needs live sockets that did not behave on the scoring machine, so every arm scored about 20% on it. It
-            measured the environment, not the model, and is excluded ({c.nExcluded} runs).
+            One eval (a port scanner) needs live sockets that did not behave on the scoring machine, so every arm scored about the same low value on it. It
+            measured the environment and is excluded ({c.nExcluded} runs).
           </li>
         </ul>
 
@@ -187,8 +188,8 @@ export default function Page() {
       <div className="col prose">
         <h2 id="cost">What the score costs</h2>
         <p>
-          Cost per task spans more than two orders of magnitude while the top of the score range is flat. The dashed line is the frontier:
-          the best score available at or below each price.
+          Cost per task varies far more than score does among the top arms. The dashed line is the frontier, which is the best score
+          available at or below each price.
         </p>
       </div>
       <div className="col-wide">
@@ -214,7 +215,7 @@ export default function Page() {
           n="4"
           title="Hard tier: mean score by model"
           sub={`${c.hard.nRuns} runs, ${c.hard.dates[0]} to ${c.hard.dates[1]}. Cluster-bootstrap 95% intervals over ${c.hard.nEvals} evals.`}
-          caption={<>Source: <code>runs.jsonl</code>, tag <code>hard-tier</code>. Not comparable with Figure 1: different tasks.</>}
+          caption={<>Source: <code>runs.jsonl</code>, tag <code>hard-tier</code>. It uses different tasks and is not comparable with Figure 1.</>}
           table={
             <DataTable
               head={["model", "evals", "runs", "mean %", "95% CI", "$/task"]}
@@ -230,17 +231,17 @@ export default function Page() {
       <div className="col prose">
         <Note title="An earlier write-up used older numbers" chip="hist">
           <p>
-            The repository&apos;s FINDINGS-CLOUD.md was written from an earlier state of the same sweep (39 evals). This page is computed from
+            The repository&apos;s FINDINGS-CLOUD.md was written from an earlier state of the same sweep. This page is computed from
             the current <code>runs.jsonl</code>, so some values differ (for example the value pick&apos;s mean). Where they disagree, this page
-            is the data.
+            is correct.
           </p>
         </Note>
         <h2 id="limits">Limitations</h2>
         <ul>
-          <li>Home-field suite: our tasks, leaning algorithmic, and saturated at the top. A standard external benchmark is still queued.</li>
-          <li>Sampling used each provider&apos;s defaults; about two trials per cell.</li>
+          <li>The tasks are ours, they lean algorithmic and the suite saturates at the top. A standard external benchmark is still queued.</li>
+          <li>Sampling used each provider&apos;s defaults, and there are few trials per cell.</li>
           <li>Providers serve higher precision than a local 4-bit build, so these are upper bounds for running the same model at home (see the <Link href="/studies/local-4070/">local study</Link>).</li>
-          <li>No sandbox for the agent shell in this suite (a rubric could be read mid-run; not observed).</li>
+          <li>The agent shell in this suite has no sandbox, so a rubric could be read mid-run. This has not been observed.</li>
         </ul>
         <h2 id="data">Data</h2>
         <p>

@@ -71,7 +71,8 @@ written down as a dated amendment with what had been seen at the time. That log 
 - **Edge0 is the fastest at the top**: ~89 decode tok/s on its own engine against ~52 for
   Qwen3.8-Flash-Next on llama.cpp; 37 tasks in 39 min vs 49 min. Its weights are a rebuild of
   Qwen3.8-Flash-Next, so this is as much an engine comparison as a model one.
-- **Code execution is the biggest single lever.** On the four models run both ways, adding
+- **Code execution helps, as expected.** This is well known and is recorded here as the reason
+  the screen switched toolsets. On the four models run both ways, adding
   `run_python` moved them from 100 to 117 solved over 35 shared tasks (+17, 95% CI +3 to +33,
   resampling tasks). Without it, models write a script they cannot run and then try to do the
   computation in their reasoning until they hit the reply cap (one worked out a CRC-32 by hand).

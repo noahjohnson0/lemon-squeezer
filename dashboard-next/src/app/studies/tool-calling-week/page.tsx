@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { studio } from "@/lib/site-data";
+import { BUGS } from "@/lib/bugs";
 import { cmp, finalState, fracPct, row, shortName, verdictStatus, verdictText } from "@/lib/studio-view";
 import { Chip, DataTable, DotPlot, Figure, Keys, Legend, Note, StudyHead, fileHref, type DotRow } from "@/components/ui";
 
 export const metadata: Metadata = {
   title: "Big local models as tool-calling agents",
-  description: "A preregistered week-long screen of open-weight models that fit in 128 GB of unified memory, scored on the end state of files, mail and messages.",
+  description: "A preregistered screen of open-weight models that fit in 128 GB of unified memory as tool-calling agents, scored on the end state of files, mail and messages.",
 };
 
 const abbrev = (n: string) =>
@@ -42,6 +43,8 @@ export default function Page() {
   const eff = cmp("gpt-oss-120b: reasoning high vs medium");
   const q35 = cmp("Qwen3.8-Flash-Next vs Qwen3.5-122B");
   const h3 = cmp("Edge0-145B vs Qwen3.8-Flash-Next, HARD3");
+  const piCmp = cmp("Qwen3.8-Flash-Next: lean+x vs pi harness");
+  const mlxRow = row("leanx_week", "gpt-oss-120b-mlx")!;
   const effHigh = row("leanx_week", "gpt-oss-120b-effhigh")!;
   const base = row("leanx_week", "gpt-oss-120b-base")!;
   const nModels = new Set([...week, ...ex.smoke].map((r) => r.key.replace(/-(base|heretic|effhigh|mlx|rhigh|plain|abliterated)$/, "").replace(/-119b$/, ""))).size;
@@ -103,9 +106,9 @@ export default function Page() {
   return (
     <>
       <StudyHead
-        kicker="Study · tool calling · 128 GB workstation"
+        kicker="Benchmarks · tool calling · 128 GB workstation"
         title="Big local models as tool-calling agents"
-        dek="Which open-weight model that fits in 128 GB of unified memory does real tool-calling work best, when it is scored on what actually changed on disk, in the mailbox and in the message database?"
+        dek="Which open-weight model that fits in 128 GB of unified memory is the best tool-calling agent, when it is scored on what changed on disk, in the mailbox and in the message database?"
         chips={
           <>
             <Chip s="explore" />
@@ -134,7 +137,7 @@ export default function Page() {
 
       <div className="col prose">
         <h2 id="summary">Summary</h2>
-        <Note title="A screen of candidates; the ranking comes from the final pass" chip="explore">
+        <Note title="This is a screen of candidates. The ranking will come from the final pass." chip="explore">
           <p>
             Every number on this page is a single trial per task, run while the harness was still being fixed, so rows from
             different days are not on identical code. The frozen final pass (64 tasks, fresh seed) is the result, and it is still running.
@@ -145,9 +148,9 @@ export default function Page() {
         <Keys
           items={[
             { v: `${edge.solved}/${edge.tasks}`, l: `${shortName(edge.model)} and ${shortName(q38.model)} on the 37 screening tasks`, s: "identical outcomes, task for task" },
-            { v: `+${pooled.diff}`, l: `tasks solved when the agent can run Python (4 models × ${pooled.n} tasks)`, s: `95% CI +${pooled.ci[0]} to +${pooled.ci[1]}, clears zero` },
-            { v: `${abl.a} = ${abl.b}`, l: "gpt-oss-120b vs its abliterated version", s: "too wide to call; behaviour differed on one injection" },
-            { v: `${mlx.a} vs ${mlx.b}`, l: "gpt-oss-120b on llama.cpp vs MLX (reasoning high)", s: `too wide to call; CI ${mlx.ci[0]} to +${mlx.ci[1]}` },
+            { v: `${mlx.a} vs ${mlx.b}`, l: "gpt-oss-120b on llama.cpp vs MLX (reasoning high)", s: `too wide to call, CI ${mlx.ci[0]} to +${mlx.ci[1]}, equal throughput` },
+            { v: `${abl.a} = ${abl.b}`, l: "gpt-oss-120b vs its abliterated version", s: `too wide to call, CI ${abl.ci[0]} to +${abl.ci[1]}` },
+            { v: `${piCmp.a} vs ${piCmp.b}`, l: `${shortName(q38.model)}: purpose-built toolset vs the pi harness, ${piCmp.n} tasks`, s: `too wide to call, CI ${piCmp.ci[0]} to +${piCmp.ci[1]}` },
           ]}
         />
       </div>
@@ -160,8 +163,8 @@ export default function Page() {
         </p>
         <p>
           The question, the model list, the method and a written expectation were fixed before the first episode. Every change after that
-          was logged as a dated amendment that says what had been seen at the time. Two of the expectations were wrong: the gpt-oss and
-          Qwen3.5 models were expected in the top three, and neither is.
+          was logged as a dated amendment that states what had been seen at the time. Two of the expectations were wrong. The gpt-oss and
+          Qwen3.5 models were expected in the top three, and neither is there.
         </p>
 
         <h2 id="method">Method</h2>
@@ -184,7 +187,7 @@ export default function Page() {
         <h3>Scoring</h3>
         <p>
           Each task has several checks on the <em>end state</em>: files on disk, mailbox labels, drafts that were sent. What the model says
-          it did is never scored. A task counts as solved only when every check passes. Every HARD2 and HARD3 task has a reference solution
+          it did is not scored. A task counts as solved only when every check passes. Every HARD2 and HARD3 task has a reference solution
           that passes and a check that an untouched workspace fails.
         </p>
         <h3>Agent and tools</h3>
@@ -205,13 +208,13 @@ export default function Page() {
         <p>
           llama.cpp&apos;s server with its tool-call grammar, 131k context, full GPU offload, one model at a time, sampling per model card,
           at most 150 steps and a 16k-token reply cap. Reasoning is sent back between tool calls for models that think. Each model runs at
-          the largest quantization that leaves room for 131k context (3 to 8 bits), which is the practical question on this machine but
-          not a matched comparison.
+          the largest quantization that leaves room for 131k context (3 to 8 bits). That is the practical choice on this machine, and it
+          means the models are not compared at a matched quantization.
         </p>
         <h3>Statistics</h3>
         <p>
           Solve rates carry a Wilson 95% interval. Differences between two runs are paired by task and get a bootstrap 95% interval over
-          tasks; when that interval includes zero the gap is reported as <Chip s="wide" />. See <Link href="/methods/#stats">Methods</Link>.
+          tasks. When that interval includes zero the gap is reported as <Chip s="wide" />. See <Link href="/methods/#stats">Methods</Link>.
         </p>
 
         <h2 id="results">Results</h2>
@@ -219,18 +222,18 @@ export default function Page() {
         <p>
           With <code>run_python</code>{" "}available, {shortName(edge.model)} and {shortName(q38.model)} each solved all {edge.tasks} tasks and
           their outcomes are identical task for task. Five more configurations solved 33 or 34. The Mistral row ran with reasoning switched
-          off by a configuration bug and is reported as that, not as the model.
+          off by a configuration bug, and it is labelled as a reasoning-off run.
         </p>
       </div>
       <div className="col-wide">
         <Figure
           n="1"
           title="Tasks solved on the 37 screening tasks (lean+x)"
-          sub="One trial per task. Bars are Wilson 95% intervals; highlighted rows solved every task."
+          sub="One trial per task. Bars are Wilson 95% intervals. Highlighted rows solved every task."
           caption={
             <>
-              Source: <code>studio/summary.json</code>, <code>exploration.leanx_week</code>. Exploration rows: the harness changed between
-              some of them (see Harness bugs).
+              Source: <code>studio/summary.json</code>, <code>exploration.leanx_week</code>. These are exploration rows, and the harness changed
+              between some of them (see Harness bugs).
             </>
           }
           table={
@@ -257,9 +260,9 @@ export default function Page() {
       <div className="col prose">
         <h3>The harder suites saturate too, at the very top</h3>
         <p>
-          Both leaders solved all 15 HARD2 tasks: they read the spec, dump the data with one <code>run_python</code>{" "}call and script the rest.
-          On HARD3 the split was {h3.a} vs {h3.b}, but that comparison is not clean: the three tasks the second model missed are the three
-          whose checkers were found broken and fixed before the first model ran. The final pass reruns both on the fixed checkers.
+          Both leaders solved all 15 HARD2 tasks. They read the spec, dump the data with one <code>run_python</code>{" "}call and script the
+          rest. On HARD3 the split was {h3.a} vs {h3.b}. That comparison is not clean, since the three tasks the second model missed are the
+          three whose checkers were found broken and fixed before the first model ran. The final pass reruns both on the fixed checkers.
         </p>
       </div>
       <div className="col-wide">
@@ -274,12 +277,15 @@ export default function Page() {
       </div>
 
       <div className="col prose">
-        <h3>Code execution is the biggest single lever</h3>
+        <h3 id="exec">Why the screen runs with code execution</h3>
         <p>
-          Four models ran the same tasks with and without <code>run_python</code>. Pooled, they went from {pooled.b} to {pooled.a} solved
-          over {pooled.n} shared tasks: +{pooled.diff}, with a 95% interval of +{pooled.ci[0]} to +{pooled.ci[1]}. Without execution, models
-          write a script they cannot run and then try to do the computation in their reasoning until they hit the reply cap (one worked out a
-          CRC-32 by hand). Each model on its own gains 3 to 5 tasks, and each of those intervals is too wide to call.
+          The screen started on a toolset with no code execution and switched after four models had run. It is well known that an agent
+          does better when it can run code, and this is reported here as the reason for the switch. Pooled over the four models, solved
+          tasks went from {pooled.b} to {pooled.a} over {pooled.n} shared tasks, a difference of +{pooled.diff} with a 95% interval of +
+          {pooled.ci[0]} to +{pooled.ci[1]}. Without execution, a model writes a script it cannot run and then tries to do the computation in
+          its reasoning until it reaches the reply cap. Each model on its own gains {Math.min(...execPairs.map((c) => c.diff))} to{" "}
+          {Math.max(...execPairs.map((c) => c.diff))} tasks, and each of those intervals is too wide to call. The rows without execution are
+          kept as a paired baseline and that toolset is not run again.
         </p>
       </div>
       <div className="col-wide">
@@ -301,7 +307,7 @@ export default function Page() {
         <Figure
           n="4"
           title="Every paired comparison in the screen"
-          sub="Difference in tasks solved (A minus B) with a bootstrap 95% interval over tasks. Highlighted rows are the only ones whose interval clears zero."
+          sub="Difference in tasks solved (A minus B) with a bootstrap 95% interval over tasks. The highlighted rows have an interval that clears zero."
           caption={<>Source: <code>studio/summary.json</code>, <code>comparisons</code>. Notes on each comparison are in the table.</>}
           table={
             <DataTable
@@ -316,35 +322,44 @@ export default function Page() {
       </div>
 
       <div className="col prose">
-        <h3>Smaller results</h3>
+        <h3 id="smaller">Engine, abliteration, reasoning effort and the pi harness</h3>
         <ul>
           <li>
-            <strong>Abliteration did not change tool use.</strong>{" "}gpt-oss-120b and its abliterated version solved the same number of tasks
-            with and without execution ({abl.a} = {abl.b}; {cmp("gpt-oss-120b: base vs heretic (abliteration), lean+").a} ={" "}
-            {cmp("gpt-oss-120b: base vs heretic (abliteration), lean+").b}). They differed in one place: the abliterated model obeyed a prompt
-            injection planted in an order-status page, and the base model did not. This is one trial on one trap, so it is a lead for a follow-up study.
+            <strong>Engine.</strong>{" "}On gpt-oss-120b at high reasoning, llama.cpp solved {mlx.a}/{mlx.n} and MLX solved {mlx.b}/{mlx.n},
+            which is too wide to call (95% CI {mlx.ci[0]} to +{mlx.ci[1]}). Throughput over wall time was {effHigh.tok_s_over_wall?.toFixed(0)}{" "}
+            against {mlxRow.tok_s_over_wall?.toFixed(0)} tok/s. {mlxRow.fail_stops.empty_reply ?? 0} of the {mlxRow.tasks - mlxRow.solved} tasks
+            MLX failed ended in an empty reply, which is a tool call its parser could not read. llama.cpp&apos;s grammar constrains the call, so
+            it had {effHigh.fail_stops.empty_reply ?? 0}. MLX ran this model with tools only after its parser was patched.
           </li>
           <li>
-            <strong>Engine:</strong>{" "}llama.cpp {mlx.a}/37 vs MLX {mlx.b}/37 on gpt-oss-120b at high reasoning, too wide to call, at equal
-            throughput. MLX lost replies to tool calls its parser could not read; llama.cpp&apos;s grammar makes those impossible.
+            <strong>Abliteration.</strong>{" "}gpt-oss-120b and its abliterated version solved the same number of tasks with execution (
+            {abl.a} and {abl.b}) and without it ({cmp("gpt-oss-120b: base vs heretic (abliteration), lean+").a} and{" "}
+            {cmp("gpt-oss-120b: base vs heretic (abliteration), lean+").b}). The interval on the difference is {abl.ci[0]} to +{abl.ci[1]} tasks,
+            so a small cost is not ruled out. Without execution the abliterated model obeyed a prompt injection planted in an order-status
+            page, and the base model did not. This is one trial on one trap, and it is a lead for a follow-up study.
           </li>
           <li>
-            <strong>Reasoning effort:</strong>{" "}high vs medium on gpt-oss-120b, {eff.a} vs {eff.b}, too wide to call, at about{" "}
+            <strong>The pi harness.</strong>{" "}pi gives the model four tools (bash, read, write, edit) and has no mail or browser tools, so
+            it ran the {piCmp.n} tasks that need none. {shortName(q38.model)} solved {piCmp.b} of them through pi and {piCmp.a} through the
+            purpose-built toolset, which is too wide to call (95% CI {piCmp.ci[0]} to +{piCmp.ci[1]}).
+          </li>
+          <li>
+            <strong>Reasoning effort.</strong>{" "}High against medium on gpt-oss-120b gave {eff.a} vs {eff.b}, too wide to call, at about{" "}
             {Math.round(effHigh.wall_min / base.wall_min)}× the wall time ({Math.round(effHigh.wall_min)} vs {Math.round(base.wall_min)} min).
           </li>
           <li>
-            <strong>Generations:</strong>{" "}Qwen3.8-Flash-Next solved {q35.diff} more tasks than its predecessor Qwen3.5-122B (95% CI +{q35.ci[0]}{" "}
+            <strong>Generations.</strong>{" "}Qwen3.8-Flash-Next solved {q35.diff} more tasks than its predecessor Qwen3.5-122B (95% CI +{q35.ci[0]}{" "}
             to +{q35.ci[1]}), the only single-model gap in the screen whose interval clears zero.
           </li>
           <li>
-            <strong>Speed:</strong> {shortName(edge.model)} decoded at {edge.decode_tok_s?.toFixed(0)} tok/s on its own engine and finished
+            <strong>Speed.</strong> {shortName(edge.model)} decoded at {edge.decode_tok_s?.toFixed(0)} tok/s on its own engine and finished
             the 37 tasks in {Math.round(edge.wall_min)} min, against {Math.round(q38.wall_min)} min for {shortName(q38.model)} on llama.cpp. Its
-            weights are a rebuild of that model, so this is as much an engine comparison as a model one.
+            weights are a rebuild of that model, so the difference comes from the engine as well as the model.
           </li>
           <li>
-            <strong>Failure modes</strong>{" "}once the harness bugs were out were model-side: claiming done with the work undone, a swapped
-            pair of letters when writing an answer, missed receipts that never say &ldquo;receipt&rdquo;, and reasoning loops that run to the
-            reply cap.
+            <strong>Failure modes.</strong>{" "}After the harness bugs were fixed, the remaining failures were on the model side. They were
+            claims of being done with the work undone, a swapped pair of letters when writing an answer, missed receipts that do not contain
+            the word receipt, and reasoning loops that run to the reply cap.
           </li>
         </ul>
 
@@ -356,7 +371,7 @@ export default function Page() {
         </p>
         <Note title={`State: ${fin.state}`} chip="pending">
           {fin.done.length === 0 ? (
-            <p>No model has finished its pass, so there is no final score yet. Partial rows show progress only:</p>
+            <p>No model has finished its pass, so there is no final score yet. Partial rows show progress only.</p>
           ) : (
             <p>{fin.done.length} model(s) have finished. Scores count only once a model&apos;s pass is complete.</p>
           )}
@@ -377,22 +392,21 @@ export default function Page() {
 
         <h2 id="bugs">Harness bugs</h2>
         <p>
-          Much of the exploration&apos;s value was finding twelve harness bugs. Each made a model look worse (or, for the isolation bug, could
-          have made one look better) than it was. Roughly half of the first day&apos;s failures were the harness. Examples: llama.cpp&apos;s
-          grammar forces tool-call keys into schema order, so one model could never add an optional key once it had passed it; the mail mock
-          silently ignored parenthesised queries and returned nothing; the code-execution jail could read the expected answers; and the
-          simulated world&apos;s date disagreed with the host clock. Rows run before a fix are kept as found and not rerun. The full log is
-          on the <Link href="/methods/#bugs">Methods</Link>{" "}page.
+          The exploration found {BUGS.length} harness bugs. Most of them made a model look worse than it was, and{" "}
+          {BUGS.filter((x) => /better/.test(x.e)).length} made or could have made one look better. First, llama.cpp&apos;s grammar forces tool-call keys into schema order, so one model could not add an optional key
+          once it had passed it. Second, the mail mock ignored parenthesised queries and returned nothing. Third, the code-execution jail
+          could read the expected answers. Last, the simulated world&apos;s date disagreed with the host clock. Rows run before a fix are kept
+          as found and are not rerun. The full log is on the <Link href="/methods/#bugs">Methods</Link>{" "}page.
         </p>
 
         <h2 id="limits">Limitations</h2>
         <ul>
           <li>One trial per task everywhere. A Wilson interval on 37 tasks is roughly ±10 points, and most pairwise gaps are inside it.</li>
-          <li>A moving harness: exploration rows were run before, between and after the fixes, and rows from before a fix understate the models it hit (gpt-oss most of all).</li>
-          <li>Not a matched quantization (3 to 8 bits), and the fastest model ran on a different engine.</li>
+          <li>The harness changed during exploration. Rows were run before, between and after the fixes, and rows from before a fix understate the models it hit (gpt-oss most of all).</li>
+          <li>The quantization is not matched across models (3 to 8 bits), and the fastest model ran on a different engine.</li>
           <li>The tasks, tools and checkers are ours, and the harness is not public yet. Task names, check names and every per-task row are.</li>
           <li>The largest model (235B at 3 bits) ran at 65k context because 131k did not fit, so its rows are not on the same context.</li>
-          <li>The world-clock bug could affect date-relative tasks in any exploration row; the final pass is the first run with the date pinned.</li>
+          <li>The world-clock bug could affect date-relative tasks in any exploration row. The final pass is the first run with the date pinned.</li>
         </ul>
 
         <h2 id="data">Data</h2>

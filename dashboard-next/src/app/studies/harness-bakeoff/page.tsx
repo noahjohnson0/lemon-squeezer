@@ -72,9 +72,9 @@ export default function Page() {
   return (
     <>
       <StudyHead
-        kicker="Study · coding agents · cloud-served open weights"
+        kicker="Benchmarks · coding agents · cloud-served open weights"
         title="Coding-agent harness bake-off"
-        dek="Hold the model and the tasks fixed and change only the agent harness around it. How much of a coding agent's score belongs to the harness?"
+        dek="The model and the tasks are held fixed and only the agent harness changes. This study measures how much of a coding agent's score comes from the harness."
         chips={
           <>
             <Chip s="solid">Direction clears zero</Chip>
@@ -110,12 +110,12 @@ export default function Page() {
       <div className="col prose">
         <h2 id="summary">Summary</h2>
         <p>
-          On identical weights, switching from our minimal tool-calling loop to aider&apos;s edit format moved weak models by 60 points or
-          more, while strong models scored 100 either way. The weaker the model, the bigger the harness swing. Any claim about the
-          &ldquo;best model&rdquo; for coding has to name the harness it ran under.
+          On identical weights, switching from our minimal tool-calling loop to aider&apos;s edit format moved {weak.map((m) => m.label).join(" and ")} by{" "}
+          {Math.floor(Math.min(...weak.map((m) => m.diff)))} points or more, while strong models scored 100 either way. A ranking of
+          models for coding should therefore name the harness it was run under.
         </p>
         <p>
-          With a strong model the harness matters much less: {hs.filter((a) => a.model === "deepseek-v4-pro").length} agent harnesses on
+          With a strong model the harness matters much less. The {hs.filter((a) => a.model === "deepseek-v4-pro").length} agent harnesses on
           deepseek-v4-pro (plus {hs.filter((a) => a.model !== "deepseek-v4-pro").length} vendor CLIs on their own models) all land between {Math.min(...hs.map((a) => a.mean)).toFixed(0)}% and {Math.max(...hs.map((a) => a.mean)).toFixed(0)}% with
           overlapping intervals.
         </p>
@@ -123,12 +123,12 @@ export default function Page() {
         <h2 id="method">Method</h2>
         <ul>
           <li>
-            Each task is a prompt plus a rubric that runs the code the agent produced and checks behaviour; a program that looks right but
+            Each task is a prompt plus a rubric that runs the code the agent produced and checks behaviour. A program that looks right and
             returns wrong answers loses most of its points. See <Link href="/methods/#scoring">Methods</Link>.
           </li>
           <li>
-            <strong>squeezer</strong>{" "}is our ~250-line reference agent: four tools (read, write, list, bash) in a plain tool-calling loop. It is
-            transparent and hackable, not a claimed best agent. <strong>aider</strong>{" "}edits through whole-file and diff formats instead of
+            <strong>squeezer</strong>{" "}is our ~250-line reference agent, with four tools (read, write, list, bash) in a plain tool-calling loop. It
+            was written to be easy to read and change, and it is the baseline here. <strong>aider</strong>{" "}edits through whole-file and diff formats instead of
             tool calls.
           </li>
           <li>
@@ -167,7 +167,7 @@ export default function Page() {
           n="2"
           title="The harness gap with its uncertainty"
           sub="aider minus squeezer, in points, with a bootstrap 95% interval over shared cells. Models with two cells have no spread to resample."
-          caption="Interval: 2,000 resamples of the per-cell differences, seeded. The pooled interval clears zero; mistral-small-3.2's does not."
+          caption="The interval is a seeded bootstrap of the per-cell differences. The pooled interval clears zero, and the one for mistral-small-3.2 includes it."
         >
           <DotPlot rows={deltaRows} domain={[-20, 100]} ticks={[-20, 0, 20, 40, 60, 80, 100]} axis="aider − squeezer, points" zero />
         </Figure>
@@ -195,7 +195,8 @@ export default function Page() {
           sub="Mean of per-eval means; bars are cluster-bootstrap 95% intervals over evals."
           caption={
             <>
-              Source: <code>runs.jsonl</code>, tag <code>harness-bakeoff</code>; squeezer from tag <code>fable-hunt</code>. pi ran 11 evals only.
+              Source: <code>runs.jsonl</code>, tag <code>harness-bakeoff</code>. The squeezer row is from tag <code>fable-hunt</code>. pi ran{" "}
+              {hs.find((a) => a.harness === "pi-cloud")?.evals} evals only.
               Cost is not recorded for some harnesses (n/r).
             </>
           }
@@ -228,10 +229,10 @@ export default function Page() {
 
         <h2 id="limits">Limitations</h2>
         <ul>
-          <li>Coverage is uneven per model; the paired view throws away every unpaired cell.</li>
-          <li>Sampling used provider defaults; temperature and seed were not pinned for these sweeps.</li>
+          <li>Coverage is uneven per model, and the paired view drops every unpaired cell.</li>
+          <li>Sampling used provider defaults. Temperature and seed were not pinned for these sweeps.</li>
           <li>The tasks are ours and lean algorithmic. A standard external benchmark has not been run yet.</li>
-          <li>The coding-suite agent shell is not sandboxed: a model could read a rubric mid-run. Not observed, but not ruled out.</li>
+          <li>The coding-suite agent shell is not sandboxed, so a model could read a rubric mid-run. This has not been observed.</li>
           <li>All scores are after the June rubric audit, which rewrote 26 rubrics and re-scored every affected run (see Methods).</li>
         </ul>
 

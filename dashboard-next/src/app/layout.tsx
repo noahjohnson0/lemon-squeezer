@@ -9,9 +9,9 @@ const sans = IBM_Plex_Sans({ subsets: ["latin"], variable: "--font-sans", displa
 const mono = IBM_Plex_Mono({ subsets: ["latin"], variable: "--font-mono", display: "swap", weight: ["400", "500"] });
 
 export const metadata: Metadata = {
-  title: { default: "lemon-squeezer: an independent local-LLM lab", template: "%s · lemon-squeezer" },
+  title: { default: "lemon-squeezer: local-LLM benchmarks and research", template: "%s · lemon-squeezer" },
   description:
-    "Measured results on open-weight language models as agents: tool calling on a 128 GB workstation, coding agents across harnesses, cloud model comparisons and a 12 GB consumer GPU. Every number is computed from published run data.",
+    "Benchmarks of open-weight models as coding and tool-calling agents: what works locally, on which hardware, for which job. Every number is computed from published run data. A separate research track lists new work and its status.",
 };
 
 // Set the theme before first paint: ?theme=light|dark, then a saved choice, else the OS setting.
@@ -30,9 +30,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <footer className="site-footer">
           <div className="bar">
             <div>
-              lemon-squeezer publishes the measured results of an independent research program on open-weight models.
+              Benchmarks: what works locally, on which hardware, for which job. Research: new effects, published when they clear the bar.
               <br />
-              Built from {t.runs.toLocaleString("en-US")} coding-suite runs and {t.studioRows} tool-calling task rows. MIT licensed.
+              Benchmarks built from {t.runs.toLocaleString("en-US")} coding-suite runs and {t.studioRows} tool-calling task rows. MIT licensed.
             </div>
             <div>
               <a href="https://github.com/noahjohnson0/lemon-squeezer">Source and data on GitHub</a>

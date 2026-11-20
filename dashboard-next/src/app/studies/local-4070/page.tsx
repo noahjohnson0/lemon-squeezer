@@ -73,9 +73,9 @@ export default function Page() {
   return (
     <>
       <StudyHead
-        kicker="Study · coding agents · 12 GB consumer GPU"
+        kicker="Benchmarks · coding agents · 12 GB consumer GPU"
         title="Coding agents on a 12 GB consumer GPU"
-        dek="What does a quantized open model on an ordinary gaming card actually finish, through which harness, and at what power draw?"
+        dek="This study reports what quantized open models finish on an ordinary gaming card, through which harness, and at what power draw."
         chips={
           <>
             <Chip s="explore">Early, small n</Chip>
@@ -114,17 +114,19 @@ export default function Page() {
         <h2 id="summary">Summary</h2>
         <ul>
           <li>
-            On a 12 GB card the mixture-of-experts model {moe.model} was both the best scorer through aider and among the lowest in GPU power,
-            about a quarter of the dense {dense.model}&apos;s draw. Only a handful of its parameters are active per token.
+            On a 12 GB card the mixture-of-experts model {moe.model} had the highest mean through aider and one of the lowest GPU power
+            draws, at {moe.powerW && dense.powerW ? Math.round((100 * moe.powerW) / dense.powerW) : "?"}% of the dense {dense.model}&apos;s. A
+            mixture-of-experts model uses only part of its parameters for each token.
           </li>
           <li>
-            The harness effect from the cloud bake-off shows up locally too: the same weights score far higher through aider than through the
-            pi agent on the evals both ran. Few evals per pair, but{" "}
+            The harness effect from the cloud bake-off is also seen locally. The same weights score higher through aider than through the
+            pi agent on the evals both ran. There are few evals per pair, and{" "}
             {L.harnessPairs.filter((p) => p.verdict === "A ahead").length} of {L.harnessPairs.length} intervals clear zero.
           </li>
           <li>
             Running a model as a 4-bit local build did not measurably lower its score against the same model served in the cloud, on the
-            evals both ran. The intervals are wide (±20 points), so a small quantization cost is not ruled out.
+            evals both ran. The intervals are wide ({L.venue.map((p) => `${p.lo} to +${p.hi}`).join(" and ")} points), so a small quantization
+            cost is not ruled out.
           </li>
         </ul>
         <Note title="This is the oldest and thinnest venue" chip="explore">
@@ -198,7 +200,7 @@ export default function Page() {
       <div className="col prose">
         <h2 id="power">Power draw</h2>
         <p>
-          Peak VRAM is near the card&apos;s 12 GB for every model (the server fills the card), so memory does not separate them. Power does.
+          Peak VRAM is near the card&apos;s 12 GB for every model (the server fills the card), so memory does not separate them, and power does.
         </p>
       </div>
       <div className="col-wide">
@@ -242,16 +244,17 @@ export default function Page() {
           <p>
             FINDINGS-CLOUD.md reported a 3 to 5 point &ldquo;quant tax&rdquo; for local 4-bit builds. Recomputed from the current runs with
             evals paired, the gap is {L.venue.map((p) => `${p.diff > 0 ? "+" : ""}${p.diff.toFixed(1)} (${p.label})`).join(" and ")}, with
-            intervals about ±20 points wide. The data supports &ldquo;no detectable difference&rdquo; and does not measure a tax.
+            intervals of {L.venue.map((p) => `${p.lo} to +${p.hi}`).join(" and ")} points. The data shows no detectable difference at this
+            sample size.
           </p>
         </Note>
 
         <h2 id="limits">Limitations</h2>
         <ul>
-          <li>Unequal eval coverage per model and mostly one trial per cell.</li>
-          <li>Unpinned sampling (provider and Ollama defaults).</li>
-          <li>Power is the GPU board only, not the whole machine.</li>
-          <li>One card; results at other VRAM sizes are not measured here.</li>
+          <li>Eval coverage is unequal across models, and most cells have one trial.</li>
+          <li>Sampling was not pinned (provider and Ollama defaults).</li>
+          <li>Power is measured at the GPU board and leaves out the rest of the machine.</li>
+          <li>Only one card was used. Results at other VRAM sizes are not measured here.</li>
         </ul>
         <h2 id="data">Data</h2>
         <p>

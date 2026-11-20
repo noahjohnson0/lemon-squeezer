@@ -6,7 +6,9 @@ export const row = (suite: string, key: string): StudioRow | undefined =>
   studio().exploration[suite]?.find((r) => r.key === key);
 
 export const cmp = (prefix: string): StudioComparison => {
-  const c = studio().comparisons.find((x) => x.name.startsWith(prefix));
+  // exact name first: "..., lean+" is also a prefix of "..., lean+x"
+  const all = studio().comparisons;
+  const c = all.find((x) => x.name === prefix) ?? all.find((x) => x.name.startsWith(prefix));
   if (!c) throw new Error(`studio comparison not found: ${prefix}`);
   return c;
 };
