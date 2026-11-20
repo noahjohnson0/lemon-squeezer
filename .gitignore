@@ -38,3 +38,6 @@ runs/**/workspace/.git/
 # eval-export safe-write artifacts
 runs.jsonl.bak
 runs.jsonl.tmp
+
+# local scratch (screenshots, local serve dir)
+.scratch/

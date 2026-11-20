@@ -40,3 +40,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 package-lock.json
+
+# build-time data copies (scripts/stage-data.mjs)
+/public/data/
+/public/runs.jsonl
+/public/bench-data.json
+/public/inflight.json
